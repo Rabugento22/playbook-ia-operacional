@@ -10,6 +10,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 - Provedor `providers/ollama-local.js` para o `promptfoo` com o Ollama local.
 - Entradas dos checkpoints 01 a 06, transcritas do enunciado.
 - Prompt `devops/triagem-de-pods` (`1.0.0`).
+- Prompt `devops/causa-raiz` (`1.0.0`).
+- Checkpoint 03: contexto com decisão de sanitização, evolução do prompt, execução nos dois modelos e com dados mascarados, e curadoria.
 - Prompt `devops/nota-de-triagem` (`1.0.0`).
 - Checkpoint 02: contexto, comparação entre ensinar o padrão por regras ou por exemplos, execução nos dois modelos e curadoria.
 - Checkpoint 01: contexto, evolução do prompt, execução nos dois modelos e curadoria.
