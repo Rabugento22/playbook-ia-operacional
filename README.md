@@ -7,28 +7,29 @@ Biblioteca de prompts parametrizáveis, versionada, testada e tratada como códi
 ```text
 playbook-ia-operacional/
 ├── README.md  CLAUDE.md  CHANGELOG.md  CONTRIBUTING.md  LICENSE
-├── validate.sh                  # valida a estrutura e os prompts
-├── providers/
-│   └── ollama-local.js          # provedor do promptfoo para o Ollama local (custo US$ 0)
-└── checkpoints/
-    └── checkpoint-XX/
-        ├── README.md            # frontmatter + documentação do prompt (CP01–06)
-        ├── prompt.md            # frontmatter + texto do prompt, com {{placeholders}}
-        ├── promptfooconfig.yaml # teste do prompt (a partir do CP08)
-        ├── 01-contexto.md
-        ├── 02-prompt.md
-        ├── 03-execucao.md
-        ├── 04-curadoria.md
-        └── entradas/            # dados do enunciado, transcritos
+├── validate.sh                      # valida a estrutura e os prompts
+├── devops/                          # a biblioteca de prompts (convenções do template prompt-registry)
+│   ├── README.md                    # escopo da categoria e índice dos prompts
+│   └── <nome-do-prompt>/
+│       ├── prompt.md                # frontmatter + texto do prompt, com {{placeholders}}
+│       ├── README.md                # o mesmo frontmatter + documentação
+│       └── promptfooconfig.yaml     # teste do prompt (a partir do CP08)
+├── checkpoints/                     # o caminho percorrido em cada checkpoint
+│   └── checkpoint-XX/
+│       ├── README.md
+│       ├── 01-contexto.md  02-prompt.md  03-execucao.md  04-curadoria.md
+│       └── entradas/                # dados do enunciado, transcritos
+└── providers/
+    └── ollama-local.js              # provedor do promptfoo para o Ollama local (custo US$ 0)
 ```
 
-Cada checkpoint que produz um prompt guarda o prompt, o teste e o caminho percorrido na mesma pasta: o teste viaja junto com o prompt. As convenções do template `prompt-registry` (frontmatter com `nome`, `descricao`, `versao`, `tags` e `inputs`, placeholders `{{variavel}}`, semver e commits semânticos) valem dentro de cada checkpoint. Detalhes em [`CONTRIBUTING.md`](CONTRIBUTING.md).
+A biblioteca segue o template `prompt-registry`: categoria como pasta na raiz, um prompt por pasta nomeada pelo resultado, frontmatter com `nome`, `descricao`, `versao`, `tags` e `inputs`, placeholders `{{variavel}}`, versionamento semver e commits semânticos. O teste de cada prompt viaja junto com ele, no `promptfooconfig.yaml`. A documentação por checkpoint segue o padrão do repositório `frameworks-prompt-engineering`. Detalhes em [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Checkpoints
 
 | CP | Tema | Situação |
 |----|------|----------|
-| [01](checkpoints/checkpoint-01/) | Triagem de pods | Concluído |
+| [01](checkpoints/checkpoint-01/) | Triagem de pods ([`devops/triagem-de-pods`](devops/triagem-de-pods/)) | Concluído |
 | 02 | Nota de triagem padronizada | Pendente |
 | 03 | Causa-raiz da degradação no Cerebro | Pendente |
 | 04 | Decisão de backpressure do Relay | Pendente |

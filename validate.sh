@@ -17,11 +17,11 @@ def erro(m): erros.append(m); print(f" ERRO {m}")
 def aviso(m): avisos.append(m); print(f"aviso {m}")
 
 print("[1/5] Arquivos obrigatórios na raiz")
-for f in ["README.md", "CLAUDE.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE", "validate.sh", "providers/ollama-local.js"]:
+for f in ["README.md", "CLAUDE.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE", "validate.sh", "providers/ollama-local.js", "devops/README.md"]:
     ok(f) if os.path.isfile(f) else erro(f"falta {f}")
 
-print("[2/5] Estrutura sem resíduos do template")
-for d in ["devops", "desenvolvimento", "financas", "produtividade", "criacao-conteudo", ".claude/commands"]:
+print("[2/5] Categorias: só devops/ (sem resíduos do template)")
+for d in ["desenvolvimento", "financas", "produtividade", "criacao-conteudo", ".claude/commands"]:
     erro(f"resíduo do template: {d}/") if os.path.exists(d) else ok(f"sem {d}/")
 
 def frontmatter(texto):
@@ -33,36 +33,47 @@ def parse(fm):
     inputs = re.findall(r"^\s+- nome:\s*(\S+)", fm, re.M)
     return campos, inputs
 
-print("[3/5] Checkpoints")
+corpos = {}
+print("[3/5] Prompts em devops/")
+indice = open("devops/README.md", encoding="utf-8").read() if os.path.isfile("devops/README.md") else ""
+for d in sorted(glob.glob("devops/*/")):
+    n = os.path.basename(d.rstrip("/"))
+    pm, rd = f"{d}prompt.md", f"{d}README.md"
+    if not os.path.isfile(pm) or not os.path.isfile(rd): erro(f"devops/{n}: precisa de prompt.md e README.md"); continue
+    fm_p, corpo = frontmatter(open(pm, encoding="utf-8").read())
+    fm_r, _ = frontmatter(open(rd, encoding="utf-8").read())
+    if fm_p is None: erro(f"devops/{n}: prompt.md sem frontmatter"); continue
+    corpos[n] = corpo.strip()
+    erro(f"devops/{n}: frontmatter diferente entre prompt.md e README.md") if fm_p != fm_r else ok(f"devops/{n}: frontmatter idêntico em prompt.md e README.md")
+    campos, inputs = parse(fm_p)
+    for k, v in campos.items():
+        if v is None or not v.group(1).strip(): erro(f"devops/{n}: campo '{k}' ausente")
+    if campos["versao"] and not re.fullmatch(r"\d+\.\d+\.\d+", campos["versao"].group(1).strip()): erro(f"devops/{n}: versao fora de semver")
+    if campos["tags"]:
+        nt = len([t for t in campos["tags"].group(1).strip("[] ").split(",") if t.strip()])
+        if not 2 <= nt <= 5: erro(f"devops/{n}: tags deve ter de 2 a 5 itens (tem {nt})")
+    ph = sorted(set(re.findall(r"\{\{(\w+)\}\}", corpo)))
+    erro(f"devops/{n}: placeholders {ph} diferentes de inputs {sorted(inputs)}") if ph != sorted(inputs) else ok(f"devops/{n}: placeholders = inputs {ph}")
+    erro(f"devops/{n}: ausente do índice devops/README.md") if f"./{n}/" not in indice else ok(f"devops/{n}: listado em devops/README.md")
+
+print("   Checkpoints")
 for cp in sorted(glob.glob("checkpoints/checkpoint-*")):
     n = os.path.basename(cp)
     if not os.path.isdir(f"{cp}/entradas"): aviso(f"{n}: sem entradas/")
-    pm = f"{cp}/prompt.md"
-    if not os.path.isfile(pm):
-        print(f"  --  {n}: sem prompt.md (checkpoint ainda não produzido ou sem prompt)")
+    p02 = f"{cp}/02-prompt.md"
+    if not os.path.isfile(p02):
+        print(f"  --  {n}: ainda não produzido")
         continue
-    for f in ["README.md", "01-contexto.md", "02-prompt.md", "03-execucao.md", "04-curadoria.md"]:
+    for f in ["README.md", "01-contexto.md", "03-execucao.md", "04-curadoria.md"]:
         if not os.path.isfile(f"{cp}/{f}"): erro(f"{n}: falta {f}")
-    if not os.path.isfile(f"{cp}/README.md") or not os.path.isfile(f"{cp}/02-prompt.md"): continue
-    fm_p, corpo = frontmatter(open(pm, encoding="utf-8").read())
-    fm_r, _ = frontmatter(open(f"{cp}/README.md", encoding="utf-8").read())
-    if fm_p is None: erro(f"{n}: prompt.md sem frontmatter"); continue
-    ok(f"{n}: frontmatter presente") 
-    erro(f"{n}: frontmatter diferente entre prompt.md e README.md") if fm_p != fm_r else ok(f"{n}: frontmatter idêntico em prompt.md e README.md")
-    campos, inputs = parse(fm_p)
-    for k, v in campos.items():
-        if v is None or not v.group(1).strip(): erro(f"{n}: campo '{k}' ausente")
-    if campos["versao"] and not re.fullmatch(r"\d+\.\d+\.\d+", campos["versao"].group(1).strip()): erro(f"{n}: versao fora de semver")
-    if campos["tags"]:
-        nt = len([t for t in campos["tags"].group(1).strip("[] ").split(",") if t.strip()])
-        if not 2 <= nt <= 5: erro(f"{n}: tags deve ter de 2 a 5 itens (tem {nt})")
-    ph = sorted(set(re.findall(r"\{\{(\w+)\}\}", corpo)))
-    erro(f"{n}: placeholders {ph} diferentes de inputs {sorted(inputs)}") if ph != sorted(inputs) else ok(f"{n}: placeholders = inputs {ph}")
-    txt02 = open(f"{cp}/02-prompt.md", encoding="utf-8").read()
-    m = re.search(r"````text\n(.*?)\n````", txt02, re.S)
-    if not m: erro(f"{n}: 02-prompt.md sem bloco do prompt final")
-    elif m.group(1).strip() != corpo.strip(): erro(f"{n}: prompt em 02-prompt.md difere do corpo de prompt.md")
-    else: ok(f"{n}: 02-prompt.md idêntico ao corpo de prompt.md")
+    txt = open(p02, encoding="utf-8").read()
+    blocos = [b.strip() for b in re.findall(r"````text\n(.*?)\n````", txt, re.S)]
+    ligados = sorted(set(re.findall(r"devops/([\w-]+)/prompt\.md", txt)))
+    if not ligados: erro(f"{n}: 02-prompt.md não aponta para nenhum devops/<prompt>/prompt.md")
+    for slug in ligados:
+        if slug not in corpos: erro(f"{n}: devops/{slug}/prompt.md não encontrado")
+        elif corpos[slug] not in blocos: erro(f"{n}: texto de devops/{slug}/prompt.md não aparece idêntico em 02-prompt.md")
+        else: ok(f"{n}: 02-prompt.md idêntico a devops/{slug}/prompt.md")
 
 print("[4/5] Links relativos nos arquivos Markdown")
 for md in [f for f in glob.glob("**/*.md", recursive=True)]:

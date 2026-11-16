@@ -4,7 +4,9 @@ Este repositório trata os prompts como código: toda mudança tem versão, comm
 
 ## Estrutura de um checkpoint
 
-Veja a árvore no [`README.md`](README.md). Cada checkpoint que produz um prompt tem `prompt.md`, `README.md` e, a partir do CP08, `promptfooconfig.yaml`, além dos quatro arquivos numerados.
+Veja a árvore no [`README.md`](README.md). O prompt vive em `devops/<nome-do-prompt>/` (`prompt.md`, `README.md` e, a partir do CP08, `promptfooconfig.yaml`). O caminho percorrido vive em `checkpoints/checkpoint-XX/` (`README.md` e quatro arquivos numerados), e o `02-prompt.md` repete o texto final do prompt, idêntico ao `prompt.md`.
+
+Um prompt novo entra com `versao: 1.0.0`, é listado no `README.md` de `devops/` e no índice da raiz.
 
 ## Frontmatter
 
@@ -26,7 +28,7 @@ inputs:
 
 ## Commits
 
-Formato `tipo(escopo): descrição`, uma linha. Tipos usados: `feat`, `fix`, `docs`, `test`, `ci`, `chore`. O escopo é o checkpoint ou a área (`checkpoint-01`, `providers`, `ci`).
+Formato `tipo(escopo): descrição`, uma linha. Tipos usados: `feat`, `fix`, `docs`, `test`, `ci`, `chore`. O escopo é a categoria do prompt ou a área: `feat(devops): adiciona prompt de triagem de pods`, `docs(checkpoint-01): ...`, `ci: ...`.
 
 ## Validação
 

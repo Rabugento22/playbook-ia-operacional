@@ -10,24 +10,29 @@ Não há aplicação a executar. O repositório contém documentação Markdown,
 
 ## Estrutura
 
-A organização segue o repositório `frameworks-prompt-engineering` (pasta por etapa, arquivos numerados, documentação na raiz). Cada etapa é um `checkpoints/checkpoint-XX/`:
+Os caminhos seguem o enunciado do desafio (`devops/<prompt>/promptfooconfig.yaml`) e as convenções do template `prompt-registry`. A documentação por etapa segue o padrão do repositório `frameworks-prompt-engineering`.
 
 ```text
-checkpoints/checkpoint-XX/
-  README.md            # mesmo frontmatter do prompt.md + documentação (CP01–06)
-  prompt.md            # frontmatter + texto do prompt, com {{placeholders}}
-  promptfooconfig.yaml # teste do prompt (a partir do CP08)
-  01-contexto.md  02-prompt.md  03-execucao.md  04-curadoria.md
-  entradas/            # dados do enunciado, transcritos
+devops/
+  README.md                    # escopo da categoria + índice dos prompts
+  <nome-do-prompt>/            # nomeado pelo resultado, em kebab-case
+    prompt.md                  # frontmatter + texto do prompt, com {{placeholders}}
+    README.md                  # mesmo frontmatter + documentação humana
+    promptfooconfig.yaml       # teste do prompt (a partir do CP08)
+checkpoints/checkpoint-XX/     # o caminho de cada checkpoint
+  README.md  01-contexto.md  02-prompt.md  03-execucao.md  04-curadoria.md
+  entradas/                    # dados do enunciado, transcritos
+providers/ollama-local.js
 ```
 
-Na raiz: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `validate.sh`, `providers/`. O `NAVIGATION.md`, o `SUMMARY.md`, `assets/` (Mermaid), `references.md` e `lessons-learned.md` entram no fechamento do projeto. Não existem as categorias do template `prompt-registry` (`devops/` etc.).
+Na raiz: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `validate.sh`. O `NAVIGATION.md`, o `SUMMARY.md`, `assets/` (Mermaid), `references.md` e `lessons-learned.md` entram no fechamento do projeto. A única categoria é `devops/`; não se criam categorias vazias.
 
 ## Regras
 
 - **Frontmatter** idêntico em `prompt.md` e `README.md` do checkpoint: `nome`, `descricao`, `versao` (semver, inicial `1.0.0`), `tags` (2 a 5) e `inputs` (um item por placeholder `{{...}}`, com `nome` e `descricao`; `inputs: []` se não houver).
 - **`prompt.md`** tem só o frontmatter e o texto do prompt. O texto é autocontido e não cita outros arquivos do repositório.
-- **`02-prompt.md`** traz o prompt final com texto idêntico ao corpo do `prompt.md`; o `validate.sh` confere.
+- **`checkpoints/checkpoint-XX/02-prompt.md`** traz o prompt final com texto idêntico ao corpo de `devops/<prompt>/prompt.md` e aponta para ele; o `validate.sh` confere.
+- **Prioridade:** o enunciado do PDF tem precedência sobre qualquer outra convenção; havendo conflito, vale o PDF.
 - **Idioma:** pt-BR em prompts e documentação.
 - **Nada fabricado:** output de modelo, resultado de teste e execução de pipeline só entram no repositório se foram realmente obtidos. Registrar sempre o modelo e o fornecedor usados.
 - **Execuções** via Ollama, sem API paga. O provedor `providers/ollama-local.js` devolve `cost: 0` para o assert `cost` do `promptfoo`.
@@ -35,6 +40,6 @@ Na raiz: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `validate.sh
 
 ## Git
 
-- Commit semântico, mensagem de uma linha, com a etapa como escopo (ex.: `docs(checkpoint-01): adiciona prompt de triagem de pods`).
+- Commit semântico, mensagem de uma linha, com a etapa como escopo (ex.: `feat(devops): adiciona prompt de triagem de pods`; para documentação do caminho, `docs(checkpoint-01): ...`).
 - O push é feito pelo mantenedor.
 - Documentos de acompanhamento locais ficam fora do repositório (`.gitignore`).
