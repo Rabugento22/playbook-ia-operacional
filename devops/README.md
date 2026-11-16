@@ -7,3 +7,4 @@ Cada prompt vive em sua pasta, nomeada pelo resultado, com `prompt.md` (frontmat
 ## Prompts
 
 - [triagem-de-pods](./triagem-de-pods/) — Analisa um snapshot do cluster (kubectl get, describe e logs) e devolve os pods problemáticos com causa provável, evidência e ação para o plantão.
+- [nota-de-triagem](./nota-de-triagem/) — Transforma um alerta cru do Sentinel em uma nota de triagem padronizada de cinco rótulos para o plantonista do turno seguinte.

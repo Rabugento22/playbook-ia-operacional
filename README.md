@@ -30,7 +30,7 @@ A biblioteca segue o template `prompt-registry`: categoria como pasta na raiz, u
 | CP | Tema | Situação |
 |----|------|----------|
 | [01](checkpoints/checkpoint-01/) | Triagem de pods ([`devops/triagem-de-pods`](devops/triagem-de-pods/)) | Concluído |
-| 02 | Nota de triagem padronizada | Pendente |
+| [02](checkpoints/checkpoint-02/) | Nota de triagem padronizada ([`devops/nota-de-triagem`](devops/nota-de-triagem/)) | Concluído |
 | 03 | Causa-raiz da degradação no Cerebro | Pendente |
 | 04 | Decisão de backpressure do Relay | Pendente |
 | 05 | Cadeia de prompts da migração do Forge | Pendente |
