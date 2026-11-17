@@ -1,0 +1,63 @@
+Cache is disabled.
+Starting evaluation eval-ogx-2026-11-17T15:45:08
+Running 6 test cases (up to 1 at a time)...
+
+┌──────────────────────────────┬──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+│ prompt_dir                   │ alerta_cru                   │ [llama3.2:3b (Meta, via      │ [gemma3:4b (Google, via      │
+│                              │                              │ Ollama)]                     │ Ollama)]                     │
+│                              │                              │ providers/carregar-prompt.js │ providers/carregar-prompt.js │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ nota-de-triagem              │ file://<repo>/…         │ [PASS] ALERTA: Sentinel -    │ [PASS] ALERTA: Sentinel -    │
+│                              │                              │ autoscaler hit max replicas  │ autoscaler atingiu o máximo  │
+│                              │                              │ (60/60) on sentinel-api,     │ de réplicas (60/60) na       │
+│                              │                              │ IMPACTO: O sistema Sentinel  │ sentinel-api                 │
+│                              │                              │ está alcançando o limite     │ IMPACTO: A sentinel-api está │
+│                              │                              │ máximo de réplicas e não     │ com o autoscaler atingindo o │
+│                              │                              │ pode ser escalado, afetando  │ máximo de réplicas, e a      │
+│                              │                              │ a capacidade de              │ profundidade da fila no      │
+│                              │                              │ processamento da API.        │ Relay está crescendo em      │
+│                              │                              │ HIPÓTESE INICIAL: A causa    │ 2k/min com CPU média de 88%, │
+│                              │                              │ prová...                     │ para ...                     │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ nota-de-triagem              │ file://<repo>/…         │ [PASS] ALERTA: Relay -       │ [FAIL] ALERTA: Relay -       │
+│                              │                              │ ingest reject rate 6% for    │ Ingest reject rate 6% por 8  │
+│                              │                              │ 8min, tenant                 │ minutos, tenant              │
+│                              │                              │ wakanda-systems, buffer      │ wakanda-systems              │
+│                              │                              │ saturated after deploy 02:55 │ IMPACTO: A ingestão de dados │
+│                              │                              │ IMPACTO: O serviço de        │ está sendo rejeitada para o  │
+│                              │                              │ ingestão está funcionando    │ tenant wakanda-systems.      │
+│                              │                              │ com uma taxa de rejeição de  │ HIPÓTESE INICIAL: O buffer   │
+│                              │                              │ 6% por 8 minutos, afetando o │ está saturado após o deploy  │
+│                              │                              │ tenant wakanda-systems, com  │ 02:55.                       │
+│                              │                              │ o buff...                    │ AÇÃO IMEDIATA: Liberar       │
+│                              │                              │                              │ espaç...                     │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ nota-de-triagem              │ file://<repo>/…         │ [PASS] ALERTA: Forge -       │ [PASS] ALERTA: Forge -       │
+│                              │                              │ consumer lag 9min e          │ Consumer lag de 9 minutos e  │
+│                              │                              │ atraindo, após falha         │ em ascensão, batch           │
+│                              │                              │ anterior, downstream         │ forge-batch-ingest           │
+│                              │                              │ Sentinel começando a atrasar │ IMPACTO: Processamento de    │
+│                              │                              │ IMPACTO: O serviço de        │ batch do Forge está          │
+│                              │                              │ ingestão de batch do Forge   │ atrasado, causando atraso em │
+│                              │                              │ está atrasando, afetando a   │ downstream Sentinel          │
+│                              │                              │ capacidade de processamento  │ HIPÓTESE INICIAL: Falha no   │
+│                              │                              │ dos clientes.                │ job anterior do batch        │
+│                              │                              │ HIPÓTESE INICIAL: A fa...    │ forge-batch-ingest           │
+│                              │                              │                              │ AÇ...                        │
+└──────────────────────────────┴──────────────────────────────┴──────────────────────────────┴──────────────────────────────┘
+✓ Eval complete (ID: eval-ogx-2026-11-17T15:45:08)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 4.823
+  Provider: 4.823 (3.985 prompt, 838 completion)
+
+Results:
+  ✓ 5 passed (83.33%)
+  ✗ 1 failed (16.67%)
+  0 errors (0%)
+Duration: 9s (concurrency: 1)
+
+Writing output to checkpoints/checkpoint-08/resultados/nota-de-triagem.json

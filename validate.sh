@@ -60,6 +60,15 @@ print("   Checkpoints")
 for cp in sorted(glob.glob("checkpoints/checkpoint-*")):
     n = os.path.basename(cp)
     p02 = f"{cp}/02-prompt.md"
+    p02t = f"{cp}/02-testes.md"
+    if os.path.isfile(p02t):
+        for f in ["README.md", "01-contexto.md", "03-execucao.md", "04-curadoria.md"]:
+            if not os.path.isfile(f"{cp}/{f}"): erro(f"{n}: falta {f}")
+        txt = open(p02t, encoding="utf-8").read()
+        for cfg in sorted(glob.glob("devops/*/promptfooconfig.yaml")):
+            conteudo = open(cfg, encoding="utf-8").read().strip()
+            erro(f"{n}: {cfg} não aparece idêntico em 02-testes.md") if conteudo not in txt else ok(f"{n}: 02-testes.md idêntico a {cfg}")
+        continue
     if os.path.isfile(p02) and not os.path.isdir(f"{cp}/entradas"): aviso(f"{n}: sem entradas/")
     if not os.path.isfile(p02):
         print(f"  --  {n}: ainda não produzido")

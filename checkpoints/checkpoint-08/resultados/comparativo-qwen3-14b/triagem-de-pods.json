@@ -1,0 +1,810 @@
+{
+  "evalId": "eval-4Zx-2026-11-17T15:43:40",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T15:43:40.926Z",
+    "prompts": [
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "qwen3:14b (Alibaba, via Ollama)",
+        "metrics": {
+          "score": 2.5833333333333335,
+          "testPassCount": 1,
+          "testFailCount": 2,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 13,
+          "assertFailCount": 2,
+          "totalLatencyMs": 25567,
+          "tokenUsage": {
+            "prompt": 3902,
+            "completion": 616,
+            "cached": 0,
+            "total": 4518,
+            "numRequests": 3,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "Latency 9292ms is greater than threshold 5000ms",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.75,
+          "reason": "Latency 9292ms is greater than threshold 5000ms",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Latency 9292ms is greater than threshold 5000ms",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "sentinel-api-7d9c8b6f4-h4m2t"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "icontains-any",
+                "value": [
+                  "OOMKilled",
+                  "memória",
+                  "memoria"
+                ]
+              }
+            }
+          ]
+        },
+        "id": "a0dbef2e-6587-4ef5-b7ef-28fa73b7aa88",
+        "latencyMs": 9292,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um engenheiro de SRE especializado em Kubernetes. Sua tarefa é analisar um **snapshot** de um cluster Kubernetes (saída de `kubectl get pods`, `kubectl describe` e `kubectl logs`) para identificar problemas em pods e recomendar ações.  \n\n**Tarefa**:  \n1. Identificar **pods em estado problemático** com base em:  \n   - **STATUS** diferente de `Running`/`Completed` (ex.: `CrashLoopBackOff`, `ImagePullBackOff`, `Pending`, `Error`, `ContainerCreating` prolongado)  \n   - **READY** incompleto (ex.: `0/1`, `1/2`)  \n   - **Restarts recentes e crescentes** (indicados por \"ago\" de minutos/horas, ou eventos/logs de falha)  \n   - **Excluir pods com STATUS `Running` e READY completo, com restarts antigos e estáveis** (ex.: \"1 (3d ago)\")  \n2. Para cada pod problemático, **identificar a causa provável** cruzando:  \n   - STATUS do pod  \n   - Eventos do `kubectl describe`  \n   - Logs do pod  \n   - **Citar a evidência literal** (campo, evento ou linha de log) entre aspas que sustenta a causa  \n3. Recomendar **ações concretas** para o plantão, em ordem de prioridade (P1, P2...)  \n4. Responder em formato legível e curto, com:  \n   - Campo explícito: **\"Pods problemáticos: N\"** no início  \n   - Se **N = 0**, dizer explicitamente que **não há pods problemáticos**, sem inventar problemas  \n   - Se **evidência for insuficiente**, dizer o que falta coletar  \n   - **Manter os nomes dos pods exatamente como aparecem no snapshot**  \n\n**Regras**:  \n- Não inventar dados ausentes do snapshot  \n- Não classificar como \"falha\" um pod que não atende aos critérios acima  \n- Priorizar ações claras e diretas (ex: reiniciar pod, revisar configurações, investigar recursos)  \n- Evitar dumps de texto; resumir informações relevantes  \n- **Causa deve explicar o mecanismo, não repetir o STATUS** (ex.: para `ImagePullBackOff`, citar \"tag da imagem não encontrada no registry\")  \n- **Evidência deve citar pelo menos duas fontes distintas** (ex.: evento + log) e relacioná-las  \n- **Ações devem ser específicas do plantão** (ex: `kubectl describe pod <pod>` ou ajustar limites de recursos)  \n- **N deve ser igual ao número de pods listados**  \n- **Proibir uso de código (```) e texto fora do formato**  \n- **Se evidência for insuficiente, usar \"Causa não confirmada\" e listar o que coletar**  \n\n**Formato de saída**:  \nPods problemáticos: N  \n[Para cada pod problemático, listar:  \n- NOME: [nome do pod]  \n- STATUS: [status] | READY: [ready] | RESTARTS: [restarts]  \n- CAUSA: [causa provável, com mecanismo específico]  \n- EVIDÊNCIA: \"[linha do evento/log]\" + \"[outra fonte]\"  \n- AÇÃO: [ação prioritária (P1, P2...)]  \n]  \n[Se N = 0:  \n**Observações (sem ação imediata):**  \n- [observação 1, se aplicável]  \n- [observação 2, se aplicável]  \n]  \n[Se N >= 1:  \n**Próxima ação do plantão:**  \n- [ordem de atuação entre pods, ex.: P1 > P2 > P3]  \n]  \n\n**Snapshot**:  \n<snapshot>  \n$ kubectl get pods -n sentinel-prod\nNAME                              READY   STATUS             RESTARTS        AGE\nsentinel-api-7d9c8b6f4-2xk9p      1/1     Running            0               6d\nsentinel-api-7d9c8b6f4-h4m2t      0/1     CrashLoopBackOff   14 (90s ago)    42m\nsentinel-worker-5b8f9c8d-jq7rs    1/1     Running            0               6d\nsentinel-scheduler-6c4d7f-nn8vx   1/1     Running            0               6d\n\n$ kubectl describe pod sentinel-api-7d9c8b6f4-h4m2t -n sentinel-prod\n    State:          Waiting\n      Reason:       CrashLoopBackOff\n    Last State:     Terminated\n      Reason:       OOMKilled\n      Exit Code:    137\n    Limits:         memory: 512Mi\n    Requests:       memory: 256Mi\nEvents:\n  Type     Reason   Age                 From     Message\n  ----     ------   ----                ----     -------\n  Warning  BackOff  2m (x18 over 40m)   kubelet  Back-off restarting failed container api\n\n$ kubectl logs sentinel-api-7d9c8b6f4-h4m2t -n sentinel-prod --previous\n2026-05-13 10:14:02 [INFO]  [api] startup complete, version 2.9.1\n2026-05-13 10:14:48 [INFO]  [cache] loading 6h alert cache (heap 410Mi/512Mi)\n2026-05-13 10:15:10 [WARN]  [runtime] high GC pressure, heap 498Mi/512Mi\n2026-05-13 10:15:12 [FATAL] [runtime] out of memory, shutting down process  \n</snapshot>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "Pods problemáticos: 1  \n- NOME: sentinel-api-7d9c8b6f4-h4m2t  \n- STATUS: CrashLoopBackOff | READY: 0/1 | RESTARTS: 14 (90s ago)  \n- CAUSA: O pod está sendo reiniciado repetidamente devido a falhas por falta de memória, provavelmente devido a limites de recursos insuficientes.  \n- EVIDÊNCIA: \"OOMKilled\" no estado do container + \"out of memory, shutting down process\" nos logs  \n- AÇÃO: P1 - Ajustar os limites de memória no deployment do sentinel-api para evitar OOMKilled. Exemplo: aumentar o limite de memória de 512Mi para 1Gi.  \n\n**Próxima ação do plantão:**  \n- P1 > (nenhuma ação adicional necessária)",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 1391,
+            "completion": 207,
+            "cached": 0,
+            "total": 1598,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.75,
+        "success": false,
+        "testCase": {
+          "description": "entrada 1 — pod reiniciando (OOMKilled)",
+          "vars": {
+            "prompt_dir": "triagem-de-pods",
+            "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-1-pod-reiniciando.txt"
+          },
+          "assert": [
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "sentinel-api-7d9c8b6f4-h4m2t"
+            },
+            {
+              "type": "icontains-any",
+              "value": [
+                "OOMKilled",
+                "memória",
+                "memoria"
+              ]
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 1391,
+          "completion": 207,
+          "cached": 0,
+          "total": 1598,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "triagem-de-pods",
+          "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-1-pod-reiniciando.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      },
+      {
+        "cost": 0,
+        "error": "Latency 12896ms is greater than threshold 5000ms",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.8333333333333334,
+          "reason": "Latency 12896ms is greater than threshold 5000ms",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Latency 12896ms is greater than threshold 5000ms",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "sentinel-api-7d9c8b6f4-zzp10"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "sentinel-ingest-8f7a9c5b-4dkqm"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "icontains-any",
+                "value": [
+                  "2.9.2",
+                  "ImagePullBackOff"
+                ]
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "icontains-any",
+                "value": [
+                  "Insufficient",
+                  "cpu"
+                ]
+              }
+            }
+          ]
+        },
+        "id": "3bcefa6d-878d-4b65-b632-afa0041c7383",
+        "latencyMs": 12896,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um engenheiro de SRE especializado em Kubernetes. Sua tarefa é analisar um **snapshot** de um cluster Kubernetes (saída de `kubectl get pods`, `kubectl describe` e `kubectl logs`) para identificar problemas em pods e recomendar ações.  \n\n**Tarefa**:  \n1. Identificar **pods em estado problemático** com base em:  \n   - **STATUS** diferente de `Running`/`Completed` (ex.: `CrashLoopBackOff`, `ImagePullBackOff`, `Pending`, `Error`, `ContainerCreating` prolongado)  \n   - **READY** incompleto (ex.: `0/1`, `1/2`)  \n   - **Restarts recentes e crescentes** (indicados por \"ago\" de minutos/horas, ou eventos/logs de falha)  \n   - **Excluir pods com STATUS `Running` e READY completo, com restarts antigos e estáveis** (ex.: \"1 (3d ago)\")  \n2. Para cada pod problemático, **identificar a causa provável** cruzando:  \n   - STATUS do pod  \n   - Eventos do `kubectl describe`  \n   - Logs do pod  \n   - **Citar a evidência literal** (campo, evento ou linha de log) entre aspas que sustenta a causa  \n3. Recomendar **ações concretas** para o plantão, em ordem de prioridade (P1, P2...)  \n4. Responder em formato legível e curto, com:  \n   - Campo explícito: **\"Pods problemáticos: N\"** no início  \n   - Se **N = 0**, dizer explicitamente que **não há pods problemáticos**, sem inventar problemas  \n   - Se **evidência for insuficiente**, dizer o que falta coletar  \n   - **Manter os nomes dos pods exatamente como aparecem no snapshot**  \n\n**Regras**:  \n- Não inventar dados ausentes do snapshot  \n- Não classificar como \"falha\" um pod que não atende aos critérios acima  \n- Priorizar ações claras e diretas (ex: reiniciar pod, revisar configurações, investigar recursos)  \n- Evitar dumps de texto; resumir informações relevantes  \n- **Causa deve explicar o mecanismo, não repetir o STATUS** (ex.: para `ImagePullBackOff`, citar \"tag da imagem não encontrada no registry\")  \n- **Evidência deve citar pelo menos duas fontes distintas** (ex.: evento + log) e relacioná-las  \n- **Ações devem ser específicas do plantão** (ex: `kubectl describe pod <pod>` ou ajustar limites de recursos)  \n- **N deve ser igual ao número de pods listados**  \n- **Proibir uso de código (```) e texto fora do formato**  \n- **Se evidência for insuficiente, usar \"Causa não confirmada\" e listar o que coletar**  \n\n**Formato de saída**:  \nPods problemáticos: N  \n[Para cada pod problemático, listar:  \n- NOME: [nome do pod]  \n- STATUS: [status] | READY: [ready] | RESTARTS: [restarts]  \n- CAUSA: [causa provável, com mecanismo específico]  \n- EVIDÊNCIA: \"[linha do evento/log]\" + \"[outra fonte]\"  \n- AÇÃO: [ação prioritária (P1, P2...)]  \n]  \n[Se N = 0:  \n**Observações (sem ação imediata):**  \n- [observação 1, se aplicável]  \n- [observação 2, se aplicável]  \n]  \n[Se N >= 1:  \n**Próxima ação do plantão:**  \n- [ordem de atuação entre pods, ex.: P1 > P2 > P3]  \n]  \n\n**Snapshot**:  \n<snapshot>  \n$ kubectl get pods -n sentinel-prod\nNAME                              READY   STATUS             RESTARTS   AGE\nsentinel-api-7d9c8b6f4-2xk9p      1/1     Running            0          6d\nsentinel-api-7d9c8b6f4-zzp10      0/1     ImagePullBackOff   0          8m\nsentinel-ingest-8f7a9c5b-4dkqm    0/1     Pending            0          8m\nsentinel-scheduler-6c4d7f-nn8vx   1/1     Running            0          6d\n\n$ kubectl describe pod sentinel-api-7d9c8b6f4-zzp10 -n sentinel-prod\n    State:    Waiting\n      Reason: ImagePullBackOff\n    Image:    registry.aegis.io/sentinel-api:2.9.2\nEvents:\n  Type     Reason   Age   From      Message\n  ----     ------   ---   ----      -------\n  Warning  Failed   7m    kubelet   Failed to pull image \"registry.aegis.io/sentinel-api:2.9.2\": manifest unknown\n  Warning  Failed   7m    kubelet   Error: ErrImagePull\n  Normal   BackOff  6m    kubelet   Back-off pulling image \"registry.aegis.io/sentinel-api:2.9.2\"\n\n$ kubectl describe pod sentinel-ingest-8f7a9c5b-4dkqm -n sentinel-prod\n    State:    Waiting\n      Reason: Pending\n    Requests: cpu: 2\nEvents:\n  Type     Reason            Age   From               Message\n  ----     ------            ---   ----               -------\n  Warning  FailedScheduling  7m    default-scheduler  0/6 nodes are available: 6 Insufficient cpu  \n</snapshot>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "Pods problemáticos: 2  \n- NOME: sentinel-api-7d9c8b6f4-zzp10  \n  STATUS: ImagePullBackOff | READY: 0/1 | RESTARTS: 0  \n  CAUSA: A imagem especificada (\"registry.aegis.io/sentinel-api:2.9.2\") não está disponível no registry, provavelmente devido a uma tag incorreta ou ausência da imagem.  \n  EVIDÊNCIA: \"Failed to pull image \"registry.aegis.io/sentinel-api:2.9.2\": manifest unknown\" + \"Error: ErrImagePull\"  \n  AÇÃO: P1 - Verificar a existência da imagem no registry e corrigir a tag ou imagem no Deployment  \n\n- NOME: sentinel-ingest-8f7a9c5b-4dkqm  \n  STATUS: Pending | READY: 0/1 | RESTARTS: 0  \n  CAUSA: O pod não pode ser agendado devido à falta de recursos (CPU), pois nenhum nó tem capacidade suficiente para atender à requisição de 2 CPUs.  \n  EVIDÊNCIA: \"0/6 nodes are available: 6 Insufficient cpu\" + \"Requests: cpu: 2\"  \n  AÇÃO: P2 - Aumentar a capacidade de CPU dos nós ou reduzir a requisição de CPU no pod  \n\n**Próxima ação do plantão:**  \n- P1 > P2",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 1316,
+            "completion": 328,
+            "cached": 0,
+            "total": 1644,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.8333333333333334,
+        "success": false,
+        "testCase": {
+          "description": "entrada 2 — dois pods que não sobem (imagem e CPU)",
+          "vars": {
+            "prompt_dir": "triagem-de-pods",
+            "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-2-pods-nao-sobem.txt"
+          },
+          "assert": [
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "sentinel-api-7d9c8b6f4-zzp10"
+            },
+            {
+              "type": "contains",
+              "value": "sentinel-ingest-8f7a9c5b-4dkqm"
+            },
+            {
+              "type": "icontains-any",
+              "value": [
+                "2.9.2",
+                "ImagePullBackOff"
+              ]
+            },
+            {
+              "type": "icontains-any",
+              "value": [
+                "Insufficient",
+                "cpu"
+              ]
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 1316,
+          "completion": 328,
+          "cached": 0,
+          "total": 1644,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "triagem-de-pods",
+          "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-2-pods-nao-sobem.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "Pods problemáticos:\\**\\s*0"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "NOME:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-icontains-any",
+                "value": [
+                  "CrashLoopBackOff",
+                  "ImagePullBackOff",
+                  "OOMKilled",
+                  "Pending",
+                  "Pods problemáticos: 1",
+                  "Pods problemáticos: 2"
+                ]
+              }
+            }
+          ]
+        },
+        "id": "0b926dee-5eb4-4e36-93d4-9f7dd3570de9",
+        "latencyMs": 3379,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um engenheiro de SRE especializado em Kubernetes. Sua tarefa é analisar um **snapshot** de um cluster Kubernetes (saída de `kubectl get pods`, `kubectl describe` e `kubectl logs`) para identificar problemas em pods e recomendar ações.  \n\n**Tarefa**:  \n1. Identificar **pods em estado problemático** com base em:  \n   - **STATUS** diferente de `Running`/`Completed` (ex.: `CrashLoopBackOff`, `ImagePullBackOff`, `Pending`, `Error`, `ContainerCreating` prolongado)  \n   - **READY** incompleto (ex.: `0/1`, `1/2`)  \n   - **Restarts recentes e crescentes** (indicados por \"ago\" de minutos/horas, ou eventos/logs de falha)  \n   - **Excluir pods com STATUS `Running` e READY completo, com restarts antigos e estáveis** (ex.: \"1 (3d ago)\")  \n2. Para cada pod problemático, **identificar a causa provável** cruzando:  \n   - STATUS do pod  \n   - Eventos do `kubectl describe`  \n   - Logs do pod  \n   - **Citar a evidência literal** (campo, evento ou linha de log) entre aspas que sustenta a causa  \n3. Recomendar **ações concretas** para o plantão, em ordem de prioridade (P1, P2...)  \n4. Responder em formato legível e curto, com:  \n   - Campo explícito: **\"Pods problemáticos: N\"** no início  \n   - Se **N = 0**, dizer explicitamente que **não há pods problemáticos**, sem inventar problemas  \n   - Se **evidência for insuficiente**, dizer o que falta coletar  \n   - **Manter os nomes dos pods exatamente como aparecem no snapshot**  \n\n**Regras**:  \n- Não inventar dados ausentes do snapshot  \n- Não classificar como \"falha\" um pod que não atende aos critérios acima  \n- Priorizar ações claras e diretas (ex: reiniciar pod, revisar configurações, investigar recursos)  \n- Evitar dumps de texto; resumir informações relevantes  \n- **Causa deve explicar o mecanismo, não repetir o STATUS** (ex.: para `ImagePullBackOff`, citar \"tag da imagem não encontrada no registry\")  \n- **Evidência deve citar pelo menos duas fontes distintas** (ex.: evento + log) e relacioná-las  \n- **Ações devem ser específicas do plantão** (ex: `kubectl describe pod <pod>` ou ajustar limites de recursos)  \n- **N deve ser igual ao número de pods listados**  \n- **Proibir uso de código (```) e texto fora do formato**  \n- **Se evidência for insuficiente, usar \"Causa não confirmada\" e listar o que coletar**  \n\n**Formato de saída**:  \nPods problemáticos: N  \n[Para cada pod problemático, listar:  \n- NOME: [nome do pod]  \n- STATUS: [status] | READY: [ready] | RESTARTS: [restarts]  \n- CAUSA: [causa provável, com mecanismo específico]  \n- EVIDÊNCIA: \"[linha do evento/log]\" + \"[outra fonte]\"  \n- AÇÃO: [ação prioritária (P1, P2...)]  \n]  \n[Se N = 0:  \n**Observações (sem ação imediata):**  \n- [observação 1, se aplicável]  \n- [observação 2, se aplicável]  \n]  \n[Se N >= 1:  \n**Próxima ação do plantão:**  \n- [ordem de atuação entre pods, ex.: P1 > P2 > P3]  \n]  \n\n**Snapshot**:  \n<snapshot>  \n$ kubectl get pods -n sentinel-prod\nNAME                              READY   STATUS    RESTARTS     AGE\nsentinel-api-7d9c8b6f4-2xk9p      1/1     Running   0            6d\nsentinel-api-7d9c8b6f4-h4m2t      1/1     Running   0            6d\nsentinel-worker-5b8f9c8d-jq7rs    1/1     Running   1 (3d ago)   6d\nsentinel-scheduler-6c4d7f-nn8vx   1/1     Running   0            6d\n\n$ kubectl logs sentinel-api-7d9c8b6f4-2xk9p -n sentinel-prod --tail=3\n2026-05-13 11:02:31 [INFO] [api] health check OK, 0 errors in the last 5min\n2026-05-13 11:03:31 [INFO] [api] processed 4.2k alerts/min, p99 latency 120ms\n2026-05-13 11:04:31 [INFO] [api] health check OK  \n</snapshot>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "Pods problemáticos: 0  \n**Observações (sem ação imediata):**  \n- Todos os pods estão em estado `Running` com `READY` completo  \n- Não há evidências de falhas recentes, restarts crescentes ou status problemáticos  \n- Logs de `sentinel-api` indicam operação estável e sem erros reportados",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 1195,
+            "completion": 81,
+            "cached": 0,
+            "total": 1276,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "entrada 3 — tudo saudável (nenhum pod problemático)",
+          "vars": {
+            "prompt_dir": "triagem-de-pods",
+            "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-3-tudo-saudavel.txt"
+          },
+          "assert": [
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "regex",
+              "value": "Pods problemáticos:\\**\\s*0"
+            },
+            {
+              "type": "not-contains",
+              "value": "NOME:"
+            },
+            {
+              "type": "not-icontains-any",
+              "value": [
+                "CrashLoopBackOff",
+                "ImagePullBackOff",
+                "OOMKilled",
+                "Pending",
+                "Pods problemáticos: 1",
+                "Pods problemáticos: 2"
+              ]
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 1195,
+          "completion": 81,
+          "cached": 0,
+          "total": 1276,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "triagem-de-pods",
+          "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-3-tudo-saudavel.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 1,
+      "failures": 2,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 3902,
+        "completion": 616,
+        "cached": 0,
+        "total": 4518,
+        "numRequests": 3,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 25643,
+      "evaluationDurationMs": 25643
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "triagem-de-pods — pods citados com a causa, entrada saudável sem pod em falha, latência e custo",
+    "prompts": [
+      "file://<repo>/providers/carregar-prompt.js"
+    ],
+    "providers": [
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "qwen3:14b (Alibaba, via Ollama)",
+        "config": {
+          "model": "qwen3:14b",
+          "temperature": 0,
+          "num_ctx": 8192
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "entrada 1 — pod reiniciando (OOMKilled)",
+        "vars": {
+          "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-1-pod-reiniciando.txt"
+        },
+        "assert": [
+          {
+            "type": "contains",
+            "value": "sentinel-api-7d9c8b6f4-h4m2t"
+          },
+          {
+            "type": "icontains-any",
+            "value": [
+              "OOMKilled",
+              "memória",
+              "memoria"
+            ]
+          }
+        ]
+      },
+      {
+        "description": "entrada 2 — dois pods que não sobem (imagem e CPU)",
+        "vars": {
+          "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-2-pods-nao-sobem.txt"
+        },
+        "assert": [
+          {
+            "type": "contains",
+            "value": "sentinel-api-7d9c8b6f4-zzp10"
+          },
+          {
+            "type": "contains",
+            "value": "sentinel-ingest-8f7a9c5b-4dkqm"
+          },
+          {
+            "type": "icontains-any",
+            "value": [
+              "2.9.2",
+              "ImagePullBackOff"
+            ]
+          },
+          {
+            "type": "icontains-any",
+            "value": [
+              "Insufficient",
+              "cpu"
+            ]
+          }
+        ]
+      },
+      {
+        "description": "entrada 3 — tudo saudável (nenhum pod problemático)",
+        "vars": {
+          "snapshot": "file://<repo>/checkpoints/checkpoint-01/entradas/entrada-3-tudo-saudavel.txt"
+        },
+        "assert": [
+          {
+            "type": "regex",
+            "value": "Pods problemáticos:\\**\\s*0"
+          },
+          {
+            "type": "not-contains",
+            "value": "NOME:"
+          },
+          {
+            "type": "not-icontains-any",
+            "value": [
+              "CrashLoopBackOff",
+              "ImagePullBackOff",
+              "OOMKilled",
+              "Pending",
+              "Pods problemáticos: 1",
+              "Pods problemáticos: 2"
+            ]
+          }
+        ]
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "checkpoints/checkpoint-08/resultados/comparativo-qwen3-14b/triagem-de-pods.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "vars": {
+        "prompt_dir": "triagem-de-pods"
+      },
+      "assert": [
+        {
+          "type": "latency",
+          "threshold": 5000
+        },
+        {
+          "type": "cost",
+          "threshold": 0.01
+        }
+      ],
+      "options": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/devops/triagem-de-pods"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T15:44:06.652Z",
+    "evaluationCreatedAt": "2026-11-17T15:43:40.926Z"
+  },
+  "vars": [
+    "prompt_dir",
+    "snapshot"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

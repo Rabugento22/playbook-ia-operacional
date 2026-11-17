@@ -1,0 +1,43 @@
+Cache is disabled.
+Starting evaluation eval-WxB-2026-11-17T15:45:44
+Running 2 test cases (up to 1 at a time)...
+
+┌────────────────────┬────────────────────┬────────────────────┬────────────────────┬────────────────────┬────────────────────┐
+│ prompt_dir         │ manifesto          │ padrao             │ mapa               │ [llama3.2:3b       │ [gemma3:4b         │
+│                    │                    │                    │                    │ (Meta, via         │ (Google, via       │
+│                    │                    │                    │                    │ Ollama)]           │ Ollama)]           │
+│                    │                    │                    │                    │ providers/carrega… │ providers/carrega… │
+├────────────────────┼────────────────────┼────────────────────┼────────────────────┼────────────────────┼────────────────────┤
+│ networkpolicy-sen… │ file://<repo>…        │ file://<repo>…        │ file://<repo>…        │ [FAIL] **O que o   │ [FAIL] O que o     │
+│                    │                    │                    │                    │ manifesto libera   │ manifesto libera   │
+│                    │                    │                    │                    │ em excesso**       │ em excesso         │
+│                    │                    │                    │                    │ O manifesto atual  │ O manifesto atual  │
+│                    │                    │                    │                    │ permite tráfego de │ permite todo o     │
+│                    │                    │                    │                    │ entrada e saída    │ tráfego de entrada │
+│                    │                    │                    │                    │ para todos os pods │ e saída para pods  │
+│                    │                    │                    │                    │ do namespace       │ no namespace       │
+│                    │                    │                    │                    │ "sentinel-prod",   │ "sentinel-prod"    │
+│                    │                    │                    │                    │ independentemente  │ sem restrições.    │
+│                    │                    │                    │                    │ do serviço ou      │ Isso é excessivo,  │
+│                    │                    │                    │                    │ porta utilizada.   │ pois não           │
+│                    │                    │                    │                    │ Além disso, não há │ especifica quais   │
+│                    │                    │                    │                    │ regras específicas │ serviços externos  │
+│                    │                    │                    │                    │ para permitir ou   │ o Sentinel deve se │
+│                    │                    │                    │                    │ ...                │ comunicar, nem ... │
+└────────────────────┴────────────────────┴────────────────────┴────────────────────┴────────────────────┴────────────────────┘
+✓ Eval complete (ID: eval-WxB-2026-11-17T15:45:44)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 3.646
+  Provider: 3.646 (2.196 prompt, 1.450 completion)
+
+Results:
+  0 passed (0%)
+  ✗ 2 failed (100%)
+  0 errors (0%)
+Duration: 15s (concurrency: 1)
+
+Writing output to checkpoints/checkpoint-08/resultados/networkpolicy-sentinel.json

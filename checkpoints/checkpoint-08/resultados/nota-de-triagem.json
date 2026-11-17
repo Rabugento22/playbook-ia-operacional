@@ -1,0 +1,1747 @@
+{
+  "evalId": "eval-ogx-2026-11-17T15:45:08",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T15:45:08.510Z",
+    "prompts": [
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "llama3.2:3b (Meta, via Ollama)",
+        "metrics": {
+          "score": 3,
+          "testPassCount": 3,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 30,
+          "assertFailCount": 0,
+          "totalLatencyMs": 4005,
+          "tokenUsage": {
+            "prompt": 2081,
+            "completion": 467,
+            "cached": 0,
+            "total": 2548,
+            "numRequests": 3,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      },
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "gemma3:4b (Google, via Ollama)",
+        "metrics": {
+          "score": 2.9,
+          "testPassCount": 2,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 29,
+          "assertFailCount": 1,
+          "totalLatencyMs": 4567,
+          "tokenUsage": {
+            "prompt": 1904,
+            "completion": 371,
+            "cached": 0,
+            "total": 2275,
+            "numRequests": 3,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ALERTA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "IMPACTO:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "HIPÓTESE INICIAL:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "AÇÃO IMEDIATA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ESCALAR PARA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "ESCALAR PARA:.*@\\w+"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().split('\\n').length <= 8"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "@sentinel-core"
+              }
+            }
+          ]
+        },
+        "id": "c3bab173-3469-4e46-be26-b34e491b4528",
+        "latencyMs": 1247,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Transforme o alerta cru em uma nota de triagem padronizada com cinco linhas, seguindo o formato abaixo. Use apenas as informações fornecidas no alerta, sem suposições ou dados não mencionados. O conteúdo deve respeitar as regras de cada linha.\n\nFormato (cinco linhas consecutivas, nesta ordem; cada rótulo é seguido do texto na mesma linha):\nALERTA: <sistema> - <condição do alerta>\nIMPACTO: <efeito para clientes ou produto>\nHIPÓTESE INICIAL: <causa provável>\nAÇÃO IMEDIATA: <ação do plantão>\nESCALAR PARA: <handle> se <condição com tempo>\n\nRegras de conteúdo:\n1. ALERTA: comece com o nome do sistema (Sentinel, Relay, Forge, Cerebro), seguido de hífen e de uma frase curta com a condição do alerta. Inclua o tenant se mencionado.\n2. IMPACTO: descreva o efeito para clientes ou produto (o que deixa de funcionar ou fica lento e para quem), apenas o que o alerta sustenta, sem repetir métricas do alerta.\n3. HIPÓTESE INICIAL: afirmação direta e curta da causa provável, baseada em evidência do próprio alerta, sem usar a palavra \"hipótese\".\n4. AÇÃO IMEDIATA: ação específica do plantão, coerente com a hipótese; evite \"revisar\" ou \"monitorar\" genéricos. Não cite números, ferramentas, comandos ou sistemas que o alerta não mencione, e não diga que uma ação já foi feita.\n5. ESCALAR PARA: handle do time dono do sistema que você escreveu em ALERTA:, conforme a tabela abaixo, seguido de \"se\" e de uma condição com tempo. Os handles são: Relay → @relay-core; Forge → @data-platform; Cerebro → @search-infra; Sentinel → @sentinel-core.\n6. Copie números, tenants, horários e nomes de serviços exatamente como estão no alerta. Não invente nenhum dado ausente do alerta.\n7. Escreva em português correto, sem markdown e sem linhas em branco.\n\nTabela de handles (use o handle da linha cujo sistema aparece em ALERTA:, sem trocar por outro):\nRelay → @relay-core\nForge → @data-platform\nCerebro → @search-infra\nSentinel → @sentinel-core\n\nResponda somente com as cinco linhas da nota, sem as tags <alerta> e sem texto antes ou depois.\n\nAlerta a ser analisado:\n<alerta>\n2026-05-12 14:02:09 UTC [Sentinel] autoscaler hit max replicas (60/60) on sentinel-api,\nqueue depth on Relay growing 2k/min, CPU avg 88%, tenant stark-industries\nsending 4x baseline volume after onboarding new region\n</alerta>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "llama3.2:3b (Meta, via Ollama)"
+        },
+        "response": {
+          "output": "ALERTA: Sentinel - autoscaler hit max replicas (60/60) on sentinel-api,\nIMPACTO: O sistema Sentinel está alcançando o limite máximo de réplicas e não pode ser escalado, afetando a capacidade de processamento da API.\nHIPÓTESE INICIAL: A causa provável é que o volume de dados está aumentando rapidamente após a onboarding de uma nova região.\nAÇÃO IMEDIATA: Desligar o sistema Sentinel para evitar sobrecarga e garantir a estabilidade do sistema.\nESCALAR PARA: @sentinel-core se CPU avg > 90%",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 707,
+            "completion": 132,
+            "cached": 0,
+            "total": 839,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "alerta 1 — Sentinel",
+          "vars": {
+            "prompt_dir": "nota-de-triagem",
+            "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-1-sentinel.txt"
+          },
+          "assert": [
+            {
+              "type": "contains",
+              "value": "ALERTA:"
+            },
+            {
+              "type": "contains",
+              "value": "IMPACTO:"
+            },
+            {
+              "type": "contains",
+              "value": "HIPÓTESE INICIAL:"
+            },
+            {
+              "type": "contains",
+              "value": "AÇÃO IMEDIATA:"
+            },
+            {
+              "type": "contains",
+              "value": "ESCALAR PARA:"
+            },
+            {
+              "type": "regex",
+              "value": "ESCALAR PARA:.*@\\w+"
+            },
+            {
+              "type": "javascript",
+              "value": "output.trim().split('\\n').length <= 8"
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "@sentinel-core"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 707,
+          "completion": 132,
+          "cached": 0,
+          "total": 839,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "nota-de-triagem",
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-1-sentinel.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ALERTA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "IMPACTO:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "HIPÓTESE INICIAL:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "AÇÃO IMEDIATA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ESCALAR PARA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "ESCALAR PARA:.*@\\w+"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().split('\\n').length <= 8"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "@sentinel-core"
+              }
+            }
+          ]
+        },
+        "id": "de40ec11-dce0-434e-8c0f-f4e88b842eb0",
+        "latencyMs": 1865,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Transforme o alerta cru em uma nota de triagem padronizada com cinco linhas, seguindo o formato abaixo. Use apenas as informações fornecidas no alerta, sem suposições ou dados não mencionados. O conteúdo deve respeitar as regras de cada linha.\n\nFormato (cinco linhas consecutivas, nesta ordem; cada rótulo é seguido do texto na mesma linha):\nALERTA: <sistema> - <condição do alerta>\nIMPACTO: <efeito para clientes ou produto>\nHIPÓTESE INICIAL: <causa provável>\nAÇÃO IMEDIATA: <ação do plantão>\nESCALAR PARA: <handle> se <condição com tempo>\n\nRegras de conteúdo:\n1. ALERTA: comece com o nome do sistema (Sentinel, Relay, Forge, Cerebro), seguido de hífen e de uma frase curta com a condição do alerta. Inclua o tenant se mencionado.\n2. IMPACTO: descreva o efeito para clientes ou produto (o que deixa de funcionar ou fica lento e para quem), apenas o que o alerta sustenta, sem repetir métricas do alerta.\n3. HIPÓTESE INICIAL: afirmação direta e curta da causa provável, baseada em evidência do próprio alerta, sem usar a palavra \"hipótese\".\n4. AÇÃO IMEDIATA: ação específica do plantão, coerente com a hipótese; evite \"revisar\" ou \"monitorar\" genéricos. Não cite números, ferramentas, comandos ou sistemas que o alerta não mencione, e não diga que uma ação já foi feita.\n5. ESCALAR PARA: handle do time dono do sistema que você escreveu em ALERTA:, conforme a tabela abaixo, seguido de \"se\" e de uma condição com tempo. Os handles são: Relay → @relay-core; Forge → @data-platform; Cerebro → @search-infra; Sentinel → @sentinel-core.\n6. Copie números, tenants, horários e nomes de serviços exatamente como estão no alerta. Não invente nenhum dado ausente do alerta.\n7. Escreva em português correto, sem markdown e sem linhas em branco.\n\nTabela de handles (use o handle da linha cujo sistema aparece em ALERTA:, sem trocar por outro):\nRelay → @relay-core\nForge → @data-platform\nCerebro → @search-infra\nSentinel → @sentinel-core\n\nResponda somente com as cinco linhas da nota, sem as tags <alerta> e sem texto antes ou depois.\n\nAlerta a ser analisado:\n<alerta>\n2026-05-12 14:02:09 UTC [Sentinel] autoscaler hit max replicas (60/60) on sentinel-api,\nqueue depth on Relay growing 2k/min, CPU avg 88%, tenant stark-industries\nsending 4x baseline volume after onboarding new region\n</alerta>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 1,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "gemma3:4b (Google, via Ollama)"
+        },
+        "response": {
+          "output": "ALERTA: Sentinel - autoscaler atingiu o máximo de réplicas (60/60) na sentinel-api\nIMPACTO: A sentinel-api está com o autoscaler atingindo o máximo de réplicas, e a profundidade da fila no Relay está crescendo em 2k/min com CPU média de 88%, para o tenant stark-industries.\nHIPÓTESE INICIAL: O autoscaler da sentinel-api está sendo acionado devido ao aumento da carga.\nAÇÃO IMEDIATA: O plantão deve investigar o aumento da carga na sentinel-api.\nESCALAR PARA: @sentinel-core se a carga persistir por mais de 15 minutos.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 650,
+            "completion": 153,
+            "cached": 0,
+            "total": 803,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "alerta 1 — Sentinel",
+          "vars": {
+            "prompt_dir": "nota-de-triagem",
+            "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-1-sentinel.txt"
+          },
+          "assert": [
+            {
+              "type": "contains",
+              "value": "ALERTA:"
+            },
+            {
+              "type": "contains",
+              "value": "IMPACTO:"
+            },
+            {
+              "type": "contains",
+              "value": "HIPÓTESE INICIAL:"
+            },
+            {
+              "type": "contains",
+              "value": "AÇÃO IMEDIATA:"
+            },
+            {
+              "type": "contains",
+              "value": "ESCALAR PARA:"
+            },
+            {
+              "type": "regex",
+              "value": "ESCALAR PARA:.*@\\w+"
+            },
+            {
+              "type": "javascript",
+              "value": "output.trim().split('\\n').length <= 8"
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "@sentinel-core"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 650,
+          "completion": 153,
+          "cached": 0,
+          "total": 803,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "nota-de-triagem",
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-1-sentinel.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "error": "Expected output to contain \"@relay-core\"",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.9,
+          "reason": "Expected output to contain \"@relay-core\"",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ALERTA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "IMPACTO:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "HIPÓTESE INICIAL:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "AÇÃO IMEDIATA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ESCALAR PARA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "ESCALAR PARA:.*@\\w+"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().split('\\n').length <= 8"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to contain \"@relay-core\"",
+              "assertion": {
+                "type": "contains",
+                "value": "@relay-core"
+              }
+            }
+          ]
+        },
+        "id": "4a76ef7e-1a10-4567-afea-20e74f62632b",
+        "latencyMs": 1369,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Transforme o alerta cru em uma nota de triagem padronizada com cinco linhas, seguindo o formato abaixo. Use apenas as informações fornecidas no alerta, sem suposições ou dados não mencionados. O conteúdo deve respeitar as regras de cada linha.\n\nFormato (cinco linhas consecutivas, nesta ordem; cada rótulo é seguido do texto na mesma linha):\nALERTA: <sistema> - <condição do alerta>\nIMPACTO: <efeito para clientes ou produto>\nHIPÓTESE INICIAL: <causa provável>\nAÇÃO IMEDIATA: <ação do plantão>\nESCALAR PARA: <handle> se <condição com tempo>\n\nRegras de conteúdo:\n1. ALERTA: comece com o nome do sistema (Sentinel, Relay, Forge, Cerebro), seguido de hífen e de uma frase curta com a condição do alerta. Inclua o tenant se mencionado.\n2. IMPACTO: descreva o efeito para clientes ou produto (o que deixa de funcionar ou fica lento e para quem), apenas o que o alerta sustenta, sem repetir métricas do alerta.\n3. HIPÓTESE INICIAL: afirmação direta e curta da causa provável, baseada em evidência do próprio alerta, sem usar a palavra \"hipótese\".\n4. AÇÃO IMEDIATA: ação específica do plantão, coerente com a hipótese; evite \"revisar\" ou \"monitorar\" genéricos. Não cite números, ferramentas, comandos ou sistemas que o alerta não mencione, e não diga que uma ação já foi feita.\n5. ESCALAR PARA: handle do time dono do sistema que você escreveu em ALERTA:, conforme a tabela abaixo, seguido de \"se\" e de uma condição com tempo. Os handles são: Relay → @relay-core; Forge → @data-platform; Cerebro → @search-infra; Sentinel → @sentinel-core.\n6. Copie números, tenants, horários e nomes de serviços exatamente como estão no alerta. Não invente nenhum dado ausente do alerta.\n7. Escreva em português correto, sem markdown e sem linhas em branco.\n\nTabela de handles (use o handle da linha cujo sistema aparece em ALERTA:, sem trocar por outro):\nRelay → @relay-core\nForge → @data-platform\nCerebro → @search-infra\nSentinel → @sentinel-core\n\nResponda somente com as cinco linhas da nota, sem as tags <alerta> e sem texto antes ou depois.\n\nAlerta a ser analisado:\n<alerta>\n2026-05-13 03:11:00 UTC [Relay] ingest reject rate 6% for 8min, tenant wakanda-systems,\nbuffer saturated after deploy 02:55\n</alerta>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 1,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "gemma3:4b (Google, via Ollama)"
+        },
+        "response": {
+          "output": "ALERTA: Relay - Ingest reject rate 6% por 8 minutos, tenant wakanda-systems\nIMPACTO: A ingestão de dados está sendo rejeitada para o tenant wakanda-systems.\nHIPÓTESE INICIAL: O buffer está saturado após o deploy 02:55.\nAÇÃO IMEDIATA: Liberar espaço no buffer do tenant wakanda-systems.\nESCALAR PARA: @data-platform se a saturação persistir por mais 15 minutos.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 628,
+            "completion": 111,
+            "cached": 0,
+            "total": 739,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.9,
+        "success": false,
+        "testCase": {
+          "description": "alerta 2 — Relay",
+          "vars": {
+            "prompt_dir": "nota-de-triagem",
+            "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-2-relay.txt"
+          },
+          "assert": [
+            {
+              "type": "contains",
+              "value": "ALERTA:"
+            },
+            {
+              "type": "contains",
+              "value": "IMPACTO:"
+            },
+            {
+              "type": "contains",
+              "value": "HIPÓTESE INICIAL:"
+            },
+            {
+              "type": "contains",
+              "value": "AÇÃO IMEDIATA:"
+            },
+            {
+              "type": "contains",
+              "value": "ESCALAR PARA:"
+            },
+            {
+              "type": "regex",
+              "value": "ESCALAR PARA:.*@\\w+"
+            },
+            {
+              "type": "javascript",
+              "value": "output.trim().split('\\n').length <= 8"
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "@relay-core"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 628,
+          "completion": 111,
+          "cached": 0,
+          "total": 739,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "nota-de-triagem",
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-2-relay.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ALERTA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "IMPACTO:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "HIPÓTESE INICIAL:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "AÇÃO IMEDIATA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ESCALAR PARA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "ESCALAR PARA:.*@\\w+"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().split('\\n').length <= 8"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "@relay-core"
+              }
+            }
+          ]
+        },
+        "id": "9237cd4a-187b-466b-8d3b-e344039e6d50",
+        "latencyMs": 1528,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Transforme o alerta cru em uma nota de triagem padronizada com cinco linhas, seguindo o formato abaixo. Use apenas as informações fornecidas no alerta, sem suposições ou dados não mencionados. O conteúdo deve respeitar as regras de cada linha.\n\nFormato (cinco linhas consecutivas, nesta ordem; cada rótulo é seguido do texto na mesma linha):\nALERTA: <sistema> - <condição do alerta>\nIMPACTO: <efeito para clientes ou produto>\nHIPÓTESE INICIAL: <causa provável>\nAÇÃO IMEDIATA: <ação do plantão>\nESCALAR PARA: <handle> se <condição com tempo>\n\nRegras de conteúdo:\n1. ALERTA: comece com o nome do sistema (Sentinel, Relay, Forge, Cerebro), seguido de hífen e de uma frase curta com a condição do alerta. Inclua o tenant se mencionado.\n2. IMPACTO: descreva o efeito para clientes ou produto (o que deixa de funcionar ou fica lento e para quem), apenas o que o alerta sustenta, sem repetir métricas do alerta.\n3. HIPÓTESE INICIAL: afirmação direta e curta da causa provável, baseada em evidência do próprio alerta, sem usar a palavra \"hipótese\".\n4. AÇÃO IMEDIATA: ação específica do plantão, coerente com a hipótese; evite \"revisar\" ou \"monitorar\" genéricos. Não cite números, ferramentas, comandos ou sistemas que o alerta não mencione, e não diga que uma ação já foi feita.\n5. ESCALAR PARA: handle do time dono do sistema que você escreveu em ALERTA:, conforme a tabela abaixo, seguido de \"se\" e de uma condição com tempo. Os handles são: Relay → @relay-core; Forge → @data-platform; Cerebro → @search-infra; Sentinel → @sentinel-core.\n6. Copie números, tenants, horários e nomes de serviços exatamente como estão no alerta. Não invente nenhum dado ausente do alerta.\n7. Escreva em português correto, sem markdown e sem linhas em branco.\n\nTabela de handles (use o handle da linha cujo sistema aparece em ALERTA:, sem trocar por outro):\nRelay → @relay-core\nForge → @data-platform\nCerebro → @search-infra\nSentinel → @sentinel-core\n\nResponda somente com as cinco linhas da nota, sem as tags <alerta> e sem texto antes ou depois.\n\nAlerta a ser analisado:\n<alerta>\n2026-05-13 03:11:00 UTC [Relay] ingest reject rate 6% for 8min, tenant wakanda-systems,\nbuffer saturated after deploy 02:55\n</alerta>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "llama3.2:3b (Meta, via Ollama)"
+        },
+        "response": {
+          "output": "ALERTA: Relay - ingest reject rate 6% for 8min, tenant wakanda-systems, buffer saturated after deploy 02:55\nIMPACTO: O serviço de ingestão está funcionando com uma taxa de rejeição de 6% por 8 minutos, afetando o tenant wakanda-systems, com o buffer saturado após a deploy do horário 02:55.\nHIPÓTESE INICIAL: A causa provável é que o buffer de ingestão esteja saturado após a deploy do serviço no horário 02:55.\nAÇÃO IMEDIATA: Desligar o serviço de ingestão para evitar o aumento da taxa de rejeição e evitar a saturação do buffer.\nESCALAR PARA: @relay-core se a taxa de rejeição persistir acima de 6% por mais de 15 minutos.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 687,
+            "completion": 186,
+            "cached": 0,
+            "total": 873,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "alerta 2 — Relay",
+          "vars": {
+            "prompt_dir": "nota-de-triagem",
+            "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-2-relay.txt"
+          },
+          "assert": [
+            {
+              "type": "contains",
+              "value": "ALERTA:"
+            },
+            {
+              "type": "contains",
+              "value": "IMPACTO:"
+            },
+            {
+              "type": "contains",
+              "value": "HIPÓTESE INICIAL:"
+            },
+            {
+              "type": "contains",
+              "value": "AÇÃO IMEDIATA:"
+            },
+            {
+              "type": "contains",
+              "value": "ESCALAR PARA:"
+            },
+            {
+              "type": "regex",
+              "value": "ESCALAR PARA:.*@\\w+"
+            },
+            {
+              "type": "javascript",
+              "value": "output.trim().split('\\n').length <= 8"
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "@relay-core"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 687,
+          "completion": 186,
+          "cached": 0,
+          "total": 873,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "nota-de-triagem",
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-2-relay.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ALERTA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "IMPACTO:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "HIPÓTESE INICIAL:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "AÇÃO IMEDIATA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ESCALAR PARA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "ESCALAR PARA:.*@\\w+"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().split('\\n').length <= 8"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "@data-platform"
+              }
+            }
+          ]
+        },
+        "id": "98393941-0fef-4d1c-81eb-ba84b34b4970",
+        "latencyMs": 1230,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Transforme o alerta cru em uma nota de triagem padronizada com cinco linhas, seguindo o formato abaixo. Use apenas as informações fornecidas no alerta, sem suposições ou dados não mencionados. O conteúdo deve respeitar as regras de cada linha.\n\nFormato (cinco linhas consecutivas, nesta ordem; cada rótulo é seguido do texto na mesma linha):\nALERTA: <sistema> - <condição do alerta>\nIMPACTO: <efeito para clientes ou produto>\nHIPÓTESE INICIAL: <causa provável>\nAÇÃO IMEDIATA: <ação do plantão>\nESCALAR PARA: <handle> se <condição com tempo>\n\nRegras de conteúdo:\n1. ALERTA: comece com o nome do sistema (Sentinel, Relay, Forge, Cerebro), seguido de hífen e de uma frase curta com a condição do alerta. Inclua o tenant se mencionado.\n2. IMPACTO: descreva o efeito para clientes ou produto (o que deixa de funcionar ou fica lento e para quem), apenas o que o alerta sustenta, sem repetir métricas do alerta.\n3. HIPÓTESE INICIAL: afirmação direta e curta da causa provável, baseada em evidência do próprio alerta, sem usar a palavra \"hipótese\".\n4. AÇÃO IMEDIATA: ação específica do plantão, coerente com a hipótese; evite \"revisar\" ou \"monitorar\" genéricos. Não cite números, ferramentas, comandos ou sistemas que o alerta não mencione, e não diga que uma ação já foi feita.\n5. ESCALAR PARA: handle do time dono do sistema que você escreveu em ALERTA:, conforme a tabela abaixo, seguido de \"se\" e de uma condição com tempo. Os handles são: Relay → @relay-core; Forge → @data-platform; Cerebro → @search-infra; Sentinel → @sentinel-core.\n6. Copie números, tenants, horários e nomes de serviços exatamente como estão no alerta. Não invente nenhum dado ausente do alerta.\n7. Escreva em português correto, sem markdown e sem linhas em branco.\n\nTabela de handles (use o handle da linha cujo sistema aparece em ALERTA:, sem trocar por outro):\nRelay → @relay-core\nForge → @data-platform\nCerebro → @search-infra\nSentinel → @sentinel-core\n\nResponda somente com as cinco linhas da nota, sem as tags <alerta> e sem texto antes ou depois.\n\nAlerta a ser analisado:\n<alerta>\n2026-05-13 11:40:22 UTC [Forge] consumer lag 9min and climbing, batch forge-batch-ingest\ndelayed after previous job failure, downstream Sentinel starting to lag\n</alerta>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "llama3.2:3b (Meta, via Ollama)"
+        },
+        "response": {
+          "output": "ALERTA: Forge - consumer lag 9min e atraindo, após falha anterior, downstream Sentinel começando a atrasar\nIMPACTO: O serviço de ingestão de batch do Forge está atrasando, afetando a capacidade de processamento dos clientes.\nHIPÓTESE INICIAL: A falha anterior no processo de ingestão de batch do Forge pode ter causado um atraso no sistema, levando a uma sobrecarga no Sentinel.\nAÇÃO IMEDIATA: Desligar o serviço de ingestão de batch do Forge e verificar se há algum problema no sistema.\nESCALAR PARA: @data-platform se o atraso persistir após 30 minutos.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 687,
+            "completion": 149,
+            "cached": 0,
+            "total": 836,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "alerta 3 — Forge",
+          "vars": {
+            "prompt_dir": "nota-de-triagem",
+            "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-3-forge.txt"
+          },
+          "assert": [
+            {
+              "type": "contains",
+              "value": "ALERTA:"
+            },
+            {
+              "type": "contains",
+              "value": "IMPACTO:"
+            },
+            {
+              "type": "contains",
+              "value": "HIPÓTESE INICIAL:"
+            },
+            {
+              "type": "contains",
+              "value": "AÇÃO IMEDIATA:"
+            },
+            {
+              "type": "contains",
+              "value": "ESCALAR PARA:"
+            },
+            {
+              "type": "regex",
+              "value": "ESCALAR PARA:.*@\\w+"
+            },
+            {
+              "type": "javascript",
+              "value": "output.trim().split('\\n').length <= 8"
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "@data-platform"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 687,
+          "completion": 149,
+          "cached": 0,
+          "total": 836,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "nota-de-triagem",
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-3-forge.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ALERTA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "IMPACTO:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "HIPÓTESE INICIAL:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "AÇÃO IMEDIATA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "ESCALAR PARA:"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "ESCALAR PARA:.*@\\w+"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().split('\\n').length <= 8"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "@data-platform"
+              }
+            }
+          ]
+        },
+        "id": "d332e572-2066-4514-bd7f-3f81e073d468",
+        "latencyMs": 1333,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Transforme o alerta cru em uma nota de triagem padronizada com cinco linhas, seguindo o formato abaixo. Use apenas as informações fornecidas no alerta, sem suposições ou dados não mencionados. O conteúdo deve respeitar as regras de cada linha.\n\nFormato (cinco linhas consecutivas, nesta ordem; cada rótulo é seguido do texto na mesma linha):\nALERTA: <sistema> - <condição do alerta>\nIMPACTO: <efeito para clientes ou produto>\nHIPÓTESE INICIAL: <causa provável>\nAÇÃO IMEDIATA: <ação do plantão>\nESCALAR PARA: <handle> se <condição com tempo>\n\nRegras de conteúdo:\n1. ALERTA: comece com o nome do sistema (Sentinel, Relay, Forge, Cerebro), seguido de hífen e de uma frase curta com a condição do alerta. Inclua o tenant se mencionado.\n2. IMPACTO: descreva o efeito para clientes ou produto (o que deixa de funcionar ou fica lento e para quem), apenas o que o alerta sustenta, sem repetir métricas do alerta.\n3. HIPÓTESE INICIAL: afirmação direta e curta da causa provável, baseada em evidência do próprio alerta, sem usar a palavra \"hipótese\".\n4. AÇÃO IMEDIATA: ação específica do plantão, coerente com a hipótese; evite \"revisar\" ou \"monitorar\" genéricos. Não cite números, ferramentas, comandos ou sistemas que o alerta não mencione, e não diga que uma ação já foi feita.\n5. ESCALAR PARA: handle do time dono do sistema que você escreveu em ALERTA:, conforme a tabela abaixo, seguido de \"se\" e de uma condição com tempo. Os handles são: Relay → @relay-core; Forge → @data-platform; Cerebro → @search-infra; Sentinel → @sentinel-core.\n6. Copie números, tenants, horários e nomes de serviços exatamente como estão no alerta. Não invente nenhum dado ausente do alerta.\n7. Escreva em português correto, sem markdown e sem linhas em branco.\n\nTabela de handles (use o handle da linha cujo sistema aparece em ALERTA:, sem trocar por outro):\nRelay → @relay-core\nForge → @data-platform\nCerebro → @search-infra\nSentinel → @sentinel-core\n\nResponda somente com as cinco linhas da nota, sem as tags <alerta> e sem texto antes ou depois.\n\nAlerta a ser analisado:\n<alerta>\n2026-05-13 11:40:22 UTC [Forge] consumer lag 9min and climbing, batch forge-batch-ingest\ndelayed after previous job failure, downstream Sentinel starting to lag\n</alerta>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 1,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "gemma3:4b (Google, via Ollama)"
+        },
+        "response": {
+          "output": "ALERTA: Forge - Consumer lag de 9 minutos e em ascensão, batch forge-batch-ingest\nIMPACTO: Processamento de batch do Forge está atrasado, causando atraso em downstream Sentinel\nHIPÓTESE INICIAL: Falha no job anterior do batch forge-batch-ingest\nAÇÃO IMEDIATA: Reiniciar o consumer do batch forge-batch-ingest\nESCALAR PARA: @data-platform se o lag persistir por mais 15 minutos",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 626,
+            "completion": 107,
+            "cached": 0,
+            "total": 733,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "alerta 3 — Forge",
+          "vars": {
+            "prompt_dir": "nota-de-triagem",
+            "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-3-forge.txt"
+          },
+          "assert": [
+            {
+              "type": "contains",
+              "value": "ALERTA:"
+            },
+            {
+              "type": "contains",
+              "value": "IMPACTO:"
+            },
+            {
+              "type": "contains",
+              "value": "HIPÓTESE INICIAL:"
+            },
+            {
+              "type": "contains",
+              "value": "AÇÃO IMEDIATA:"
+            },
+            {
+              "type": "contains",
+              "value": "ESCALAR PARA:"
+            },
+            {
+              "type": "regex",
+              "value": "ESCALAR PARA:.*@\\w+"
+            },
+            {
+              "type": "javascript",
+              "value": "output.trim().split('\\n').length <= 8"
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "contains",
+              "value": "@data-platform"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 626,
+          "completion": 107,
+          "cached": 0,
+          "total": 733,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "nota-de-triagem",
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-3-forge.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 5,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 3985,
+        "completion": 838,
+        "cached": 0,
+        "total": 4823,
+        "numRequests": 6,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 8662,
+      "evaluationDurationMs": 8662
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "nota-de-triagem — cinco rótulos, handle @palavra, no máximo 8 linhas, latência e custo",
+    "prompts": [
+      "file://<repo>/providers/carregar-prompt.js"
+    ],
+    "providers": [
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "llama3.2:3b (Meta, via Ollama)",
+        "config": {
+          "model": "llama3.2:3b",
+          "temperature": 0,
+          "num_ctx": 8192
+        }
+      },
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "gemma3:4b (Google, via Ollama)",
+        "config": {
+          "model": "gemma3:4b",
+          "temperature": 0,
+          "num_ctx": 8192
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "alerta 1 — Sentinel",
+        "vars": {
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-1-sentinel.txt"
+        },
+        "assert": [
+          {
+            "type": "contains",
+            "value": "@sentinel-core"
+          }
+        ]
+      },
+      {
+        "description": "alerta 2 — Relay",
+        "vars": {
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-2-relay.txt"
+        },
+        "assert": [
+          {
+            "type": "contains",
+            "value": "@relay-core"
+          }
+        ]
+      },
+      {
+        "description": "alerta 3 — Forge",
+        "vars": {
+          "alerta_cru": "file://<repo>/checkpoints/checkpoint-02/entradas/alerta-3-forge.txt"
+        },
+        "assert": [
+          {
+            "type": "contains",
+            "value": "@data-platform"
+          }
+        ]
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "checkpoints/checkpoint-08/resultados/nota-de-triagem.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "vars": {
+        "prompt_dir": "nota-de-triagem"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "ALERTA:"
+        },
+        {
+          "type": "contains",
+          "value": "IMPACTO:"
+        },
+        {
+          "type": "contains",
+          "value": "HIPÓTESE INICIAL:"
+        },
+        {
+          "type": "contains",
+          "value": "AÇÃO IMEDIATA:"
+        },
+        {
+          "type": "contains",
+          "value": "ESCALAR PARA:"
+        },
+        {
+          "type": "regex",
+          "value": "ESCALAR PARA:.*@\\w+"
+        },
+        {
+          "type": "javascript",
+          "value": "output.trim().split('\\n').length <= 8"
+        },
+        {
+          "type": "latency",
+          "threshold": 5000
+        },
+        {
+          "type": "cost",
+          "threshold": 0.01
+        }
+      ],
+      "options": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/devops/nota-de-triagem"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T15:45:17.301Z",
+    "evaluationCreatedAt": "2026-11-17T15:45:08.510Z"
+  },
+  "vars": [
+    "prompt_dir",
+    "alerta_cru"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

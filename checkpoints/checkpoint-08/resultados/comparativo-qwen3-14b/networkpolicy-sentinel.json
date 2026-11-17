@@ -1,0 +1,432 @@
+{
+  "evalId": "eval-Ayg-2026-11-17T15:44:08",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T15:44:08.175Z",
+    "prompts": [
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "qwen3:14b (Alibaba, via Ollama)",
+        "metrics": {
+          "score": 0.8888888888888888,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 8,
+          "assertFailCount": 1,
+          "totalLatencyMs": 38031,
+          "tokenUsage": {
+            "prompt": 1132,
+            "completion": 962,
+            "cached": 0,
+            "total": 2094,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "Latency 38031ms is greater than threshold 5000ms",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.8888888888888888,
+          "reason": "Latency 38031ms is greater than threshold 5000ms",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "kind: NetworkPolicy"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const blocos = [...output.matchAll(/policyTypes:([^\\n]*(?:\\n\\s*-[^\\n]*)*)/g)].map(m => m[1]).join(' ');\nreturn /Ingress/.test(blocos) && /Egress/.test(blocos);\n"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "- {}"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "5432"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "contains",
+                "value": "9200"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "app:\\s*\"?relay\"?"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const regras = (output.match(/^\\s*-\\s*(from|to):/gm) || []).length;\nconst comentarios = (output.match(/#/g) || []).length;\nreturn regras > 0 && comentarios >= regras;\n"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Latency 38031ms is greater than threshold 5000ms",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            }
+          ]
+        },
+        "id": "a30d6bab-d3cd-4223-aa51-89b881ce0274",
+        "latencyMs": 38031,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um engenheiro de segurança de Kubernetes. Sua tarefa é endurecer a NetworkPolicy do manifesto fornecido ao final deste prompt, seguindo o padrão de segurança da empresa e usando apenas o que o mapa de serviços informa, e devolver a política corrigida pronta para revisão.\n\nContexto (C-A-R-E): o padrão da empresa, fornecido ao final deste prompt, é a referência obrigatória. O mapa de serviços diz como cada serviço é identificado no cluster. O manifesto recebido é permissivo demais e não deve ser reaproveitado como está.\n\nRegras:\n- Use nos seletores apenas os namespaces, labels de pod e portas que o mapa informa. Não invente nenhum. Quando o mapa não trouxer um dado de que uma regra precisa (por exemplo, a porta de uma origem), não invente: deixe a regra sem esse dado e registre a lacuna em Limitações.\n- Use apenas campos que existem em networking.k8s.io/v1.\n- O mapa informa o nome de cada namespace, não o label que o identifica. Selecione o namespace pelo label kubernetes.io/metadata.name, que o Kubernetes aplica a todo namespace, e declare essa suposição em Limitações. Não use um label chamado name.\n- Se o padrão exigir default-deny explícito, escreva-o como uma NetworkPolicy separada, que seleciona todos os pods do namespace e não tem nenhuma regra de ingress nem de egress.\n- A política de liberação seleciona só os pods do serviço que o padrão protege, e não todos os pods do namespace.\n- Em cada origem ou destino, o namespaceSelector e o podSelector ficam no mesmo item da lista (E), nunca em itens separados (OU).\n- O campo ports de uma regra fica no mesmo nível de from ou de to, ao lado deles, e nunca dentro de um item da lista from ou to.\n- Não escreva regra vazia (- {}), from ou to vazio, nem seletor vazio que libere tudo; a única exceção é o podSelector vazio do default-deny.\n- Para um serviço de DNS, libere UDP e TCP na porta informada.\n- Todo item de ingress e de egress tem um comentário dizendo qual fluxo legítimo ele libera e de qual regra do padrão ele vem.\n- Escreva em português, em texto simples, sem tabelas e sem negrito. Não escreva texto fora das seções.\n\nUse exatamente estes títulos, nesta ordem:\n\nO que o manifesto libera em excesso\nEm poucas linhas, cada permissividade do manifesto recebido.\n\nPolítica corrigida\nO YAML completo, com uma ou mais NetworkPolicy separadas por --- em um único bloco de código.\n\nFluxos liberados\nPara cada regra, o fluxo legítimo que ela libera e a regra do padrão de que ela vem.\n\nLimitações e suposições\nO que a política não cobre, o que o mapa não informa e as suposições feitas. Se uma regra ficou sem porta porque o mapa não a informa, diga que ela libera todas as portas daquela origem ou daquele destino. Diga também que o namespace foi selecionado por kubernetes.io/metadata.name, que o mapa não informa.\n\nO manifesto, o padrão e o mapa de serviços estão nos blocos abaixo.\n\n<manifesto>\n{\"apiVersion\":\"networking.k8s.io/v1\",\"kind\":\"NetworkPolicy\",\"metadata\":{\"name\":\"sentinel-allow\",\"namespace\":\"sentinel-prod\"},\"spec\":{\"podSelector\":{},\"policyTypes\":[\"Ingress\",\"Egress\"],\"ingress\":[{}],\"egress\":[{}]}}\n</manifesto>\n<padrao>\nNetworkPolicy para o namespace \"sentinel-prod\":\n- pods do Sentinel só aceitam tráfego de entrada do Relay (consumo de\n  eventos) e do gateway de API da plataforma\n- pods do Sentinel só fazem saída para: Forge (warehouse, porta 5432),\n  Cerebro (busca, porta 9200) e DNS interno\n- nada de \"allow all\" em ingress ou egress\n- política default-deny explícita no namespace\n- toda regra precisa de comentário dizendo qual fluxo legítimo ela libera\n</padrao>\n<mapa>\nSentinel     → namespace sentinel-prod, pods com label app=sentinel\nRelay        → namespace relay-prod,    pods com label app=relay\nAPI gateway  → namespace edge,          pods com label app=api-gateway\nForge        → namespace forge-prod,    pods com label app=forge,   porta 5432 (Postgres do warehouse)\nCerebro      → namespace cerebro-prod,  pods com label app=cerebro, porta 9200 (Elasticsearch)\nDNS interno  → namespace kube-system,   pods com label k8s-app=kube-dns, porta 53\n</mapa>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "O que o manifesto libera em excesso  \nO manifesto atual permite tráfego de entrada e saída para todos os pods no namespace sentinel-prod, sem restrições. Isso viola o padrão de segurança, que exige regras específicas e uma política default-deny explícita.\n\nPolítica corrigida  \n```yaml\n---\n# Política default-deny para o namespace sentinel-prod\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: sentinel-default-deny\n  namespace: sentinel-prod\nspec:\n  podSelector: {}\n  policyTypes:\n    - Ingress\n    - Egress\n  ingress: []\n  egress: []\n\n---\n# Política de entrada para pods do Sentinel\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: sentinel-ingress\n  namespace: sentinel-prod\nspec:\n  podSelector:\n    matchLabels:\n      app: sentinel\n  policyTypes:\n    - Ingress\n  ingress:\n    - from:\n        - namespaceSelector:\n            matchLabels:\n              kubernetes.io/metadata.name: relay-prod\n          podSelector:\n            matchLabels:\n              app: relay\n        - namespaceSelector:\n            matchLabels:\n              kubernetes.io/metadata.name: edge\n          podSelector:\n            matchLabels:\n              app: api-gateway\n      ports:\n        - protocol: TCP\n          port: 8080\n  # Fluxo legítimo: tráfego de entrada do Relay (consumo de eventos) e do gateway de API da plataforma\n\n---\n# Política de saída para pods do Sentinel\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata:\n  name: sentinel-egress\n  namespace: sentinel-prod\nspec:\n  podSelector:\n    matchLabels:\n      app: sentinel\n  policyTypes:\n    - Egress\n  egress:\n    - to:\n        - namespaceSelector:\n            matchLabels:\n              kubernetes.io/metadata.name: forge-prod\n          podSelector:\n            matchLabels:\n              app: forge\n        - ports:\n            - protocol: TCP\n              port: 5432\n      # Fluxo legítimo: tráfego para Forge (warehouse, porta 5432)\n\n    - to:\n        - namespaceSelector:\n            matchLabels:\n              kubernetes.io/metadata.name: cerebro-prod\n          podSelector:\n            matchLabels:\n              app: cerebro\n        - ports:\n            - protocol: TCP\n              port: 9200\n      # Fluxo legítimo: tráfego para Cerebro (busca, porta 9200)\n\n    - to:\n        - namespaceSelector:\n            matchLabels:\n              kubernetes.io/metadata.name: kube-system\n          podSelector:\n            matchLabels:\n              k8s-app: kube-dns\n        - ports:\n            - protocol: UDP\n              port: 53\n            - protocol: TCP\n              port: 53\n      # Fluxo legítimo: tráfego para DNS interno\n```\n\nFluxos liberados  \n- Regra de entrada: tráfego de entrada do Relay (consumo de eventos) e do gateway de API da plataforma (regra do padrão).  \n- Regra de saída para Forge: tráfego para Forge (warehouse, porta 5432) (regra do padrão).  \n- Regra de saída para Cerebro: tráfego para Cerebro (busca, porta 9200) (regra do padrão).  \n- Regra de saída para DNS interno: tráfego para DNS interno (regra do padrão).  \n\nLimitações e suposições  \n- O manifesto original não especifica as portas de entrada para os serviços Relay e API gateway, então a política assume que a porta 8080 é a correta.  \n- O mapa de serviços não informa as portas de entrada para os serviços Relay e API gateway, então a política libera todas as portas para esses serviços.  \n- O namespace foi selecionado com base no label `kubernetes.io/metadata.name`, que o Kubernetes aplica automaticamente a todos os namespaces.  \n- A política default-deny foi criada separadamente, selecionando todos os pods do namespace `sentinel-prod`.  \n- A política de liberação seleciona apenas os pods do serviço Sentinel, e não todos os pods do namespace.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 1132,
+            "completion": 962,
+            "cached": 0,
+            "total": 2094,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.8888888888888888,
+        "success": false,
+        "testCase": {
+          "description": "manifesto permissivo + padrão Aegis + mapa de serviços",
+          "vars": {
+            "prompt_dir": "networkpolicy-sentinel",
+            "manifesto": "file://<repo>/checkpoints/checkpoint-06/entradas/manifesto-permissivo.yaml",
+            "padrao": "file://<repo>/checkpoints/checkpoint-06/entradas/padrao-aegis.txt",
+            "mapa": "file://<repo>/checkpoints/checkpoint-06/entradas/mapa-de-servicos.txt"
+          },
+          "assert": [
+            {
+              "type": "contains",
+              "value": "kind: NetworkPolicy"
+            },
+            {
+              "type": "javascript",
+              "value": "const blocos = [...output.matchAll(/policyTypes:([^\\n]*(?:\\n\\s*-[^\\n]*)*)/g)].map(m => m[1]).join(' ');\nreturn /Ingress/.test(blocos) && /Egress/.test(blocos);\n"
+            },
+            {
+              "type": "not-contains",
+              "value": "- {}"
+            },
+            {
+              "type": "contains",
+              "value": "5432"
+            },
+            {
+              "type": "contains",
+              "value": "9200"
+            },
+            {
+              "type": "regex",
+              "value": "app:\\s*\"?relay\"?"
+            },
+            {
+              "type": "javascript",
+              "value": "const regras = (output.match(/^\\s*-\\s*(from|to):/gm) || []).length;\nconst comentarios = (output.match(/#/g) || []).length;\nreturn regras > 0 && comentarios >= regras;\n"
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 1132,
+          "completion": 962,
+          "cached": 0,
+          "total": 2094,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "networkpolicy-sentinel",
+          "manifesto": "file://<repo>/checkpoints/checkpoint-06/entradas/manifesto-permissivo.yaml",
+          "padrao": "file://<repo>/checkpoints/checkpoint-06/entradas/padrao-aegis.txt",
+          "mapa": "file://<repo>/checkpoints/checkpoint-06/entradas/mapa-de-servicos.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      }
+    ],
+    "stats": {
+      "successes": 0,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 1132,
+        "completion": 962,
+        "cached": 0,
+        "total": 2094,
+        "numRequests": 1,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 38081,
+      "evaluationDurationMs": 38081
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "networkpolicy-sentinel — NetworkPolicy válida, sem allow-all, portas do Forge e Cerebro, ingress do Relay, comentário em cada regra, latência e custo",
+    "prompts": [
+      "file://<repo>/providers/carregar-prompt.js"
+    ],
+    "providers": [
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "qwen3:14b (Alibaba, via Ollama)",
+        "config": {
+          "model": "qwen3:14b",
+          "temperature": 0,
+          "num_ctx": 8192
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "manifesto permissivo + padrão Aegis + mapa de serviços"
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "checkpoints/checkpoint-08/resultados/comparativo-qwen3-14b/networkpolicy-sentinel.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "vars": {
+        "prompt_dir": "networkpolicy-sentinel",
+        "manifesto": "file://<repo>/checkpoints/checkpoint-06/entradas/manifesto-permissivo.yaml",
+        "padrao": "file://<repo>/checkpoints/checkpoint-06/entradas/padrao-aegis.txt",
+        "mapa": "file://<repo>/checkpoints/checkpoint-06/entradas/mapa-de-servicos.txt"
+      },
+      "assert": [
+        {
+          "type": "contains",
+          "value": "kind: NetworkPolicy"
+        },
+        {
+          "type": "javascript",
+          "value": "const blocos = [...output.matchAll(/policyTypes:([^\\n]*(?:\\n\\s*-[^\\n]*)*)/g)].map(m => m[1]).join(' ');\nreturn /Ingress/.test(blocos) && /Egress/.test(blocos);\n"
+        },
+        {
+          "type": "not-contains",
+          "value": "- {}"
+        },
+        {
+          "type": "contains",
+          "value": "5432"
+        },
+        {
+          "type": "contains",
+          "value": "9200"
+        },
+        {
+          "type": "regex",
+          "value": "app:\\s*\"?relay\"?"
+        },
+        {
+          "type": "javascript",
+          "value": "const regras = (output.match(/^\\s*-\\s*(from|to):/gm) || []).length;\nconst comentarios = (output.match(/#/g) || []).length;\nreturn regras > 0 && comentarios >= regras;\n"
+        },
+        {
+          "type": "latency",
+          "threshold": 5000
+        },
+        {
+          "type": "cost",
+          "threshold": 0.01
+        }
+      ],
+      "options": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/devops/networkpolicy-sentinel"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T15:44:46.322Z",
+    "evaluationCreatedAt": "2026-11-17T15:44:08.175Z"
+  },
+  "vars": [
+    "prompt_dir",
+    "manifesto",
+    "padrao",
+    "mapa"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

@@ -6,6 +6,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ### Adicionado
 
+- Checkpoint 08: `promptfooconfig.yaml` de `nota-de-triagem`, `triagem-de-pods` e `networkpolicy-sentinel`, com `providers/carregar-prompt.js`, execuções reais, comparativo com o `qwen3:14b` e curadoria.
 - Checkpoint 07: nota de mapeamento do playbook nas convenções do template `prompt-registry`.
 - Estrutura do repositório: `devops/` (biblioteca), `checkpoints/checkpoint-XX/` (caminho) e documentação na raiz.
 - Provedor `providers/ollama-local.js` para o `promptfoo` com o Ollama local.
@@ -22,3 +23,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 - Prompt `devops/nota-de-triagem` (`1.0.0`).
 - Checkpoint 02: contexto, comparação entre ensinar o padrão por regras ou por exemplos, execução nos dois modelos e curadoria.
 - Checkpoint 01: contexto, evolução do prompt, execução nos dois modelos e curadoria.
+
+### Alterado
+
+- `devops/nota-de-triagem` `1.0.1`: o formato mostra cada linha preenchível e o handle é o do sistema escrito em `ALERTA:`, para os modelos pequenos do CP08 seguirem o formato.

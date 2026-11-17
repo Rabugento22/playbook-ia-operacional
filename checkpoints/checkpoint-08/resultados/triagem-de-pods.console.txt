@@ -1,0 +1,62 @@
+Cache is disabled.
+Starting evaluation eval-86Q-2026-11-17T15:45:18
+Running 6 test cases (up to 1 at a time)...
+
+┌──────────────────────────────┬──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+│ prompt_dir                   │ snapshot                     │ [llama3.2:3b (Meta, via      │ [gemma3:4b (Google, via      │
+│                              │                              │ Ollama)]                     │ Ollama)]                     │
+│                              │                              │ providers/carregar-prompt.js │ providers/carregar-prompt.js │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ triagem-de-pods              │ file://<repo>/…         │ [PASS] Pods problemáticos: 1 │ [FAIL] Pods problemáticos: 1 │
+│                              │                              │ [Sentinel-api-7d9c8b6f4-h4m… │ - NOME:                      │
+│                              │                              │ - NOME:                      │ sentinel-api-7d9c8b6f4-h4m2t │
+│                              │                              │ sentinel-api-7d9c8b6f4-h4m2t │ - STATUS: Waiting | READY:   │
+│                              │                              │ - STATUS: CrashLoopBackOff | │ 0/1 | RESTARTS: 14 (90s ago) │
+│                              │                              │ READY: 0/1 | RESTARTS: 14    │ - CAUSA: Falta de memória    │
+│                              │                              │ (90s ago)                    │ (OOMKilled) devido a pressão │
+│                              │                              │ - CAUSA: Falha de memória,   │ de garbage collection e      │
+│                              │                              │ causa pelo uso excessivo de  │ consumo excessivo de heap.   │
+│                              │                              │ memória pelo cache de        │ - EVIDÊNCIA: "Back-off       │
+│                              │                              │ alertas, que ...             │ res...                       │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ triagem-de-pods              │ file://<repo>/…         │ [PASS] Pods problemáticos: 2 │ [PASS] Pods problemáticos: 2 │
+│                              │                              │ 1.                           │ - NOME:                      │
+│                              │                              │ sentinel-api-7d9c8b6f4-zzp10 │ sentinel-api-7d9c8b6f4-zzp10 │
+│                              │                              │    - NOME:                   │   STATUS: Waiting | READY: … │
+│                              │                              │ sentinel-api-7d9c8b6f4-zzp10 │ | RESTARTS: 0                │
+│                              │                              │    - STATUS: ImagePullBackO… │   CAUSA: Falha na extração … │
+│                              │                              │ READY: 0/1 | RESTARTS: 0     │ imagem devido à tag          │
+│                              │                              │    - CAUSA: tag da imagem n… │ inexistente no registry.     │
+│                              │                              │ encontrada no registry       │   EVIDÊNCIA: "Failed to pull │
+│                              │                              │    - EVIDÊNCIA: "Failed to … │ image                        │
+│                              │                              │ image 'reg...                │ \"registry.aegis.io/sentine… │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ triagem-de-pods              │ file://<repo>/…         │ [FAIL] Pods problemáticos: 2 │ [FAIL] Pods problemáticos: 1 │
+│                              │                              │ **1.                         │ - NOME:                      │
+│                              │                              │ sentinel-api-7d9c8b6f4-h4m2… │ sentinel-worker-5b8f9c8d-jq… │
+│                              │                              │ - NOME:                      │   - STATUS: Running | READY: │
+│                              │                              │ sentinel-api-7d9c8b6f4-h4m2t │ 1/1 | RESTARTS: 1 (3d ago)   │
+│                              │                              │ - STATUS: ImagePullBackOff | │   - CAUSA: Restarts frequen… │
+│                              │                              │ READY: 1/1 | RESTARTS: 1 (3d │ devido a um problema de      │
+│                              │                              │ ago)                         │ processamento de alertas.    │
+│                              │                              │ - CAUSA: tag da imagem não   │   - EVIDÊNCIA: "[1 (3d ago)… │
+│                              │                              │ encontrada no registry       │ (evento de restart...        │
+│                              │                              │ - EVIDÊNCIA: [evento de      │                              │
+│                              │                              │ erro] + [linh...             │                              │
+└──────────────────────────────┴──────────────────────────────┴──────────────────────────────┴──────────────────────────────┘
+✓ Eval complete (ID: eval-86Q-2026-11-17T15:45:18)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 9.897
+  Provider: 9.897 (7.667 prompt, 2.230 completion)
+
+Results:
+  ✓ 3 passed (50.00%)
+  ✗ 3 failed (50.00%)
+  0 errors (0%)
+Duration: 24s (concurrency: 1)
+
+Writing output to checkpoints/checkpoint-08/resultados/triagem-de-pods.json
