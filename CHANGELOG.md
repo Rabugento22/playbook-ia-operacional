@@ -14,8 +14,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 - Checkpoint 05: contexto, evolução v1 a v3 com medições, duas cadeias completas (um modelo cada) e curadoria.
 - Prompt `devops/decisao-backpressure` (`1.0.0`).
 - Checkpoint 04: contexto do cenário, evolução do prompt (v1 a v4), execução nos dois modelos e curadoria.
-- Prompt `devops/networkpolicy-sentinel` (`1.0.0`).
-- Checkpoint 06: contexto, evolução do prompt (P1 → P2), prompts de verificação e refino, iterações v1 a v4 nos dois modelos e curadoria.
+- Prompt `devops/networkpolicy-sentinel` (`1.0.1`), com teste das políticas em um cluster `kind`.
+- Checkpoint 06: contexto, evolução do prompt (P1 → P2 → 1.0.1), prompts de verificação e refino, iterações v1 a v4 nos dois modelos, scripts e resultados do teste em cluster e curadoria.
 - Prompt `devops/causa-raiz` (`1.0.0`).
 - Checkpoint 03: contexto com decisão de sanitização, evolução do prompt, execução nos dois modelos e com dados mascarados, e curadoria.
 - Prompt `devops/nota-de-triagem` (`1.0.0`).

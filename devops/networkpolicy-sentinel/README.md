@@ -1,7 +1,7 @@
 ---
 nome: Endurecimento de NetworkPolicy
 descricao: Recebe um manifesto de NetworkPolicy permissivo, o padrão de segurança e o mapa de serviços, e devolve a política corrigida com default-deny explícito, seletores só do mapa e comentário em cada regra.
-versao: 1.0.0
+versao: 1.0.1
 tags: [kubernetes, seguranca, networkpolicy, endurecimento]
 inputs:
   - nome: manifesto
@@ -28,7 +28,7 @@ Transformar uma NetworkPolicy permissiva (um allow-all disfarçado) em uma polí
 
 1. Cole o manifesto a corrigir, as regras do padrão e o mapa de serviços (namespace, label e porta de cada serviço).
 2. Copie o texto de [`prompt.md`](prompt.md) (depois do frontmatter) e troque `{{manifesto}}`, `{{padrao}}` e `{{mapa}}`.
-3. **Valide o YAML antes de aplicar:** confira a indentação de `ports`, `from` e `to`, o default-deny e as suposições declaradas. Nos testes, os dois modelos erraram a posição de `ports` e a verificação feita pelo próprio modelo não percebeu. Use uma checagem determinística (por exemplo, os asserts do CP08) e, se possível, um cluster de teste.
+3. **Valide o YAML antes de aplicar:** confira a indentação de `ports`, `from` e `to`, o default-deny e as suposições declaradas. Nos testes, os dois modelos erraram a posição de `ports` e a verificação feita pelo próprio modelo não percebeu. Use uma checagem determinística (por exemplo, `kubectl apply --dry-run=server` e os asserts do CP08) e, se possível, um cluster de teste.
 
 ## Exemplo
 
@@ -66,10 +66,10 @@ As iterações completas (v1 até v4) dos dois modelos estão em [`03-execucao.m
 
 ## Limitações
 
-- **A primeira saída tem defeitos.** Nos dois modelos, a v1 saiu com `ports` fora do lugar (sem restringir a porta) e o `qwen3:14b` ainda gerou um item `- ports:` solto.
+- **A primeira saída tem defeitos.** Nos dois modelos, a v1 saiu com `ports` fora do lugar (o kube-apiserver rejeita esse manifesto) e o `qwen3:14b` ainda gerou um item `- ports:` solto.
 - **Verificação pelo mesmo modelo não basta.** Os modelos aprovaram políticas defeituosas e apontaram defeitos que não existiam; a correção veio de um validador determinístico.
-- O mapa não informa o label do namespace nem a porta de entrada; o prompt manda declarar a lacuna, mas a v4 dos dois modelos não registrou a porta de entrada em Limitações.
-- A política foi checada por script, mas não aplicada em um cluster.
+- O mapa não informa o label do namespace nem a porta de entrada; o prompt `1.0.1` manda declarar as duas lacunas. O `gpt-oss:20b` declarou na primeira execução; o `qwen3:14b` só depois de refino dirigido.
+- As versões finais foram aplicadas em um cluster `kind` (8 fluxos testados, em `checkpoints/checkpoint-06/teste-cluster/`); isso não substitui um teste no seu CNI.
 - Uma execução por modelo; a variação entre execuções não foi medida.
 
 ## Documentação do caminho

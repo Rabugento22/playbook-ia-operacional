@@ -18,6 +18,7 @@ Regras:
 - Se o padrão exigir default-deny explícito, escreva-o como uma NetworkPolicy separada, que seleciona todos os pods do namespace e não tem nenhuma regra de ingress nem de egress.
 - A política de liberação seleciona só os pods do serviço que o padrão protege, e não todos os pods do namespace.
 - Em cada origem ou destino, o namespaceSelector e o podSelector ficam no mesmo item da lista (E), nunca em itens separados (OU).
+- O campo ports de uma regra fica no mesmo nível de from ou de to, ao lado deles, e nunca dentro de um item da lista from ou to.
 - Não escreva regra vazia (- {}), from ou to vazio, nem seletor vazio que libere tudo; a única exceção é o podSelector vazio do default-deny.
 - Para um serviço de DNS, libere UDP e TCP na porta informada.
 - Todo item de ingress e de egress tem um comentário dizendo qual fluxo legítimo ele libera e de qual regra do padrão ele vem.
@@ -35,7 +36,7 @@ Fluxos liberados
 Para cada regra, o fluxo legítimo que ela libera e a regra do padrão de que ela vem.
 
 Limitações e suposições
-O que a política não cobre, o que o mapa não informa e as suposições feitas.
+O que a política não cobre, o que o mapa não informa e as suposições feitas. Se uma regra ficou sem porta porque o mapa não a informa, diga que ela libera todas as portas daquela origem ou daquele destino. Diga também que o namespace foi selecionado por kubernetes.io/metadata.name, que o mapa não informa.
 
 O manifesto, o padrão e o mapa de serviços estão nos blocos abaixo.
 
@@ -58,8 +59,9 @@ Geração por meta-prompting; o P2 é um refino manual dirigido por mim a partir
 |--------|--------|--------------------------|
 | P1 | `qwen3:14b` gerou o corpo (um meta-prompt), e eu anexei os blocos `<manifesto>`, `<padrao>` e `<mapa>` | Os dois modelos copiaram do exemplo de YAML do prompt o label `name: <namespace>` para os namespaces, que o mapa não informa e que não existe por padrão no Kubernetes; nenhum escreveu um default-deny separado; ambos deixaram o DNS só em UDP; o `qwen3:14b` gerou YAML inválido (`ports` mal indentado) e uma porta 8080 inventada; usaram negrito apesar do pedido de texto simples |
 | P2 | Refino manual: namespace por `kubernetes.io/metadata.name` e suposição declarada, default-deny como política separada, liberação só nos pods do serviço protegido, `namespaceSelector` e `podSelector` no mesmo item, sem regra vazia, só campos da API, DNS em UDP e TCP, comentário em cada item, sem negrito, sem exemplo de YAML | Corrigiu os pontos acima na v1; mas os dois modelos erraram a posição de `ports` (ver a execução), o que só o ciclo de verificação, com ajuda do validador, corrigiu |
+| P2 1.0.1 | Duas regras: `ports` ao lado de `from`/`to`, nunca dentro; e Limitações declaram a regra sem porta (libera todas as portas) e o label `kubernetes.io/metadata.name` | `gpt-oss:20b`: 9/9 · 4/4 e 8 de 8 no cluster na primeira execução. `qwen3:14b`: ainda errou `ports` e inventou a porta 80; precisou de dois refinos dirigidos (ver a execução) |
 
-O P2 é a versão `1.0.0` da biblioteca. O P1 fica registrado só aqui.
+O texto final, acima, é a versão `1.0.1` da biblioteca (a `1.0.0` não tinha as duas últimas regras). O P1 fica registrado só aqui.
 
 ### Texto do P1 (gerado, sem os blocos de entrada preenchidos)
 

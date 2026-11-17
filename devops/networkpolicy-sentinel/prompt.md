@@ -1,7 +1,7 @@
 ---
 nome: Endurecimento de NetworkPolicy
 descricao: Recebe um manifesto de NetworkPolicy permissivo, o padrão de segurança e o mapa de serviços, e devolve a política corrigida com default-deny explícito, seletores só do mapa e comentário em cada regra.
-versao: 1.0.0
+versao: 1.0.1
 tags: [kubernetes, seguranca, networkpolicy, endurecimento]
 inputs:
   - nome: manifesto
@@ -23,6 +23,7 @@ Regras:
 - Se o padrão exigir default-deny explícito, escreva-o como uma NetworkPolicy separada, que seleciona todos os pods do namespace e não tem nenhuma regra de ingress nem de egress.
 - A política de liberação seleciona só os pods do serviço que o padrão protege, e não todos os pods do namespace.
 - Em cada origem ou destino, o namespaceSelector e o podSelector ficam no mesmo item da lista (E), nunca em itens separados (OU).
+- O campo ports de uma regra fica no mesmo nível de from ou de to, ao lado deles, e nunca dentro de um item da lista from ou to.
 - Não escreva regra vazia (- {}), from ou to vazio, nem seletor vazio que libere tudo; a única exceção é o podSelector vazio do default-deny.
 - Para um serviço de DNS, libere UDP e TCP na porta informada.
 - Todo item de ingress e de egress tem um comentário dizendo qual fluxo legítimo ele libera e de qual regra do padrão ele vem.
@@ -40,7 +41,7 @@ Fluxos liberados
 Para cada regra, o fluxo legítimo que ela libera e a regra do padrão de que ela vem.
 
 Limitações e suposições
-O que a política não cobre, o que o mapa não informa e as suposições feitas.
+O que a política não cobre, o que o mapa não informa e as suposições feitas. Se uma regra ficou sem porta porque o mapa não a informa, diga que ela libera todas as portas daquela origem ou daquele destino. Diga também que o namespace foi selecionado por kubernetes.io/metadata.name, que o mapa não informa.
 
 O manifesto, o padrão e o mapa de serviços estão nos blocos abaixo.
 

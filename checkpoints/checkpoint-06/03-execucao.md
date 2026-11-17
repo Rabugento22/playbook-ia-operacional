@@ -20,7 +20,7 @@ Quatro instrumentos, todos com o mesmo modelo que gerou a política (a IA critic
 3. **Refinador:** um prompt que recebe a política e os defeitos e devolve a política corrigida. Texto em [`02-prompt.md`](02-prompt.md).
 4. **Validador determinístico (meu):** um script local em Python, fora do repositório, que lê o YAML e confere 11 itens. Os itens 1 a 8 e o 11 vêm do padrão Aegis e do enunciado (YAML válido; namespace `sentinel-prod`; default-deny explícito e separado; liberação só nos pods `app=sentinel`; nenhuma regra vazia `- {}`; `namespaceSelector` e `podSelector` no mesmo item e só campos que existem na API; ingress só do Relay e do API gateway; egress só para Forge 5432, Cerebro 9200 e DNS 53; comentário em cada regra, conferido à mão). Os itens 9 e 10 são **recomendados**, não exigidos pelo padrão: DNS também em TCP e namespace selecionado pelo label `kubernetes.io/metadata.name`. O placar abaixo é `x/9 · y/2`: itens obrigatórios e itens recomendados atendidos.
 
-O validador **não substitui o revisor humano**: não aplica a política em um cluster (não havia cluster disponível) e não prova que ela bloqueia o tráfego certo.
+O validador **não substitui o revisor humano** e, nesta fase, não aplicava a política em um cluster. O teste em cluster foi feito depois, e está no fim deste arquivo; na análise original, dizia-se aqui que não havia cluster disponível, e o `kind` com Docker resolveu isso.
 
 O processo teve duas fases. Primeiro rodei o prompt gerado por meta-prompting (P1) com duas rodadas de verificação, que expuseram os defeitos do próprio prompt; depois rodei o prompt refinado (P2, o final). A seção seguinte traz o P2, o caminho que vale para a entrega; a última traz o P1.
 
@@ -1263,7 +1263,7 @@ Limitações
 Itens reprovados pelo validador na v1 e na v4:
 
 - `qwen3:14b`, v1: seletor de ingress ou egress com item sem `namespaceSelector` e `podSelector` juntos (um item `- ports:` solto), egress que não confere com o padrão e DNS só em UDP.
-- `gpt-oss:20b`, v1: `ports` dentro do item `to`, em vez de ao lado dele (o egress deixa de restringir a porta), e DNS só em UDP.
+- `gpt-oss:20b`, v1: `ports` dentro do item `to`, em vez de ao lado dele (o kube-apiserver rejeita esse manifesto; ver o teste em cluster no fim deste arquivo), e DNS só em UDP.
 - v4, nos dois modelos: nenhum item reprovado.
 
 ## Execução com o prompt gerado (P1)
@@ -1757,3 +1757,580 @@ reprovada para entrar no playbook.
 | v3 | 7/9 · 0/2 | 5/9 · 0/2 | 9/9 · 0/2 | 9/9 · 1/2 |
 
 A v1 é a mesma nas duas rodadas. Os YAMLs intermediários do P1 não estão neste arquivo; o placar vem do validador aplicado a eles na hora.
+
+
+## Prompt 1.0.1 e teste em cluster
+
+Depois da primeira entrega, duas falhas foram atacadas: as lacunas que a v4 não declarava e a falta de teste em cluster. Tudo abaixo foi executado de verdade.
+
+### Teste em cluster (kind v0.33, Kubernetes v1.37.0)
+
+Os scripts estão em [`teste-cluster/`](teste-cluster/): `setup.sh` cria os namespaces e os pods (servidores `nc` do `busybox:1.36` nas portas esperadas) e `probe.sh` testa 8 fluxos, com o resultado esperado de cada um. O CNI padrão do `kind` (kindnet) aplicou as NetworkPolicy. As portas do teste são arbitrárias (a de entrada do Sentinel é 8081, porque o mapa não informa nenhuma).
+
+Linha de base, sem política, e o manifesto permissivo do enunciado (a saída é idêntica nos dois casos: nada é bloqueado):
+
+```text
+=== none
+OK     relay -> sentinel:8081                 esperado=ABRE      obtido=ABRE
+OK     gateway -> sentinel:8081               esperado=ABRE      obtido=ABRE
+FALHA  outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=ABRE
+OK     sentinel -> forge:5432                 esperado=ABRE      obtido=ABRE
+FALHA  sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=ABRE
+OK     sentinel -> cerebro:9200               esperado=ABRE      obtido=ABRE
+FALHA  sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=ABRE
+OK     DNS: nslookup resolve
+=== manifesto-permissivo.yaml
+apply: networkpolicy.networking.k8s.io/sentinel-allow created
+OK     relay -> sentinel:8081                 esperado=ABRE      obtido=ABRE
+OK     gateway -> sentinel:8081               esperado=ABRE      obtido=ABRE
+FALHA  outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=ABRE
+OK     sentinel -> forge:5432                 esperado=ABRE      obtido=ABRE
+FALHA  sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=ABRE
+OK     sentinel -> cerebro:9200               esperado=ABRE      obtido=ABRE
+FALHA  sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=ABRE
+OK     DNS: nslookup resolve
+```
+
+Versão final v4 de cada modelo (P2 1.0.0):
+
+```text
+=== pol-v4-pg.yaml  (gpt-oss:20b)
+apply: networkpolicy.networking.k8s.io/sentinel-default-deny created
+apply: networkpolicy.networking.k8s.io/sentinel-allow created
+OK     relay -> sentinel:8081                 esperado=ABRE      obtido=ABRE
+OK     gateway -> sentinel:8081               esperado=ABRE      obtido=ABRE
+OK     outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> forge:5432                 esperado=ABRE      obtido=ABRE
+OK     sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> cerebro:9200               esperado=ABRE      obtido=ABRE
+OK     sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     DNS: nslookup resolve
+=== pol-v4-pq.yaml  (qwen3:14b)
+apply: networkpolicy.networking.k8s.io/sentinel-default-deny created
+apply: networkpolicy.networking.k8s.io/sentinel-ingress created
+apply: networkpolicy.networking.k8s.io/sentinel-egress created
+OK     relay -> sentinel:8081                 esperado=ABRE      obtido=ABRE
+OK     gateway -> sentinel:8081               esperado=ABRE      obtido=ABRE
+OK     outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> forge:5432                 esperado=ABRE      obtido=ABRE
+OK     sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> cerebro:9200               esperado=ABRE      obtido=ABRE
+OK     sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     DNS: nslookup resolve
+```
+
+As versões v3 de cada modelo (as que o validador reprovou por `ports` dentro do item `to`) **não chegaram a ser aplicadas**: o kube-apiserver as rejeitou na criação da política de liberação, com `strict decoding error: unknown field "spec.egress[0].to[0].ports"` (e o mesmo erro para as outras regras). A política de default-deny, criada antes, ficou sozinha no namespace, e o resultado é todo tráfego bloqueado:
+
+```text
+=== pol-v3-pg
+apply: networkpolicy.networking.k8s.io/sentinel-default-deny created
+apply: Error from server (BadRequest): error when creating "pol-v3-pg.yaml": NetworkPolicy in version "v1" cannot be handled as a NetworkPolicy: strict decoding error: unknown field "spec.egress[0].to[0].ports", unknown field "spec.egress[1].to[0].ports", unknown field "spec.egress[2].to[0].ports"
+FALHA  relay -> sentinel:8081                 esperado=ABRE      obtido=BLOQUEIA
+FALHA  gateway -> sentinel:8081               esperado=ABRE      obtido=BLOQUEIA
+OK     outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=BLOQUEIA
+FALHA  sentinel -> forge:5432                 esperado=ABRE      obtido=BLOQUEIA
+OK     sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=BLOQUEIA
+FALHA  sentinel -> cerebro:9200               esperado=ABRE      obtido=BLOQUEIA
+OK     sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=BLOQUEIA
+FALHA  DNS: nslookup nao resolve
+=== pol-v3-pq
+apply: networkpolicy.networking.k8s.io/sentinel-default-deny created
+apply: networkpolicy.networking.k8s.io/sentinel-ingress created
+apply: Error from server (BadRequest): error when creating "pol-v3-pq.yaml": NetworkPolicy in version "v1" cannot be handled as a NetworkPolicy: strict decoding error: unknown field "spec.egress[0].to[1].ports", unknown field "spec.egress[1].to[1].ports", unknown field "spec.egress[2].to[1].ports"
+OK     relay -> sentinel:8081                 esperado=ABRE      obtido=ABRE
+OK     gateway -> sentinel:8081               esperado=ABRE      obtido=ABRE
+OK     outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=BLOQUEIA
+FALHA  sentinel -> forge:5432                 esperado=ABRE      obtido=BLOQUEIA
+OK     sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=BLOQUEIA
+FALHA  sentinel -> cerebro:9200               esperado=ABRE      obtido=BLOQUEIA
+OK     sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=BLOQUEIA
+FALHA  DNS: nslookup nao resolve
+```
+
+Isso corrige uma afirmação anterior deste checkpoint: o defeito de `ports` fora do lugar **não deixava a regra sem restringir a porta**, como o texto de defeitos que escrevi para o refino dizia (o texto está preservado acima, como foi usado). No Kubernetes v1.37.0 o servidor recusa o manifesto. Nos dois modelos, o `apply --dry-run=server` teria acusado o erro na v1.
+
+### P2 versão 1.0.1
+
+Duas regras novas no prompt: `ports` fica ao lado de `from`/`to`, nunca dentro de um item deles; e a seção Limitações deve dizer que uma regra sem porta libera todas as portas e que o namespace foi selecionado por `kubernetes.io/metadata.name`. Texto em [`02-prompt.md`](02-prompt.md). O validador ganhou três itens recomendados: 12 (Limitações declaram as duas lacunas), 13 (`kubectl apply --dry-run=server` aceita) e 14 (ingress sem porta inventada).
+
+#### `gpt-oss:20b` (OpenAI, via Ollama; 61 s, 2.465 tokens). Validador: 9/9 · 4/4; cluster: 8 de 8
+
+````text
+O que o manifesto libera em excesso  
+O manifesto original permite qualquer tráfego de entrada e saída para todos os pods do namespace *sentinel-prod*, sem restrições de origem, destino ou porta.
+
+Política corrigida  
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-default-deny
+  namespace: sentinel-prod
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-ingress-allow
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: relay-prod
+          podSelector:
+            matchLabels:
+              app: relay
+      # libera tráfego de entrada do Relay (consumo de eventos) - padrão
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: edge
+          podSelector:
+            matchLabels:
+              app: api-gateway
+      # libera tráfego de entrada do gateway de API da plataforma - padrão
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-egress-allow
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: forge-prod
+          podSelector:
+            matchLabels:
+              app: forge
+      ports:
+        - protocol: TCP
+          port: 5432
+      # libera saída para Forge (warehouse, porta 5432) - padrão
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cerebro-prod
+          podSelector:
+            matchLabels:
+              app: cerebro
+      ports:
+        - protocol: TCP
+          port: 9200
+      # libera saída para Cerebro (busca, porta 9200) - padrão
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+      # libera saída para DNS interno (porta 53, UDP e TCP) - padrão
+```
+
+Fluxos liberados  
+- Tráfego de entrada do Relay (consumo de eventos) – regra de ingress do padrão.  
+- Tráfego de entrada do gateway de API da plataforma – regra de ingress do padrão.  
+- Saída para Forge (warehouse, porta 5432) – regra de egress do padrão.  
+- Saída para Cerebro (busca, porta 9200) – regra de egress do padrão.  
+- Saída para DNS interno (porta 53, UDP e TCP) – regra de egress do padrão.
+
+Limitações e suposições  
+- O mapa de serviços não fornece portas para o Relay nem para o API gateway; portanto, as regras de ingress permitem todas as portas de origem.  
+- O namespace é selecionado pelo label `kubernetes.io/metadata.name`, que o Kubernetes aplica a todos os namespaces; essa suposição não está explicitada no mapa.  
+- Não há informações sobre outras portas ou protocolos que possam ser necessários; as regras de egress especificam apenas as portas indicadas no mapa.  
+- A política default-deny explícita bloqueia todo tráfego não permitido pelas regras de ingress e egress.
+````
+
+```text
+=== pol-p3-g
+apply: networkpolicy.networking.k8s.io/sentinel-default-deny created
+apply: networkpolicy.networking.k8s.io/sentinel-ingress-allow created
+apply: networkpolicy.networking.k8s.io/sentinel-egress-allow created
+OK     relay -> sentinel:8081                 esperado=ABRE      obtido=ABRE
+OK     gateway -> sentinel:8081               esperado=ABRE      obtido=ABRE
+OK     outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> forge:5432                 esperado=ABRE      obtido=ABRE
+OK     sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> cerebro:9200               esperado=ABRE      obtido=ABRE
+OK     sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     DNS: nslookup resolve
+```
+
+#### `qwen3:14b` (Alibaba, via Ollama; 53 s, 1.063 tokens). Validador: 7/9 · 1/4
+
+A porta de entrada foi **inventada** (80) e o `ports` voltou a sair dentro do item `to`.
+
+````text
+O que o manifesto libera em excesso  
+O manifesto atual permite tráfego de entrada de qualquer origem e tráfego de saída para qualquer destino, o que viola o padrão de segurança ao permitir "allow all" em ingress e egress. Além disso, seleciona todos os pods do namespace, em vez de apenas os pods do serviço Sentinel.
+
+Política corrigida  
+```yaml
+---
+# Política default-deny para o namespace sentinel-prod
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-default-deny
+  namespace: sentinel-prod
+spec:
+  podSelector: {}  # Aplica a todos os pods no namespace
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []
+
+---
+# Política de entrada para pods do Sentinel
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-ingress
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel  # Seleciona apenas os pods do serviço Sentinel
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: relay-prod  # Namespace do Relay
+          podSelector:
+            matchLabels:
+              app: relay  # Pods do Relay
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: edge  # Namespace do API gateway
+          podSelector:
+            matchLabels:
+              app: api-gateway  # Pods do API gateway
+      ports:
+        - protocol: TCP
+          port: 80  # Exemplo de porta de entrada legítima (a ser ajustada conforme necessidade)
+
+---
+# Política de saída para pods do Sentinel
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-egress
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel  # Seleciona apenas os pods do serviço Sentinel
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: forge-prod  # Namespace do Forge
+          podSelector:
+            matchLabels:
+              app: forge  # Pods do Forge
+        - ports:
+            - protocol: TCP
+              port: 5432  # Porta do Postgres (warehouse)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cerebro-prod  # Namespace do Cerebro
+          podSelector:
+            matchLabels:
+              app: cerebro  # Pods do Cerebro
+        - ports:
+            - protocol: TCP
+              port: 9200  # Porta do Elasticsearch (busca)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system  # Namespace do DNS interno
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns  # Pods do DNS
+        - ports:
+            - protocol: UDP
+              port: 53  # Porta do DNS (UDP)
+            - protocol: TCP
+              port: 53  # Porta do DNS (TCP)
+```
+
+Fluxos liberados  
+- Regra de entrada do Sentinel: permite tráfego de entrada do Relay e do API gateway. Vem da regra do padrão que diz que os pods do Sentinel só aceitam tráfego de entrada do Relay e do gateway de API da plataforma.  
+- Regra de saída do Sentinel: permite tráfego para o Forge (porta 5432), Cerebro (porta 9200) e DNS interno (portas 53 UDP e TCP). Vem da regra do padrão que diz que os pods do Sentinel só fazem saída para: Forge, Cerebro e DNS interno.
+
+Limitações e suposições  
+- O manifesto original não informa a porta de entrada legítima para os pods do Sentinel, então a política assume uma porta (80) como exemplo. Isso pode precisar ser ajustado com base no serviço real.  
+- A política de saída para o Forge e Cerebro libera apenas as portas especificadas no mapa. Se o mapa não informar uma porta, a política não a incluirá, e a regra ficará sem ela.  
+- O namespace foi selecionado com base no label `kubernetes.io/metadata.name`, que o Kubernetes aplica automaticamente a todos os namespaces. O mapa não informa esse label, então essa suposição foi feita.  
+- A política de default-deny foi escrita como uma NetworkPolicy separada, que seleciona todos os pods do namespace e não tem regras de ingress ou egress.
+````
+
+Refino com os defeitos do validador (os mesmos três `ports`), `qwen3:14b`, 47 s. Validador: 9/9 · 3/4 (falhou o item 14, a porta 80 de entrada, e o item 12, porque a seção Limitações encolheu e perdeu as suposições). Cluster: relay e gateway **bloqueados**, porque a política só liberava a porta 80 e o serviço do teste escuta na 8081.
+
+````text
+O que mudou  
+Os defeitos listados referem-se à posição incorreta da chave `ports` dentro do item `to` nas regras de egress da política `sentinel-egress`. Segundo a API do Kubernetes, `ports` deve estar no mesmo nível de `to`, não dentro dele. Assim, corrigi a estrutura das regras de egress, movendo `ports` para o nível correto, conforme especificado. Não houve necessidade de alterar outros campos, pois o restante da política já estava alinhado com o padrão e o mapa de serviços.
+
+Política corrigida  
+```yaml
+---
+# Política default-deny para o namespace sentinel-prod
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-default-deny
+  namespace: sentinel-prod
+spec:
+  podSelector: {}  # Aplica a todos os pods no namespace
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []
+
+---
+# Política de entrada para pods do Sentinel
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-ingress
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel  # Seleciona apenas os pods do serviço Sentinel
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: relay-prod  # Namespace do Relay
+          podSelector:
+            matchLabels:
+              app: relay  # Pods do Relay
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: edge  # Namespace do API gateway
+          podSelector:
+            matchLabels:
+              app: api-gateway  # Pods do API gateway
+      ports:
+        - protocol: TCP
+          port: 80  # Exemplo de porta de entrada legítima (a ser ajustada conforme necessidade)
+
+---
+# Política de saída para pods do Sentinel
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-egress
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel  # Seleciona apenas os pods do serviço Sentinel
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: forge-prod  # Namespace do Forge
+          podSelector:
+            matchLabels:
+              app: forge  # Pods do Forge
+      ports:
+        - protocol: TCP
+          port: 5432  # Porta do Postgres (warehouse)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cerebro-prod  # Namespace do Cerebro
+          podSelector:
+            matchLabels:
+              app: cerebro  # Pods do Cerebro
+      ports:
+        - protocol: TCP
+          port: 9200  # Porta do Elasticsearch (busca)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system  # Namespace do DNS interno
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns  # Pods do DNS
+      ports:
+        - protocol: UDP
+          port: 53  # Porta do DNS (UDP)
+        - protocol: TCP
+          port: 53  # Porta do DNS (TCP)
+```
+
+Limitações  
+A política não cobre possíveis variações de porta ou protocolo que não estejam explicitamente listadas. Por exemplo, se o serviço Forge usar outra porta além de 5432, a política atual não permitirá o tráfego. Além disso, a política assume que os namespaces e labels descritos no mapa estão corretamente configurados no cluster. Se houver desvios nesses valores, a política não funcionará conforme o esperado.
+````
+
+```text
+=== pol-p3d-q
+apply: networkpolicy.networking.k8s.io/sentinel-default-deny created
+apply: networkpolicy.networking.k8s.io/sentinel-ingress created
+apply: networkpolicy.networking.k8s.io/sentinel-egress created
+FALHA  relay -> sentinel:8081                 esperado=ABRE      obtido=BLOQUEIA
+FALHA  gateway -> sentinel:8081               esperado=ABRE      obtido=BLOQUEIA
+OK     outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> forge:5432                 esperado=ABRE      obtido=ABRE
+OK     sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> cerebro:9200               esperado=ABRE      obtido=ABRE
+OK     sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     DNS: nslookup resolve
+```
+
+Segundo refino, com defeitos escritos por mim (porta de entrada inventada; Limitações sem as duas lacunas), `qwen3:14b`, 47 s. Validador: 9/9 · 5/5 (itens 9 a 14). Cluster: 8 de 8.
+
+````text
+O que mudou  
+1. Removi o campo `ports` das regras de ingress na política `sentinel-ingress`, conforme solicitado, pois o mapa de serviços não especifica nenhuma porta de entrada legítima para o Sentinel. Isso permite que o tráfego legítimo entre Relay e API gateway, independentemente da porta, continue a funcionar.  
+2. Adicionei ao bloco `Limitações` a informação de que as regras de ingress não especificam portas, liberando todas as portas do Relay e do API gateway, e que o uso de `kubernetes.io/metadata.name` para selecionar namespaces não está no mapa de serviços, mas foi usado por falta de alternativa válida.
+
+Política corrigida  
+```yaml
+---
+# Política default-deny para o namespace sentinel-prod
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-default-deny
+  namespace: sentinel-prod
+spec:
+  podSelector: {}  # Aplica a todos os pods no namespace
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []
+
+---
+# Política de entrada para pods do Sentinel
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-ingress
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel  # Seleciona apenas os pods do serviço Sentinel
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: relay-prod  # Namespace do Relay
+          podSelector:
+            matchLabels:
+              app: relay  # Pods do Relay
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: edge  # Namespace do API gateway
+          podSelector:
+            matchLabels:
+              app: api-gateway  # Pods do API gateway
+      # Libera tráfego de entrada do Relay e do API gateway para os pods do Sentinel
+
+---
+# Política de saída para pods do Sentinel
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sentinel-egress
+  namespace: sentinel-prod
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel  # Seleciona apenas os pods do serviço Sentinel
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: forge-prod  # Namespace do Forge
+          podSelector:
+            matchLabels:
+              app: forge  # Pods do Forge
+      ports:
+        - protocol: TCP
+          port: 5432  # Porta do Postgres (warehouse)
+      # Libera tráfego para o Forge na porta 5432
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cerebro-prod  # Namespace do Cerebro
+          podSelector:
+            matchLabels:
+              app: cerebro  # Pods do Cerebro
+      ports:
+        - protocol: TCP
+          port: 9200  # Porta do Elasticsearch (busca)
+      # Libera tráfego para o Cerebro na porta 9200
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system  # Namespace do DNS interno
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns  # Pods do DNS
+      ports:
+        - protocol: UDP
+          port: 53  # Porta do DNS (UDP)
+        - protocol: TCP
+          port: 53  # Porta do DNS (TCP)
+      # Libera tráfego para o DNS interno nas portas 53 (UDP e TCP)
+```
+
+Limitações  
+- As regras de ingress não especificam portas, o que significa que liberam todas as portas do Relay e do API gateway. Isso pode permitir tráfego legítimo, mas também potencialmente tráfego não desejado se não houver controle adicional.  
+- O uso de `kubernetes.io/metadata.name` para selecionar namespaces não está no mapa de serviços, mas foi usado por falta de alternativa válida. Isso pode não ser compatível com todas as versões do Kubernetes ou com configurações personalizadas.
+````
+
+```text
+OK     relay -> sentinel:8081                 esperado=ABRE      obtido=ABRE
+OK     gateway -> sentinel:8081               esperado=ABRE      obtido=ABRE
+OK     outro ns -> sentinel:8081              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> forge:5432                 esperado=ABRE      obtido=ABRE
+OK     sentinel -> forge:9999                 esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     sentinel -> cerebro:9200               esperado=ABRE      obtido=ABRE
+OK     sentinel -> outro ns:8082              esperado=BLOQUEIA  obtido=BLOQUEIA
+OK     DNS: nslookup resolve
+```
