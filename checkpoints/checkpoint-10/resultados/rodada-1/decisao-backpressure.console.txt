@@ -1,0 +1,35 @@
+Cache is disabled.
+Starting evaluation eval-ozr-2026-11-17T17:25:47
+Running 1 test cases (up to 1 at a time)...
+
+┌────────────────────────────────────────┬────────────────────────────────────────┬────────────────────────────────────────┐
+│ prompt_dir                             │ cenario                                │ [qwen3:14b (Alibaba, via Ollama)]      │
+│                                        │                                        │ providers/carregar-prompt.js           │
+├────────────────────────────────────────┼────────────────────────────────────────┼────────────────────────────────────────┤
+│ decisao-backpressure                   │ file://<repo>… │ [FAIL] Reformulação do cenário         │
+│                                        │                                        │ **Fatos:**                             │
+│                                        │                                        │ - Relay (barramento de eventos) tem    │
+│                                        │                                        │ throughput sustentado de 180k msgs/s e │
+│                                        │                                        │ pico observado de 320k msgs/s por 25   │
+│                                        │                                        │ minutos.                               │
+│                                        │                                        │ - Retenção atual do sistema é de 4     │
+│                                        │                                        │ horas.                                 │
+│                                        │                                        │ - Consumidores são Forge (ingestão) e  │
+│                                        │                                        │ Sen...                                 │
+└────────────────────────────────────────┴────────────────────────────────────────┴────────────────────────────────────────┘
+✓ Eval complete (ID: eval-ozr-2026-11-17T17:25:47)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 3.684
+  Provider: 3.684 (1.063 prompt, 2.621 completion)
+
+Results:
+  0 passed (0%)
+  ✗ 1 failed (100%)
+  0 errors (0%)
+Duration: 2m 29s (concurrency: 1)
+
+Writing output to checkpoints/checkpoint-10/resultados/decisao-backpressure.json

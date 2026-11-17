@@ -1,0 +1,37 @@
+Cache is disabled.
+Starting evaluation eval-Mea-2026-11-17T17:32:30
+Running 1 test cases (up to 1 at a time)...
+
+┌──────────────────────────────┬──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+│ prompt_dir                   │ cenario                      │ plano                        │ [qwen3:14b (Alibaba, via     │
+│                              │                              │                              │ Ollama)]                     │
+│                              │                              │                              │ providers/carregar-prompt.js │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ migracao-forge-execucao      │ file://<repo>… │ file://<repo>… │ [FAIL] Garantias do cenário  │
+│                              │                              │                              │ - Consumir do Relay          │
+│                              │                              │                              │ continuamente, processando   │
+│                              │                              │                              │ em pequenos blocos no lugar  │
+│                              │                              │                              │ do lote de 1h.               │
+│                              │                              │                              │ - Manter quem depende do     │
+│                              │                              │                              │ Forge funcionando durante a  │
+│                              │                              │                              │ transição.                   │
+│                              │                              │                              │ - Nada de virada única       │
+│                              │                              │                              │ (big-bang): a migração tem   │
+│                              │                              │                              │ que ir em passos...          │
+└──────────────────────────────┴──────────────────────────────┴──────────────────────────────┴──────────────────────────────┘
+✓ Eval complete (ID: eval-Mea-2026-11-17T17:32:30)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 6.438
+  Provider: 6.438 (3.749 prompt, 2.689 completion)
+
+Results:
+  0 passed (0%)
+  ✗ 1 failed (100%)
+  0 errors (0%)
+Duration: 2m 51s (concurrency: 1)
+
+Writing output to checkpoints/checkpoint-10/resultados/migracao-forge-execucao.json

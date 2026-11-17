@@ -1,0 +1,61 @@
+# Teste do prompt migracao-forge-plano (CP10).
+# Saída aberta: o teste é determinístico só no que dá para verificar sem julgamento (títulos, ordem,
+# formato proibido e fatos que a saída precisa conter). A qualidade do conteúdo não é avaliada aqui.
+# Rodar a partir da raiz do repositório:
+#   promptfoo eval -c devops/migracao-forge-plano/promptfooconfig.yaml --no-cache -j 1
+# Sem assert de latência: o modelo roda com raciocínio ligado (de 1 a 3 minutos por chamada); o limite
+# de 5 s do enunciado vale para os prompts de saída estruturada (CP08).
+description: migracao-forge-plano — sete seções, fases reversíveis, etapa por dependente e janela de madrugada protegida
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: qwen3:14b (Alibaba, via Ollama)
+    config:
+      model: qwen3:14b
+      think: true
+      temperature: 0
+      num_ctx: 12288
+
+defaultTest:
+  vars:
+    prompt_dir: migracao-forge-plano
+  assert:
+    # os títulos exigidos, todos presentes e na ordem do prompt
+    - type: javascript
+      value: |
+        const titulos = ["Garantias e lacunas que moldam o plano", "Fases", "Ordem e dependências entre fases", "Convivência entre o modelo antigo e o novo", "Riscos do plano e mitigação", "Decisões em aberto", "Verificação contra as garantias"];
+        // o título é uma linha inteira (com ou sem ":" no fim), e os títulos aparecem em ordem
+        const linhas = output.split('\n').map((l) => l.trim().replace(/:$/, ''));
+        let pos = -1;
+        for (const t of titulos) {
+          const i = linhas.indexOf(t, pos + 1);
+          if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };
+          pos = i;
+        }
+        return true;
+    # formato proibido pelo prompt
+    - type: not-contains
+      value: '```'
+    - type: not-contains
+      value: '*'
+    # a janela de madrugada aparece ao longo do plano (pelo menos 2 vezes)
+    - type: javascript
+      value: (output.match(/madrugada/gi) || []).length >= 2
+    # os três dependentes ganham tratamento próprio
+    - type: javascript
+      value: /Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)
+    # cada fase tem um caminho de volta
+    - type: regex
+      value: 'reversão|reverter|voltar atrás|rollback'
+    # custo (o provedor local devolve 0)
+    - type: cost
+      threshold: 0.01
+
+tests:
+  - description: cenário do Forge com o diagnóstico real do CP05 (qwen3:14b)
+    vars:
+      cenario: file://../../checkpoints/checkpoint-05/entradas/cenario-forge.txt
+      diagnostico: file://../../checkpoints/checkpoint-10/entradas/diagnostico-qwen3-14b.txt

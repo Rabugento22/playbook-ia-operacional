@@ -1,0 +1,62 @@
+# Teste do prompt migracao-forge-execucao (CP10).
+# Saída aberta: o teste é determinístico só no que dá para verificar sem julgamento (títulos, ordem,
+# formato proibido e fatos que a saída precisa conter). A qualidade do conteúdo não é avaliada aqui.
+# Rodar a partir da raiz do repositório:
+#   promptfoo eval -c devops/migracao-forge-execucao/promptfooconfig.yaml --no-cache -j 1
+# Sem assert de latência: o modelo roda com raciocínio ligado (de 1 a 3 minutos por chamada); o limite
+# de 5 s do enunciado vale para os prompts de saída estruturada (CP08).
+description: migracao-forge-execucao — sete seções, go/no-go, rollback com gatilho e limite de tempo, janela de madrugada
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: qwen3:14b (Alibaba, via Ollama)
+    config:
+      model: qwen3:14b
+      think: true
+      temperature: 0
+      num_ctx: 12288
+
+defaultTest:
+  vars:
+    prompt_dir: migracao-forge-execucao
+  assert:
+    # os títulos exigidos, todos presentes e na ordem do prompt
+    - type: javascript
+      value: |
+        const titulos = ["Garantias do cenário", "Pré-requisitos globais", "Roteiro por fase", "Proteção dos dependentes", "Comunicação", "Riscos residuais", "Checklist final contra as garantias"];
+        // o título é uma linha inteira (com ou sem ":" no fim), e os títulos aparecem em ordem
+        const linhas = output.split('\n').map((l) => l.trim().replace(/:$/, ''));
+        let pos = -1;
+        for (const t of titulos) {
+          const i = linhas.indexOf(t, pos + 1);
+          if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };
+          pos = i;
+        }
+        return true;
+    # formato proibido pelo prompt
+    - type: not-contains
+      value: '```'
+    - type: not-contains
+      value: '*'
+    # a janela de madrugada vale para o roteiro
+    - type: javascript
+      value: (output.match(/madrugada/gi) || []).length >= 1
+    # go/no-go, gatilho e limite de tempo do rollback
+    - type: regex
+      value: 'go/no-go'
+    - type: javascript
+      value: /gatilho/i.test(output)
+    - type: javascript
+      value: /limite de tempo/i.test(output)
+    # custo (o provedor local devolve 0)
+    - type: cost
+      threshold: 0.01
+
+tests:
+  - description: cenário do Forge com o plano real do CP05 (qwen3:14b)
+    vars:
+      cenario: file://../../checkpoints/checkpoint-05/entradas/cenario-forge.txt
+      plano: file://../../checkpoints/checkpoint-10/entradas/plano-qwen3-14b.txt

@@ -49,6 +49,7 @@ As execuções completas dos dois modelos estão em [`03-execucao.md`](../../che
 - Os dois modelos escreveram o diagnóstico sem tecnologia nomeada e com "não declarado" para as tolerâncias dos dependentes, mas o `qwen3:14b` ainda usou negrito.
 - A seção Janelas de consumo levou a madrugada do billing até o plano e o roteiro nos dois modelos, mas o `gpt-oss:20b` a registrou como "suposição", embora o cenário a declare.
 - Uma execução da cadeia por modelo; a variação entre execuções não foi medida.
+- **Teste (CP10):** `promptfooconfig.yaml` verifica títulos, formato e fatos da saída, sem avaliar a qualidade do raciocínio; a proibição de asteriscos reprova com o `qwen3:14b`; a janela de madrugada está na seção correta. Detalhes em [`checkpoint-10`](../../checkpoints/checkpoint-10/).
 
 ## Documentação do caminho
 

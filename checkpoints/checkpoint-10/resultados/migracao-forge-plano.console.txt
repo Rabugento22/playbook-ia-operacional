@@ -1,0 +1,37 @@
+Cache is disabled.
+Starting evaluation eval-fNz-2026-11-17T17:29:43
+Running 1 test cases (up to 1 at a time)...
+
+┌──────────────────────────────┬──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+│ prompt_dir                   │ cenario                      │ diagnostico                  │ [qwen3:14b (Alibaba, via     │
+│                              │                              │                              │ Ollama)]                     │
+│                              │                              │                              │ providers/carregar-prompt.js │
+├──────────────────────────────┼──────────────────────────────┼──────────────────────────────┼──────────────────────────────┤
+│ migracao-forge-plano         │ file://<repo>… │ file://<repo>… │ [FAIL] Garantias e lacunas   │
+│                              │                              │                              │ que moldam o plano           │
+│                              │                              │                              │ Garantias do cenário:        │
+│                              │                              │                              │ 1. Consumir do Relay         │
+│                              │                              │                              │ continuamente, processando   │
+│                              │                              │                              │ em pequenos blocos no lugar  │
+│                              │                              │                              │ do lote de 1h.               │
+│                              │                              │                              │ 2. Manter quem depende do    │
+│                              │                              │                              │ Forge funcionando durante a  │
+│                              │                              │                              │ transição.                   │
+│                              │                              │                              │ 3. Nada de virada únic...    │
+└──────────────────────────────┴──────────────────────────────┴──────────────────────────────┴──────────────────────────────┘
+✓ Eval complete (ID: eval-fNz-2026-11-17T17:29:43)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 4.859
+  Provider: 4.859 (2.032 prompt, 2.827 completion)
+
+Results:
+  0 passed (0%)
+  ✗ 1 failed (100%)
+  0 errors (0%)
+Duration: 2m 44s (concurrency: 1)
+
+Writing output to checkpoints/checkpoint-10/resultados/migracao-forge-plano.json

@@ -1,0 +1,62 @@
+# Teste do prompt decisao-backpressure (CP10).
+# Saída aberta: o teste é determinístico só no que dá para verificar sem julgamento (títulos, ordem,
+# formato proibido e fatos que a saída precisa conter). A qualidade do conteúdo não é avaliada aqui.
+# Rodar a partir da raiz do repositório:
+#   promptfoo eval -c devops/decisao-backpressure/promptfooconfig.yaml --no-cache -j 1
+# Sem assert de latência: o modelo roda com raciocínio ligado (de 1 a 3 minutos por chamada); o limite
+# de 5 s do enunciado vale para os prompts de saída estruturada (CP08).
+description: decisao-backpressure — seis seções, tabela, três caminhos, contas do pico e sem asteriscos
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: qwen3:14b (Alibaba, via Ollama)
+    config:
+      model: qwen3:14b
+      think: true
+      temperature: 0
+      num_ctx: 12288
+
+defaultTest:
+  vars:
+    prompt_dir: decisao-backpressure
+  assert:
+    # os títulos exigidos, todos presentes e na ordem do prompt
+    - type: javascript
+      value: |
+        const titulos = ["Reformulação do cenário", "Contas", "Caminhos propostos", "Tabela comparativa", "Recomendação", "Limites e validação"];
+        // o título é uma linha inteira (com ou sem ":" no fim), e os títulos aparecem em ordem
+        const linhas = output.split('\n').map((l) => l.trim().replace(/:$/, ''));
+        let pos = -1;
+        for (const t of titulos) {
+          const i = linhas.indexOf(t, pos + 1);
+          if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };
+          pos = i;
+        }
+        return true;
+    # formato proibido pelo prompt
+    - type: not-contains
+      value: '```'
+    - type: not-contains
+      value: '*'
+    # tabela comparativa com barras verticais (pelo menos 3 linhas com |)
+    - type: javascript
+      value: (output.match(/^.*\|.*$/gm) || []).length >= 3
+    # pelo menos três caminhos
+    - type: javascript
+      value: (output.match(/^[\s*]*Caminho\s*\d/gim) || []).length >= 3
+    # as contas do pico: excedente de 140 mil msgs/s e volume acumulado de 210 milhões
+    - type: regex
+      value: '140[\s.,]?000|140\s?k'
+    - type: regex
+      value: '210[\s.,]?000[\s.,]?000|210\s?(M|milh)'
+    # custo (o provedor local devolve 0)
+    - type: cost
+      threshold: 0.01
+
+tests:
+  - description: Relay, pico de 320k msgs/s por 25 min, SLA de 60 s e perda inaceitável
+    vars:
+      cenario: file://../../checkpoints/checkpoint-04/entradas/cenario-relay.txt

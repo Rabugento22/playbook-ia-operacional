@@ -54,6 +54,7 @@ As execuções completas dos dois modelos estão em [`03-execucao.md`](../../che
 - Os dois planos respeitam a janela de madrugada do billing, mas o `qwen3:14b` a justifica de forma fraca ("os dados não são consumidos durante esse período") e o `gpt-oss:20b` repete "suposição" do diagnóstico.
 - O descomissionamento do modelo antigo (última fase) tem o rollback mais frágil: restaurar o que foi removido depende de backups que o plano só menciona.
 - Uma execução da cadeia por modelo; a variação entre execuções não foi medida.
+- **Teste (CP10):** `promptfooconfig.yaml` verifica títulos, formato e fatos da saída, sem avaliar a qualidade do raciocínio; a proibição de asteriscos reprova com o `qwen3:14b`. Detalhes em [`checkpoint-10`](../../checkpoints/checkpoint-10/).
 
 ## Documentação do caminho
 

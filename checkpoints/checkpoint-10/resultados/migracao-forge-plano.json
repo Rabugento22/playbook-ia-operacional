@@ -1,0 +1,397 @@
+{
+  "evalId": "eval-fNz-2026-11-17T17:29:43",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T17:29:43.309Z",
+    "prompts": [
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "qwen3:14b (Alibaba, via Ollama)",
+        "metrics": {
+          "score": 0.8571428571428571,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 6,
+          "assertFailCount": 1,
+          "totalLatencyMs": 164357,
+          "tokenUsage": {
+            "prompt": 2032,
+            "completion": 2827,
+            "cached": 0,
+            "total": 4859,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "Expected output to not contain \"*\"",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.8571428571428571,
+          "reason": "Expected output to not contain \"*\"",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const titulos = [\"Garantias e lacunas que moldam o plano\", \"Fases\", \"Ordem e dependências entre fases\", \"Convivência entre o modelo antigo e o novo\", \"Riscos do plano e mitigação\", \"Decisões em aberto\", \"Verificação contra as garantias\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "```"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to not contain \"*\"",
+              "assertion": {
+                "type": "not-contains",
+                "value": "*"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "(output.match(/madrugada/gi) || []).length >= 2"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "/Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "reversão|reverter|voltar atrás|rollback"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            }
+          ]
+        },
+        "id": "5f55cca8-3714-444c-be07-6454458b9826",
+        "latencyMs": 164357,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um arquiteto de dados e SRE. Sua tarefa é montar o plano de migração, em fases, do pipeline descrito no bloco <cenario>, a partir do diagnóstico do bloco <diagnostico> (saída do prompt anterior da cadeia). A sua resposta será a entrada do próximo prompt, que detalhará o plano em passos executáveis.\n\nRegras que valem para toda a resposta:\n- Use só o que está nos blocos de entrada. Distinga o que o cenário declara do que você infere, e marque inferências e suposições como tal.\n- Não presuma nenhuma ferramenta, produto ou tecnologia que as entradas não citem. Se uma decisão depender de escolher uma, registre como decisão em aberto, sem nomear produtos como premissa.\n- Não invente números, limiares, prazos, percentuais ou capacidades. Onde faltar um valor, escreva \"limiar a definir\" e diga com base em qual métrica ou dado ele deve ser definido.\n- As garantias do cenário são somente as que ele declara; não crie garantias novas (por exemplo, de segurança ou de disponibilidade) que o cenário não traga.\n- Escreva em português, em texto simples: use títulos e listas simples, sem tabelas, sem negrito, sem asteriscos e sem cercas de código. Não escreva texto fora das seções.\n\nCondições do plano:\n- Nenhuma virada única: a migração avança em fases incrementais.\n- Toda fase deve poder ser desfeita. Nenhuma fase pode ser declarada irreversível; se um passo parecer irreversível, divida-o até que exista um caminho de volta e descreva-o.\n- Cada dependente citado no cenário tem a sua própria etapa de troca de fonte, com validação antes e reversão depois, para que a troca de um não obrigue a troca dos outros.\n- Cada janela de consumo da seção Janelas de consumo do diagnóstico é uma janela protegida: nenhuma troca de fonte, mudança ou reversão do que um dependente usa pode acontecer dentro dela. Em cada fase, diga quais janelas protegidas se aplicam e como o plano as respeita, inclusive para a reversão.\n- O modelo antigo e o novo convivem durante a transição, com validação de equivalência dos resultados.\n\nUse exatamente estes títulos, nesta ordem:\n\nGarantias e lacunas que moldam o plano\nListe as Garantias do cenário (reproduzidas do diagnóstico) e as lacunas do diagnóstico que mais afetam o plano, dizendo como cada uma muda o desenho.\n\nFases\nPara cada fase: objetivo; o que muda; o que permanece como está; dependentes afetados e como são protegidos; janelas protegidas que se aplicam e como são respeitadas; critério de entrada; critério de saída, com a evidência verificável e o limiar a definir; como voltar atrás (o passo de reversão e quando acioná-lo).\n\nOrdem e dependências entre fases\nPor que esta ordem e qual risco cada fase retira.\n\nConvivência entre o modelo antigo e o novo\nComo os dois coexistem e como validar que os resultados são equivalentes.\n\nRiscos do plano e mitigação\nRiscos, com a mitigação de cada um.\n\nDecisões em aberto\nO que o time precisa decidir ou descobrir antes de começar, incluindo as escolhas de ferramenta, sem nomear produtos como premissa.\n\nVerificação contra as garantias\nPara cada Garantia do cenário, em quais fases ela é sustentada e como, e para cada janela protegida, em quais fases ela é respeitada. Declare qualquer garantia ou janela que o plano não consiga sustentar.\n\nAs entradas estão nos blocos abaixo.\n\n<cenario>\nForge hoje:\n- ingestão: um job em cron acorda a cada 60min (o \"forge-batch-ingest\")\n- transformação: 14 etapas de processamento encadeadas (em Spark), ~40min no total\n- destino: grava em tabelas no data warehouse, particionadas por hora\n- ponto frágil: se um lote falha, o próximo acumula o dobro de volume\n- quem depende do Forge: Sentinel (lê as tabelas agregadas), Cerebro (indexa\n  os eventos transformados) e os relatórios de billing da Pepper (rodam de madrugada)\n\nO que a migração precisa garantir:\n- consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h\n- manter quem depende do Forge funcionando durante a transição\n- nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás\n</cenario>\n<diagnostico>\nGarantias do cenário  \n1. Consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h.  \n2. Manter quem depende do Forge funcionando durante a transição.  \n3. Nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás.  \n\nEstado atual  \n- Ingestão: job em cron acorda a cada 60min (forge-batch-ingest).  \n- Transformação: 14 etapas de processamento encadeadas (em Spark), ~40min no total.  \n- Destino: grava em tabelas no data warehouse, particionadas por hora.  \n- Ponto frágil: se um lote falha, o próximo acumula o dobro de volume.  \n\nDependentes e o que cada um espera  \n- **Sentinel**: depende das tabelas agregadas do Forge. Tolerância não declarada.  \n- **Cerebro**: depende dos eventos transformados do Forge. Tolerância não declarada.  \n- **Relatórios de billing da Pepper**: dependem dos dados do Forge. Tolerância não declarada.  \n\nJanelas de consumo  \n- **Sentinel**: janela não declarada.  \n- **Cerebro**: janela não declarada.  \n- **Relatórios de billing da Pepper**: consomem de madrugada.  \n\nPontos frágeis e riscos  \n- **Ponto frágil**: se um lote falha, o próximo acumula o dobro de volume. Efeito: sobrecarga no processamento, risco de falhas em cascata e inconsistências nos dados consumidos pelos dependentes.  \n\nO que muda do lote para eventos  \n- **Arquitetura**: migração de processamento em lote para eventos, com consumo contínuo.  \n- **Fluxo**: dados processados em pequenos blocos, em vez de lotes de 1h.  \n- **Garantias de entrega e ordem**: perda de garantias de ordem e entrega garantida (novo risco de dados perdidos ou fora de ordem).  \n- **Novos riscos**: possibilidade de processamento parcial, inconsistências em tempo real e necessidade de buffer para garantir tolerância a falhas.  \n\nInvariantes  \n- **Garantia 1**: consumo contínuo do Relay. Origina-se da garantia de consumo contínuo.  \n- **Garantia 2**: dependentes (Sentinel, Cerebro, Pepper) devem continuar funcionando. Origina-se da garantia de manter dependências funcionais.  \n- **Garantia 3**: migração em passos reversíveis. Origina-se da garantia de evitar big-bang.  \n\nLacunas  \n- **Tolerância dos dependentes**: não há informações sobre tolerância a atrasos, inconsistências ou falhas parciais. Pergunta a fazer: quais são os limites de tolerância de Sentinel, Cerebro e Pepper para atrasos ou dados incompletos? Consultar os responsáveis por cada dependente.  \n- **Janelas de consumo**: Sentinel e Cerebro não têm janelas declaradas. Pergunta a fazer: em quais momentos Sentinel e Cerebro consomem os dados? Consultar os responsáveis por cada dependente.  \n\nVerificação  \n- Garantia 1: tratada em \"O que muda do lote para eventos\".  \n- Garantia 2: tratada em \"Dependentes e o que cada um espera\" e \"Invariantes\".  \n- Garantia 3: tratada em \"Invariantes\".  \n- Janelas de consumo: \"Relatórios de billing da Pepper\" (madrugada) está em \"Janelas de consumo\". Outras janelas não declaradas estão registradas como lacunas.\n</diagnostico>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "Garantias e lacunas que moldam o plano  \nGarantias do cenário:  \n1. Consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h.  \n2. Manter quem depende do Forge funcionando durante a transição.  \n3. Nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás.  \n\nLacunas do diagnóstico que afetam o plano:  \n- **Tolerância dos dependentes**: Não há informações sobre tolerância a atrasos, inconsistências ou falhas parciais. Isso afeta a ordem das fases, pois a migração só pode avançar se os dependentes suportarem a coexistência de modelos antigo e novo.  \n- **Janelas de consumo**: Sentinel e Cerebro não têm janelas declaradas. Isso afeta a definição de fases, pois a migração não pode ocorrer durante janelas protegidas não identificadas.  \n\nFases  \n**Fase 1: Validação do novo pipeline com coexistência parcial**  \n- **Objetivo**: Validar que o novo pipeline (consumo contínuo do Relay) gera resultados equivalentes ao modelo antigo, sem impactar os dependentes.  \n- **O que muda**:  \n  - Ingestão: paralelamente ao job atual (forge-batch-ingest), iniciar um novo job que lê do Relay continuamente.  \n  - Transformação: executar as 14 etapas do Spark no novo pipeline, mas sem escrever para o data warehouse.  \n- **O que permanece como está**:  \n  - O job original (forge-batch-ingest) continua ativo.  \n  - Os dependentes (Sentinel, Cerebro, Pepper) continuam lendo do data warehouse original.  \n- **Dependentes afetados e como são protegidos**:  \n  - Nenhum dependente é afetado diretamente, pois o novo pipeline não escreve dados.  \n- **Janelas protegidas que se aplicam**:  \n  - Nenhuma janela protegida é afetada, pois o novo pipeline não escreve dados.  \n- **Critério de entrada**:  \n  - O novo pipeline está configurado e rodando sem erros por pelo menos 24 horas.  \n- **Critério de saída**:  \n  - Evidência verificável: resultados do novo pipeline (sem escrita) são equivalentes aos do modelo antigo.  \n  - Limiar a definir: percentual de equivalência entre resultados (ex.: 99,9%) com base em métricas de validação.  \n- **Como voltar atrás**:  \n  - Desativar o novo pipeline e reativar o job original (forge-batch-ingest) se a validação falhar.  \n\n**Fase 2: Escrita paralela no data warehouse com validação**  \n- **Objetivo**: Escrever dados do novo pipeline no data warehouse, mantendo o modelo antigo ativo.  \n- **O que muda**:  \n  - O novo pipeline começa a escrever em tabelas paralelas no data warehouse (ex.: com prefixo \"new_\").  \n- **O que permanece como está**:  \n  - O job original (forge-batch-ingest) continua ativo.  \n  - Os dependentes continuam lendo do data warehouse original.  \n- **Dependentes afetados e como são protegidos**:  \n  - Nenhum dependente é afetado, pois os dados do novo pipeline são escritos em tabelas separadas.  \n- **Janelas protegidas que se aplicam**:  \n  - Nenhuma janela protegida é afetada, pois os dependentes não leem das tabelas novas.  \n- **Critério de entrada**:  \n  - O novo pipeline está escrevendo dados no data warehouse por pelo menos 72 horas sem erros.  \n- **Critério de saída**:  \n  - Evidência verificável: dados das tabelas novas são equivalentes aos das tabelas antigas.  \n  - Limiar a definir: percentual de equivalência entre dados (ex.: 99,9%) com base em métricas de validação.  \n- **Como voltar atrás**:  \n  - Desativar a escrita no novo pipeline e reativar o job original (forge-batch-ingest) se a validação falhar.  \n\n**Fase 3: Redirecionamento gradual dos dependentes para o novo pipeline**  \n- **Objetivo**: Redirecionar os dependentes (Sentinel, Cerebro, Pepper) para lerem dados do novo pipeline, mantendo o modelo antigo como fallback.  \n- **O que muda**:  \n  - Cada dependente é redirecionado para ler das tabelas novas (ex.: \"new_\") em etapas separadas.  \n- **O que permanece como está**:  \n  - O job original (forge-batch-ingest) continua ativo até que todos os dependentes sejam migrados.  \n- **Dependentes afetados e como são protegidos**:  \n  - Cada dependente tem sua própria etapa de redirecionamento, com validação antes e reversão depois.  \n- **Janelas protegidas que se aplicam**:  \n  - Para **Relatórios de billing da Pepper**: a migração só pode ocorrer fora da janela de consumo (madrugada).  \n  - Para **Sentinel** e **Cerebro**: janelas protegidas não declaradas, então a migração só pode ocorrer após definir as janelas com os responsáveis.  \n- **Critério de entrada**:  \n  - Para cada dependente: a validação de equivalência entre dados antigos e novos está completa.  \n- **Critério de saída**:  \n  - Evidência verificável: todos os dependentes estão lendo do novo pipeline sem impacto.  \n  - Limiar a definir: percentual de sucesso no consumo (ex.: 99,9%) com base em métricas de uso.  \n- **Como voltar atrás**:  \n  - Reverter o redirecionamento para o dependente e reativar o modelo antigo se a migração causar falhas.  \n\nOrdem e dependências entre fases  \n- **Fase 1** é pré-requisito para **Fase 2**, pois a validação do pipeline é necessária antes de escrever dados.  \n- **Fase 2** é pré-requisito para **Fase 3**, pois a escrita paralela é necessária antes de redirecionar os dependentes.  \n- A ordem evita riscos de falhas em cascata, pois cada fase é reversível e não depende de etapas anteriores além da validação.  \n\nConvivência entre o modelo antigo e o novo  \n- Ambos os modelos coexistem durante a transição:  \n  - O modelo antigo (forge-batch-ingest) continua ativo até que todos os dependentes sejam migrados.  \n  - O modelo novo (consumo contínuo do Relay) é validado em paralelo.  \n- Validação de equivalência:  \n  - Para cada etapa do pipeline, comparar resultados do modelo antigo e novo usando métricas como precisão, recall e taxa de erro.  \n  - Para os dependentes, validar que os dados lidos do novo pipeline geram os mesmos resultados que os do modelo antigo.  \n\nRiscos do plano e mitigação  \n- **Risco 1**: Dados inconsistentes entre modelos antigo e novo.  \n  - **Mitigação**: Validar equivalência em tempo real com métricas definidas (ex.: 99,9% de precisão).  \n- **Risco 2**: Dependentes falham ao migrar para o novo pipeline.  \n  - **Mitigação**: Redirecionar dependentes em etapas separadas, com reversão imediata se a migração falhar.  \n- **Risco 3**: Janelas protegidas não respeitadas.  \n  - **Mitigação**: Para **Pepper**, migrar fora da janela de madrugada. Para **Sentinel** e **Cerebro**, definir janelas protegidas com os responsáveis antes de migrar.  \n\nDecisões em aberto  \n- **Escolha de ferramenta para o novo pipeline**: Qual tecnologia será usada para o consumo contínuo do Relay (ex.: Kafka, Pulsar)?  \n- **Definição de janelas protegidas para Sentinel e Cerebro**: Consultar os responsáveis para identificar quando esses dependentes consomem dados.  \n- **Limiares de validação**: Definir percentuais de equivalência (ex.: 99,9%) para garantir que os resultados sejam equivalentes.  \n\nVerificação contra as garantias  \n- **Garantia 1 (consumo contínuo do Relay)**:  \n  - **Fase 1**: Validado com o novo pipeline rodando.  \n  - **Fase 2**: Validado com a escrita paralela.  \n  - **Fase 3**: Validado com o consumo contínuo ativo.  \n- **Garantia 2 (dependentes funcionando)**:  \n  - **Fase 1**: Validado com os dependentes lendo do modelo antigo.  \n  - **Fase 2**: Validado com os dependentes lendo do modelo antigo.  \n  - **Fase 3**: Validado com os dependentes lendo do modelo novo.  \n- **Garantia 3 (migração em passos reversíveis)**:  \n  - **Fase 1**: Reversível com desativação do novo pipeline.  \n  - **Fase 2**: Reversível com desativação da escrita no novo pipeline.  \n  - **Fase 3**: Reversível com reativação do modelo antigo.  \n- **Janelas protegidas**:  \n  - **Relatórios de billing da Pepper**: Respeitadas em **Fase 3** (migração fora da madrugada).  \n  - **Sentinel** e **Cerebro**: Não respeitadas, pois janelas protegidas não foram definidas.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 2032,
+            "completion": 2827,
+            "cached": 0,
+            "total": 4859,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.8571428571428571,
+        "success": false,
+        "testCase": {
+          "description": "cenário do Forge com o diagnóstico real do CP05 (qwen3:14b)",
+          "vars": {
+            "prompt_dir": "migracao-forge-plano",
+            "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt",
+            "diagnostico": "file://<repo>/checkpoints/checkpoint-10/entradas/diagnostico-qwen3-14b.txt"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "const titulos = [\"Garantias e lacunas que moldam o plano\", \"Fases\", \"Ordem e dependências entre fases\", \"Convivência entre o modelo antigo e o novo\", \"Riscos do plano e mitigação\", \"Decisões em aberto\", \"Verificação contra as garantias\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+            },
+            {
+              "type": "not-contains",
+              "value": "```"
+            },
+            {
+              "type": "not-contains",
+              "value": "*"
+            },
+            {
+              "type": "javascript",
+              "value": "(output.match(/madrugada/gi) || []).length >= 2"
+            },
+            {
+              "type": "javascript",
+              "value": "/Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)"
+            },
+            {
+              "type": "regex",
+              "value": "reversão|reverter|voltar atrás|rollback"
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 2032,
+          "completion": 2827,
+          "cached": 0,
+          "total": 4859,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "migracao-forge-plano",
+          "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt",
+          "diagnostico": "file://<repo>/checkpoints/checkpoint-10/entradas/diagnostico-qwen3-14b.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      }
+    ],
+    "stats": {
+      "successes": 0,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 2032,
+        "completion": 2827,
+        "cached": 0,
+        "total": 4859,
+        "numRequests": 1,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 164396,
+      "evaluationDurationMs": 164396
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "migracao-forge-plano — sete seções, fases reversíveis, etapa por dependente e janela de madrugada protegida",
+    "prompts": [
+      "file://<repo>/providers/carregar-prompt.js"
+    ],
+    "providers": [
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "qwen3:14b (Alibaba, via Ollama)",
+        "config": {
+          "model": "qwen3:14b",
+          "think": true,
+          "temperature": 0,
+          "num_ctx": 12288
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "cenário do Forge com o diagnóstico real do CP05 (qwen3:14b)",
+        "vars": {
+          "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt",
+          "diagnostico": "file://<repo>/checkpoints/checkpoint-10/entradas/diagnostico-qwen3-14b.txt"
+        }
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "checkpoints/checkpoint-10/resultados/migracao-forge-plano.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "vars": {
+        "prompt_dir": "migracao-forge-plano"
+      },
+      "assert": [
+        {
+          "type": "javascript",
+          "value": "const titulos = [\"Garantias e lacunas que moldam o plano\", \"Fases\", \"Ordem e dependências entre fases\", \"Convivência entre o modelo antigo e o novo\", \"Riscos do plano e mitigação\", \"Decisões em aberto\", \"Verificação contra as garantias\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+        },
+        {
+          "type": "not-contains",
+          "value": "```"
+        },
+        {
+          "type": "not-contains",
+          "value": "*"
+        },
+        {
+          "type": "javascript",
+          "value": "(output.match(/madrugada/gi) || []).length >= 2"
+        },
+        {
+          "type": "javascript",
+          "value": "/Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)"
+        },
+        {
+          "type": "regex",
+          "value": "reversão|reverter|voltar atrás|rollback"
+        },
+        {
+          "type": "cost",
+          "threshold": 0.01
+        }
+      ],
+      "options": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/devops/migracao-forge-plano"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T17:32:27.773Z",
+    "evaluationCreatedAt": "2026-11-17T17:29:43.309Z"
+  },
+  "vars": [
+    "prompt_dir",
+    "cenario",
+    "diagnostico"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

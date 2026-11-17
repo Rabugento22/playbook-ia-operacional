@@ -43,6 +43,7 @@ Volume acumulado no pico: 140 000 msgs/s × 1 500 s = 210 000�
 - O `qwen3:14b` ignorou a proibição de asteriscos (54 linhas da resposta com asteriscos); o `gpt-oss:20b` quase obedeceu (5 linhas).
 - Os modelos afirmam que a solução fica "dentro do orçamento" sem custos no cenário para sustentar isso.
 - Uma execução por modelo; a variação entre execuções não foi medida.
+- **Teste (CP10):** `promptfooconfig.yaml` verifica títulos, formato e fatos da saída, sem avaliar a qualidade do raciocínio; as contas do pico (140 mil msgs/s de excedente e 210 milhões acumulados) e a proibição de asteriscos reprovam com o `qwen3:14b`. Detalhes em [`checkpoint-10`](../../checkpoints/checkpoint-10/).
 
 ## Documentação do caminho
 

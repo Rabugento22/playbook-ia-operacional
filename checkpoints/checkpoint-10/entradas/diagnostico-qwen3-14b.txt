@@ -1,0 +1,44 @@
+Garantias do cenário  
+1. Consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h.  
+2. Manter quem depende do Forge funcionando durante a transição.  
+3. Nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás.  
+
+Estado atual  
+- Ingestão: job em cron acorda a cada 60min (forge-batch-ingest).  
+- Transformação: 14 etapas de processamento encadeadas (em Spark), ~40min no total.  
+- Destino: grava em tabelas no data warehouse, particionadas por hora.  
+- Ponto frágil: se um lote falha, o próximo acumula o dobro de volume.  
+
+Dependentes e o que cada um espera  
+- **Sentinel**: depende das tabelas agregadas do Forge. Tolerância não declarada.  
+- **Cerebro**: depende dos eventos transformados do Forge. Tolerância não declarada.  
+- **Relatórios de billing da Pepper**: dependem dos dados do Forge. Tolerância não declarada.  
+
+Janelas de consumo  
+- **Sentinel**: janela não declarada.  
+- **Cerebro**: janela não declarada.  
+- **Relatórios de billing da Pepper**: consomem de madrugada.  
+
+Pontos frágeis e riscos  
+- **Ponto frágil**: se um lote falha, o próximo acumula o dobro de volume. Efeito: sobrecarga no processamento, risco de falhas em cascata e inconsistências nos dados consumidos pelos dependentes.  
+
+O que muda do lote para eventos  
+- **Arquitetura**: migração de processamento em lote para eventos, com consumo contínuo.  
+- **Fluxo**: dados processados em pequenos blocos, em vez de lotes de 1h.  
+- **Garantias de entrega e ordem**: perda de garantias de ordem e entrega garantida (novo risco de dados perdidos ou fora de ordem).  
+- **Novos riscos**: possibilidade de processamento parcial, inconsistências em tempo real e necessidade de buffer para garantir tolerância a falhas.  
+
+Invariantes  
+- **Garantia 1**: consumo contínuo do Relay. Origina-se da garantia de consumo contínuo.  
+- **Garantia 2**: dependentes (Sentinel, Cerebro, Pepper) devem continuar funcionando. Origina-se da garantia de manter dependências funcionais.  
+- **Garantia 3**: migração em passos reversíveis. Origina-se da garantia de evitar big-bang.  
+
+Lacunas  
+- **Tolerância dos dependentes**: não há informações sobre tolerância a atrasos, inconsistências ou falhas parciais. Pergunta a fazer: quais são os limites de tolerância de Sentinel, Cerebro e Pepper para atrasos ou dados incompletos? Consultar os responsáveis por cada dependente.  
+- **Janelas de consumo**: Sentinel e Cerebro não têm janelas declaradas. Pergunta a fazer: em quais momentos Sentinel e Cerebro consomem os dados? Consultar os responsáveis por cada dependente.  
+
+Verificação  
+- Garantia 1: tratada em "O que muda do lote para eventos".  
+- Garantia 2: tratada em "Dependentes e o que cada um espera" e "Invariantes".  
+- Garantia 3: tratada em "Invariantes".  
+- Janelas de consumo: "Relatórios de billing da Pepper" (madrugada) está em "Janelas de consumo". Outras janelas não declaradas estão registradas como lacunas.

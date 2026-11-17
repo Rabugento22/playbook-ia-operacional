@@ -1,0 +1,414 @@
+{
+  "evalId": "eval-Mea-2026-11-17T17:32:30",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T17:32:30.009Z",
+    "prompts": [
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "qwen3:14b (Alibaba, via Ollama)",
+        "metrics": {
+          "score": 0.75,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 6,
+          "assertFailCount": 2,
+          "totalLatencyMs": 170376,
+          "tokenUsage": {
+            "prompt": 3749,
+            "completion": 2689,
+            "cached": 0,
+            "total": 6438,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "Expected output to match regex \"limite de tempo\"",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.75,
+          "reason": "Expected output to match regex \"limite de tempo\"",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const titulos = [\"Garantias do cenário\", \"Pré-requisitos globais\", \"Roteiro por fase\", \"Proteção dos dependentes\", \"Comunicação\", \"Riscos residuais\", \"Checklist final contra as garantias\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "```"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to not contain \"*\"",
+              "assertion": {
+                "type": "not-contains",
+                "value": "*"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "(output.match(/madrugada/gi) || []).length >= 1"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "go/no-go"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "[Gg]atilho"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to match regex \"limite de tempo\"",
+              "assertion": {
+                "type": "regex",
+                "value": "limite de tempo"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            }
+          ]
+        },
+        "id": "0ddb0c89-c6da-4222-b89d-2128ef64ef03",
+        "latencyMs": 170376,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um engenheiro de SRE e de dados responsável por transformar um plano de migração em um roteiro executável e reversível. Sua tarefa é detalhar cada fase do plano do bloco <plano> (saída do prompt anterior da cadeia), respeitando as garantias do bloco <cenario>.\n\nRegras que valem para toda a resposta:\n- Use só o que está nos blocos de entrada. Distinga o que o cenário declara do que você infere, e marque inferências e suposições como tal.\n- Não presuma nenhuma ferramenta, produto ou tecnologia que as entradas não citem. Se uma decisão depender de escolher uma, registre como decisão em aberto, sem nomear produtos como premissa.\n- Não invente números, limiares, prazos, percentuais ou capacidades. Onde faltar um valor, escreva \"limiar a definir\" e diga com base em qual métrica ou dado ele deve ser definido.\n- As garantias do cenário são somente as que ele declara; não crie garantias novas (por exemplo, de segurança ou de disponibilidade) que o cenário não traga.\n- Escreva em português, em texto simples: use títulos e listas simples, sem tabelas, sem negrito, sem asteriscos e sem cercas de código. Não escreva texto fora das seções.\n\nCondições do roteiro:\n- Descreva os passos em termos funcionais (o que deve acontecer e o que verificar); não invente comandos, nomes de ferramentas, produtos ou parâmetros. Onde a ferramenta importar, escreva \"a definir pelo time\".\n- Todo passo tem uma verificação e todo avanço entre fases tem um critério de go/no-go.\n- Todo rollback tem um gatilho observável e um limite de tempo para decidir.\n- Toda janela protegida do plano vale para o roteiro: nenhum passo, troca de fonte ou rollback que mude o que um dependente usa pode ser executado dentro da janela desse dependente. Cada passo desse tipo indica a janela proibida e o momento permitido; se o rollback cair na janela, o roteiro diz o que fazer.\n- Papéis são funcionais (por exemplo, quem executa e quem aprova), derivados do plano; não nomeie ferramentas de comunicação.\n\nUse exatamente estes títulos, nesta ordem:\n\nGarantias do cenário\nListe as garantias que o cenário declara.\n\nPré-requisitos globais\nO que precisa estar decidido, disponível ou medido antes da primeira fase, incluindo as decisões em aberto do plano que bloqueiam o início.\n\nRoteiro por fase\nPara cada fase do plano: pré-condições; passos numerados e ordenados; verificação de cada passo (o que medir e o limiar a definir); critério de go/no-go; rollback passo a passo, com o gatilho e o limite de tempo para decidir; papéis envolvidos.\n\nProteção dos dependentes\nPara cada dependente citado no cenário, as verificações que garantem que ele continua funcionando em cada fase, a sua janela protegida e o que fazer se não continuar.\n\nComunicação\nQuem precisa saber o quê em cada fase e em cada reversão, sem nomear ferramentas.\n\nRiscos residuais\nOs riscos que sobram, com probabilidade e impacto em termos qualitativos (baixo, médio, alto) e a mitigação.\n\nChecklist final contra as garantias\nPara cada Garantia do cenário: a fase e o passo que a sustentam, como a conformidade é confirmada e o que fazer se ela falhar.\n\nAs entradas estão nos blocos abaixo.\n\n<cenario>\nForge hoje:\n- ingestão: um job em cron acorda a cada 60min (o \"forge-batch-ingest\")\n- transformação: 14 etapas de processamento encadeadas (em Spark), ~40min no total\n- destino: grava em tabelas no data warehouse, particionadas por hora\n- ponto frágil: se um lote falha, o próximo acumula o dobro de volume\n- quem depende do Forge: Sentinel (lê as tabelas agregadas), Cerebro (indexa\n  os eventos transformados) e os relatórios de billing da Pepper (rodam de madrugada)\n\nO que a migração precisa garantir:\n- consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h\n- manter quem depende do Forge funcionando durante a transição\n- nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás\n</cenario>\n<plano>\nGarantias e lacunas que moldam o plano  \nGarantias do cenário:  \n1. Consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h.  \n2. Manter quem depende do Forge funcionando durante a transição.  \n3. Nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás.  \n\nLacunas do diagnóstico:  \n- **Tolerância dos dependentes**: Não há informações sobre tolerância a atrasos, inconsistências ou falhas parciais. Pergunta a fazer: quais são os limites de tolerância de Sentinel, Cerebro e Pepper para atrasos ou dados incompletos? Consultar os responsáveis por cada dependente.  \n- **Janelas de consumo**: Sentinel e Cerebro não têm janelas declaradas. Pergunta a fazer: em quais momentos Sentinel e Cerebro consomem os dados? Consultar os responsáveis por cada dependente.  \n\nFases  \n**Fase 1: Ingestão contínua com paralelo do lote antigo**  \n- **Objetivo**: Configurar a ingestão contínua do Relay, mantendo o job de lote antigo ativo.  \n- **O que muda**: O job de ingestão (forge-batch-ingest) é replicado para consumir do Relay em blocos pequenos, com intervalos ajustáveis.  \n- **O que permanece como está**: O job de lote antigo continua rodando, mas com prioridade reduzida.  \n- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente. O consumo de dados pelos dependentes (Sentinel, Cerebro, Pepper) continua usando as tabelas do data warehouse.  \n- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois a ingestão contínua não interfere com os dados já processados.  \n- **Critério de entrada**: O job de ingestão contínua está configurado e validado.  \n- **Critério de saída**: O job de ingestão contínua está processando dados sem falhas, com evidência de logs de consumo e métricas de latência. Limiar a definir: taxa de sucesso do job contínuo (ex: 99,9%).  \n- **Como voltar atrás**: Reativar o job de lote antigo e desativar o job contínuo, garantindo que os dados processados pelo contínuo sejam ignorados.  \n\n**Fase 2: Processamento paralelo com validação de equivalência**  \n- **Objetivo**: Executar as 14 etapas de transformação em paralelo com o Spark antigo, validando resultados.  \n- **O que muda**: Um subconjunto das etapas de transformação (ex: 3 etapas) é reescrito para processar eventos em tempo real, com buffer para tolerância a falhas.  \n- **O que permanece como está**: As 14 etapas de Spark antigo continuam ativas, mas com prioridade reduzida.  \n- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente. Os dados processados pelos dependentes continuam vindo do Spark antigo.  \n- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois os dados processados pelo novo pipeline não são consumidos durante esse período.  \n- **Critério de entrada**: O pipeline de transformação contínua está processando dados sem falhas, com resultados equivalentes aos do Spark antigo.  \n- **Critério de saída**: A validação de equivalência entre os resultados do Spark antigo e do novo pipeline está completa, com evidência de comparações de métricas (ex: 99,9% de concordância). Limiar a definir: percentual de concordância entre resultados (ex: 99,9%).  \n- **Como voltar atrás**: Reativar o Spark antigo e desativar o pipeline de transformação contínua, garantindo que os dados processados pelo novo pipeline sejam ignorados.  \n\n**Fase 3: Armazenamento paralelo com validação de compatibilidade**  \n- **Objetivo**: Gravar os dados processados pelo novo pipeline em tabelas paralelas ao data warehouse antigo, validando compatibilidade.  \n- **O que muda**: Os dados processados pelo novo pipeline são gravados em tabelas com partição por evento (em vez de por hora), com suporte a consultas compatíveis com os dependentes.  \n- **O que permanece como está**: As tabelas do data warehouse antigo continuam ativas, mas com prioridade reduzida.  \n- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente. Os dependentes continuam usando as tabelas do data warehouse antigo.  \n- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois os dados gravados pelo novo pipeline não são consumidos durante esse período.  \n- **Critério de entrada**: As tabelas do novo pipeline estão gravando dados sem falhas, com compatibilidade verificada.  \n- **Critério de saída**: A validação de compatibilidade entre as tabelas do data warehouse antigo e do novo pipeline está completa, com evidência de consultas bem-sucedidas. Limiar a definir: percentual de consultas bem-sucedidas (ex: 99,9%).  \n- **Como voltar atrás**: Reativar as tabelas do data warehouse antigo e desativar as tabelas do novo pipeline, garantindo que os dados gravados pelo novo pipeline sejam ignorados.  \n\n**Fase 4: Decomissão do pipeline antigo**  \n- **Objetivo**: Desativar o job de lote, o Spark antigo e as tabelas do data warehouse antigo, migrando totalmente para o novo pipeline.  \n- **O que muda**: O job de lote, o Spark antigo e as tabelas do data warehouse antigo são desativados.  \n- **O que permanece como está**: Nenhum.  \n- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente, pois os dados são fornecidos pelo novo pipeline.  \n- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois os dados são fornecidos pelo novo pipeline.  \n- **Critério de entrada**: Todos os dependentes estão usando exclusivamente os dados do novo pipeline, com validação completa.  \n- **Critério de saída**: O novo pipeline está operando sem falhas, com evidência de logs de consumo e métricas de latência. Limiar a definir: taxa de sucesso do novo pipeline (ex: 99,9%).  \n- **Como voltar atrás**: Reativar o job de lote, o Spark antigo e as tabelas do data warehouse antigo, garantindo que os dados do novo pipeline sejam ignorados.  \n\nOrdem e dependências entre fases  \n- **Fase 1 → Fase 2**: A ingestão contínua é pré-requisito para a transformação paralela, pois os dados processados pelo novo pipeline dependem da ingestão contínua.  \n- **Fase 2 → Fase 3**: A transformação paralela é pré-requisito para o armazenamento paralelo, pois os dados gravados pelo novo pipeline dependem da transformação contínua.  \n- **Fase 3 → Fase 4**: O armazenamento paralelo é pré-requisito para a decomissão do pipeline antigo, pois os dependentes dependem dos dados gravados pelo novo pipeline.  \n\nConvivência entre o modelo antigo e o novo  \n- **Coexistência**: Durante as fases 1 a 3, o modelo antigo e o novo coexistem, com os dependentes usando exclusivamente os dados do modelo antigo.  \n- **Validação de equivalência**: Em cada fase, os resultados do novo pipeline são comparados com os do modelo antigo, usando métricas como concordância de dados, latência e consistência.  \n\nRiscos do plano e mitigação  \n- **Risco 1**: Dados perdidos ou fora de ordem no novo pipeline.  \n  - **Mitigação**: Implementar buffer para tolerância a falhas e validar a ordem dos dados em tempo real.  \n- **Risco 2**: Dependentes não tolerando atrasos ou inconsistências.  \n  - **Mitigação**: Consultar os responsáveis pelos dependentes para entender limites de tolerância e ajustar o plano conforme necessário.  \n- **Risco 3**: Falha na reversão de uma fase.  \n  - **Mitigação**: Garantir que cada fase tenha um caminho de reversão claro, com backup dos dados e configurações do modelo antigo.  \n\nDecisões em aberto  \n- **Escolha de ferramenta para processamento contínuo**: Qual tecnologia será usada para substituir o Spark (ex: Apache Flink, Kafka Streams)?  \n- **Definição de limiares para validação**: Quais métricas serão usadas para definir limiares de sucesso (ex: taxa de sucesso, percentual de concordância)?  \n- **Definição de janelas de consumo para Sentinel e Cerebro**: Em quais momentos Sentinel e Cerebro consomem os dados?  \n\nVerificação contra as garantias  \n- **Garantia 1 (consumo contínuo do Relay)**:  \n  - **Fase 1**: Sustentada pela ingestão contínua configurada.  \n  - **Fase 2**: Sustentada pela ingestão contínua mantida.  \n  - **Fase 3**: Sustentada pela ingestão contínua mantida.  \n  - **Fase 4**: Sustentada pela ingestão contínua mantida.  \n- **Garantia 2 (dependentes funcionando)**:  \n  - **Fase 1**: Sustentada pelo uso exclusivo do modelo antigo pelos dependentes.  \n  - **Fase 2**: Sustentada pelo uso exclusivo do modelo antigo pelos dependentes.  \n  - **Fase 3**: Sustentada pelo uso exclusivo do modelo antigo pelos dependentes.  \n  - **Fase 4**: Sustentada pelo uso exclusivo do novo modelo pelos dependentes.  \n- **Garantia 3 (migração em passos reversíveis)**:  \n  - **Fase 1**: Sustentada pela reversão do job contínuo.  \n  - **Fase 2**: Sustentada pela reversão do pipeline de transformação.  \n  - **Fase 3**: Sustentada pela reversão das tabelas do novo pipeline.  \n  - **Fase 4**: Sustentada pela reversão do novo pipeline.  \n- **Janelas protegidas**:  \n  - **Fase 1**: Respeitada pela não alteração da janela de consumo da Pepper.  \n  - **Fase 2**: Respeitada pela não alteração da janela de consumo da Pepper.  \n  - **Fase 3**: Respeitada pela não alteração da janela de consumo da Pepper.  \n  - **Fase 4**: Respeitada pela não alteração da janela de consumo da Pepper.\n</plano>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "Garantias do cenário  \n- Consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h.  \n- Manter quem depende do Forge funcionando durante a transição.  \n- Nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás.  \n\nPré-requisitos globais  \n- Decisão sobre a ferramenta para processamento contínuo (ex: substituição do Spark).  \n- Definição de limiares para validação (ex: taxa de sucesso, percentual de concordância).  \n- Identificação das janelas de consumo de Sentinel e Cerebro.  \n- Validação de tolerância dos dependentes (Sentinel, Cerebro, Pepper) a atrasos ou inconsistências.  \n\nRoteiro por fase  \n**Fase 1: Ingestão contínua com paralelo do lote antigo**  \n- **Pré-condições**:  \n  - O job de ingestão (forge-batch-ingest) está ativo.  \n  - A ferramenta para processamento contínuo foi definida.  \n- **Passos**:  \n  1. Configurar o job de ingestão contínua para consumir do Relay em blocos pequenos.  \n  2. Validar que o job contínuo está processando dados sem falhas.  \n- **Verificação**:  \n  - Taxa de sucesso do job contínuo (limiar a definir com base em métricas de latência e logs).  \n- **Critério de go/no-go**:  \n  - A taxa de sucesso do job contínuo atinge o limiar definido.  \n- **Rollback**:  \n  - Reativar o job de lote antigo e desativar o job contínuo.  \n  - **Gatilho**: Falha no job contínuo ou não atingimento do limiar.  \n  - **Limite de tempo**: 2 horas para decidir.  \n- **Papéis envolvidos**:  \n  - Equipe de operações para executar o rollback.  \n  - Equipe de validação para aprovar o rollback.  \n\n**Fase 2: Processamento paralelo com validação de equivalência**  \n- **Pré-condições**:  \n  - O job contínuo está ativo e validado.  \n  - As 14 etapas de transformação estão ativas.  \n- **Passos**:  \n  1. Reescrever um subconjunto das etapas de transformação para processar eventos em tempo real.  \n  2. Validar que os resultados do novo pipeline são equivalentes aos do Spark antigo.  \n- **Verificação**:  \n  - Percentual de concordância entre resultados (limiar a definir com base em métricas de comparação).  \n- **Critério de go/no-go**:  \n  - O percentual de concordância atinge o limiar definido.  \n- **Rollback**:  \n  - Reativar o Spark antigo e desativar o pipeline de transformação contínua.  \n  - **Gatilho**: Divergência nos resultados ou não atingimento do limiar.  \n  - **Limite de tempo**: 2 horas para decidir.  \n- **Papéis envolvidos**:  \n  - Equipe de engenharia para executar o rollback.  \n  - Equipe de validação para aprovar o rollback.  \n\n**Fase 3: Armazenamento paralelo com validação de compatibilidade**  \n- **Pré-condições**:  \n  - O pipeline de transformação contínua está ativo e validado.  \n  - As tabelas do data warehouse antigo estão ativas.  \n- **Passos**:  \n  1. Gravar os dados processados pelo novo pipeline em tabelas paralelas ao data warehouse antigo.  \n  2. Validar que as tabelas do novo pipeline são compatíveis com os dependentes.  \n- **Verificação**:  \n  - Percentual de consultas bem-sucedidas (limiar a definir com base em métricas de uso).  \n- **Critério de go/no-go**:  \n  - O percentual de consultas bem-sucedidas atinge o limiar definido.  \n- **Rollback**:  \n  - Reativar as tabelas do data warehouse antigo e desativar as tabelas do novo pipeline.  \n  - **Gatilho**: Falha na compatibilidade ou não atingimento do limiar.  \n  - **Limite de tempo**: 2 horas para decidir.  \n- **Papéis envolvidos**:  \n  - Equipe de operações para executar o rollback.  \n  - Equipe de validação para aprovar o rollback.  \n\n**Fase 4: Decomissão do pipeline antigo**  \n- **Pré-condições**:  \n  - As tabelas do novo pipeline estão ativas e validadas.  \n  - Todos os dependentes estão usando exclusivamente os dados do novo pipeline.  \n- **Passos**:  \n  1. Desativar o job de lote, o Spark antigo e as tabelas do data warehouse antigo.  \n- **Verificação**:  \n  - Taxa de sucesso do novo pipeline (limiar a definir com base em métricas de latência).  \n- **Critério de go/no-go**:  \n  - A taxa de sucesso do novo pipeline atinge o limiar definido.  \n- **Rollback**:  \n  - Reativar o job de lote, o Spark antigo e as tabelas do data warehouse antigo.  \n  - **Gatilho**: Falha no novo pipeline ou não atingimento do limiar.  \n  - **Limite de tempo**: 2 horas para decidir.  \n- **Papéis envolvidos**:  \n  - Equipe de operações para executar o rollback.  \n  - Equipe de validação para aprovar o rollback.  \n\nProteção dos dependentes  \n- **Sentinel**:  \n  - **Verificações**: Continua usando tabelas do data warehouse antigo.  \n  - **Janela protegida**: Não há janela declarada.  \n  - **Ação se falhar**: Reativar o pipeline antigo e desativar o novo.  \n- **Cerebro**:  \n  - **Verificações**: Continua usando tabelas do data warehouse antigo.  \n  - **Janela protegida**: Não há janela declarada.  \n  - **Ação se falhar**: Reativar o pipeline antigo e desativar o novo.  \n- **Pepper**:  \n  - **Verificações**: Continua usando tabelas do data warehouse antigo durante a madrugada.  \n  - **Janela protegida**: Madrugada.  \n  - **Ação se falhar**: Reativar o pipeline antigo e desativar o novo.  \n\nComunicação  \n- **Fase 1**:  \n  - Equipe de operações informa a equipe de validação sobre o status do job contínuo.  \n- **Fase 2**:  \n  - Equipe de engenharia informa a equipe de validação sobre a equivalência dos resultados.  \n- **Fase 3**:  \n  - Equipe de operações informa a equipe de validação sobre a compatibilidade das tabelas.  \n- **Fase 4**:  \n  - Equipe de operações informa a equipe de validação sobre a decomissão do pipeline antigo.  \n- **Rollback**:  \n  - Equipe de operações informa a equipe de validação sobre a reversão de cada fase.  \n\nRiscos residuais  \n- **Risco 1**: Dados perdidos ou fora de ordem no novo pipeline.  \n  - **Probabilidade**: Médio.  \n  - **Impacto**: Alto.  \n  - **Mitigação**: Implementar buffer para tolerância a falhas e validar a ordem dos dados em tempo real.  \n- **Risco 2**: Dependentes não tolerando atrasos ou inconsistências.  \n  - **Probabilidade**: Médio.  \n  - **Impacto**: Alto.  \n  - **Mitigação**: Consultar os responsáveis pelos dependentes para entender limites de tolerância.  \n- **Risco 3**: Falha na reversão de uma fase.  \n  - **Probabilidade**: Baixo.  \n  - **Impacto**: Médio.  \n  - **Mitigação**: Garantir que cada fase tenha um caminho de reversão claro.  \n\nChecklist final contra as garantias  \n- **Garantia 1 (consumo contínuo do Relay)**:  \n  - **Fase 1**: Sustentada pela ingestão contínua configurada.  \n  - **Conformidade**: Verificar logs de consumo e métricas de latência.  \n  - **Ação se falhar**: Reativar o job de lote antigo.  \n- **Garantia 2 (dependentes funcionando)**:  \n  - **Fase 1-3**: Sustentada pelo uso exclusivo do modelo antigo pelos dependentes.  \n  - **Conformidade**: Verificar que Sentinel, Cerebro e Pepper continuam usando tabelas do data warehouse antigo.  \n  - **Ação se falhar**: Reativar o pipeline antigo.  \n- **Garantia 3 (migração em passos reversíveis)**:  \n  - **Fase 1-4**: Sustentada pela reversão de cada fase.  \n  - **Conformidade**: Verificar que cada fase tem um caminho de reversão definido.  \n  - **Ação se falhar**: Reativar o pipeline antigo e desativar o novo.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 3749,
+            "completion": 2689,
+            "cached": 0,
+            "total": 6438,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.75,
+        "success": false,
+        "testCase": {
+          "description": "cenário do Forge com o plano real do CP05 (qwen3:14b)",
+          "vars": {
+            "prompt_dir": "migracao-forge-execucao",
+            "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt",
+            "plano": "file://<repo>/checkpoints/checkpoint-10/entradas/plano-qwen3-14b.txt"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "const titulos = [\"Garantias do cenário\", \"Pré-requisitos globais\", \"Roteiro por fase\", \"Proteção dos dependentes\", \"Comunicação\", \"Riscos residuais\", \"Checklist final contra as garantias\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+            },
+            {
+              "type": "not-contains",
+              "value": "```"
+            },
+            {
+              "type": "not-contains",
+              "value": "*"
+            },
+            {
+              "type": "javascript",
+              "value": "(output.match(/madrugada/gi) || []).length >= 1"
+            },
+            {
+              "type": "regex",
+              "value": "go/no-go"
+            },
+            {
+              "type": "regex",
+              "value": "[Gg]atilho"
+            },
+            {
+              "type": "regex",
+              "value": "limite de tempo"
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 3749,
+          "completion": 2689,
+          "cached": 0,
+          "total": 6438,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "migracao-forge-execucao",
+          "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt",
+          "plano": "file://<repo>/checkpoints/checkpoint-10/entradas/plano-qwen3-14b.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      }
+    ],
+    "stats": {
+      "successes": 0,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 3749,
+        "completion": 2689,
+        "cached": 0,
+        "total": 6438,
+        "numRequests": 1,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 170420,
+      "evaluationDurationMs": 170420
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "migracao-forge-execucao — sete seções, go/no-go, rollback com gatilho e limite de tempo, janela de madrugada",
+    "prompts": [
+      "file://<repo>/providers/carregar-prompt.js"
+    ],
+    "providers": [
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "qwen3:14b (Alibaba, via Ollama)",
+        "config": {
+          "model": "qwen3:14b",
+          "think": true,
+          "temperature": 0,
+          "num_ctx": 12288
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "cenário do Forge com o plano real do CP05 (qwen3:14b)",
+        "vars": {
+          "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt",
+          "plano": "file://<repo>/checkpoints/checkpoint-10/entradas/plano-qwen3-14b.txt"
+        }
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "checkpoints/checkpoint-10/resultados/migracao-forge-execucao.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "vars": {
+        "prompt_dir": "migracao-forge-execucao"
+      },
+      "assert": [
+        {
+          "type": "javascript",
+          "value": "const titulos = [\"Garantias do cenário\", \"Pré-requisitos globais\", \"Roteiro por fase\", \"Proteção dos dependentes\", \"Comunicação\", \"Riscos residuais\", \"Checklist final contra as garantias\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+        },
+        {
+          "type": "not-contains",
+          "value": "```"
+        },
+        {
+          "type": "not-contains",
+          "value": "*"
+        },
+        {
+          "type": "javascript",
+          "value": "(output.match(/madrugada/gi) || []).length >= 1"
+        },
+        {
+          "type": "regex",
+          "value": "go/no-go"
+        },
+        {
+          "type": "regex",
+          "value": "[Gg]atilho"
+        },
+        {
+          "type": "regex",
+          "value": "limite de tempo"
+        },
+        {
+          "type": "cost",
+          "threshold": 0.01
+        }
+      ],
+      "options": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/devops/migracao-forge-execucao"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T17:35:20.506Z",
+    "evaluationCreatedAt": "2026-11-17T17:32:30.009Z"
+  },
+  "vars": [
+    "prompt_dir",
+    "cenario",
+    "plano"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

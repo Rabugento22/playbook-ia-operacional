@@ -1,0 +1,393 @@
+{
+  "evalId": "eval-zEw-2026-11-17T17:28:17",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T17:28:17.361Z",
+    "prompts": [
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "qwen3:14b (Alibaba, via Ollama)",
+        "metrics": {
+          "score": 0.8571428571428571,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 6,
+          "assertFailCount": 1,
+          "totalLatencyMs": 84201,
+          "tokenUsage": {
+            "prompt": 1080,
+            "completion": 1543,
+            "cached": 0,
+            "total": 2623,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "Expected output to not contain \"*\"",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.8571428571428571,
+          "reason": "Expected output to not contain \"*\"",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const titulos = [\"Garantias do cenário\", \"Estado atual\", \"Dependentes e o que cada um espera\", \"Janelas de consumo\", \"Pontos frágeis e riscos\", \"O que muda do lote para eventos\", \"Invariantes\", \"Lacunas\", \"Verificação\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "```"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to not contain \"*\"",
+              "assertion": {
+                "type": "not-contains",
+                "value": "*"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nconst a = linhas.indexOf('Janelas de consumo');\nconst b = linhas.indexOf('Pontos frágeis e riscos', a);\nconst secao = linhas.slice(a, b).join('\\n');\nreturn /madrugada/i.test(secao) ? true : { pass: false, score: 0, reason: 'a janela de madrugada não está na seção Janelas de consumo' };\n"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "/Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "regex",
+                "value": "big-bang|virada única"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            }
+          ]
+        },
+        "id": "3878f938-6d2f-477e-80c2-d965d8b82de0",
+        "latencyMs": 84201,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um engenheiro de dados e SRE. Sua tarefa é diagnosticar o estado atual de um pipeline de dados em lote (batch), descrito no bloco <cenario>, para preparar a migração para um modelo orientado a eventos. A sua resposta será a entrada do próximo prompt da cadeia, que montará o plano da migração; por isso seja objetivo e estruturado.\n\nRegras que valem para toda a resposta:\n- Use só o que está nos blocos de entrada. Distinga o que o cenário declara do que você infere, e marque inferências e suposições como tal.\n- Não presuma nenhuma ferramenta, produto ou tecnologia que as entradas não citem. Se uma decisão depender de escolher uma, registre como decisão em aberto, sem nomear produtos como premissa.\n- Não invente números, limiares, prazos, percentuais ou capacidades. Onde faltar um valor, escreva \"limiar a definir\" e diga com base em qual métrica ou dado ele deve ser definido.\n- As garantias do cenário são somente as que ele declara; não crie garantias novas (por exemplo, de segurança ou de disponibilidade) que o cenário não traga.\n- Escreva em português, em texto simples: use títulos e listas simples, sem tabelas, sem negrito, sem asteriscos e sem cercas de código. Não escreva texto fora das seções.\n\nUse exatamente estes títulos, nesta ordem:\n\nGarantias do cenário\nCopie, em lista numerada e com as palavras do cenário, cada garantia que a migração precisa dar. Esta lista é a referência de todo o diagnóstico e dos próximos prompts.\n\nEstado atual\nDescreva o fluxo de dados atual passo a passo, apenas com o que o cenário informa.\n\nDependentes e o que cada um espera\nPara cada dependente citado no cenário: de que ele depende no pipeline, em que janela ou momento consome e o que o cenário declara sobre o que ele tolera. Quando o cenário não declarar a tolerância, escreva \"não declarado\" e registre-o como lacuna, sem supor um valor.\n\nJanelas de consumo\nPara cada dependente, o momento em que ele consome os dados, com as palavras do cenário (por exemplo, \"de madrugada\"). Cada janela declarada é uma restrição do plano: nada que ele use pode mudar, falhar ou ser revertido nessa janela. Para o dependente sem janela declarada, escreva \"janela não declarada\" e registre-a como lacuna.\n\nPontos frágeis e riscos\nCada ponto frágil com a evidência literal do cenário e o efeito sobre os dependentes.\n\nO que muda do lote para eventos\nDiferenças de arquitetura, de fluxo e de garantias de entrega e de ordem, e os novos riscos que isso cria, sem presumir tecnologia.\n\nInvariantes\nO que não pode quebrar durante a migração, derivado exclusivamente das Garantias do cenário e do comportamento dos dependentes. Para cada invariante, indique qual garantia ou dependente o origina.\n\nLacunas\nO que o cenário não informa e muda o plano, com a pergunta a fazer e quem ou o que consultar para descobrir.\n\nVerificação\nConfirme, garantia por garantia, em qual seção cada uma foi tratada, e confirme que cada janela de consumo declarada no cenário aparece na seção Janelas de consumo.\n\nAs entradas estão nos blocos abaixo.\n\n<cenario>\nForge hoje:\n- ingestão: um job em cron acorda a cada 60min (o \"forge-batch-ingest\")\n- transformação: 14 etapas de processamento encadeadas (em Spark), ~40min no total\n- destino: grava em tabelas no data warehouse, particionadas por hora\n- ponto frágil: se um lote falha, o próximo acumula o dobro de volume\n- quem depende do Forge: Sentinel (lê as tabelas agregadas), Cerebro (indexa\n  os eventos transformados) e os relatórios de billing da Pepper (rodam de madrugada)\n\nO que a migração precisa garantir:\n- consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h\n- manter quem depende do Forge funcionando durante a transição\n- nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás\n</cenario>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "Garantias do cenário  \n1. Consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h.  \n2. Manter quem depende do Forge funcionando durante a transição.  \n3. Nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás.  \n\nEstado atual  \n- Ingestão: um job em cron acorda a cada 60min (o \"forge-batch-ingest\").  \n- Transformação: 14 etapas de processamento encadeadas (em Spark), ~40min no total.  \n- Destino: grava em tabelas no data warehouse, particionadas por hora.  \n- Ponto frágil: se um lote falha, o próximo acumula o dobro de volume.  \n\nDependentes e o que cada um espera  \n- **Sentinel**: depende das tabelas agregadas do Forge. Não há declaração sobre tolerância a atrasos ou inconsistências.  \n- **Cerebro**: indexa os eventos transformados. Não há declaração sobre tolerância a atrasos ou inconsistências.  \n- **Relatórios de billing da Pepper**: consomem os dados de madrugada. Não há declaração sobre tolerância a atrasos ou inconsistências.  \n\nJanelas de consumo  \n- **Sentinel**: janela não declarada.  \n- **Cerebro**: janela não declarada.  \n- **Relatórios de billing da Pepper**: consomem de madrugada.  \n\nPontos frágeis e riscos  \n- **Ponto frágil**: se um lote falha, o próximo acumula o dobro de volume. Efeito: aumento de carga no pipeline e risco de falhas em cascata.  \n- **Risco de migração**: a transição para processamento contínuo pode gerar inconsistências se os dependentes não tolerarem atrasos ou dados parciais.  \n\nO que muda do lote para eventos  \n- **Arquitetura**: processamento contínuo em vez de lote de 1h.  \n- **Fluxo**: dados consumidos continuamente, em pequenos blocos, ao invés de lotes periódicos.  \n- **Garantias de entrega**: possibilidade de perda de dados parciais se não houver mecanismos de compensação.  \n- **Ordem**: perda de garantia de ordem temporal se os eventos não forem processados em sequência.  \n- **Novos riscos**: dependências podem falhar se não estiverem preparadas para dados parciais ou atrasos.  \n\nInvariantes  \n- **Garantia 1**: os dependentes (Sentinel, Cerebro, Pepper) devem continuar funcionando durante a migração.  \n- **Garantia 2**: a migração deve ser reversível, garantindo que nenhum dado seja perdido ou corrompido durante a transição.  \n- **Garantia 3**: o pipeline não pode ter falhas de virada única, exigindo que cada etapa da migração seja testada e validada antes de avançar.  \n\nLacunas  \n- **Tolerância de Sentinel e Cerebro**: não há declaração sobre tolerância a atrasos ou inconsistências. Pergunta: quais são os limites de tolerância de Sentinel e Cerebro para atrasos ou dados parciais? Consultar os responsáveis por cada dependente.  \n- **Janelas de consumo de Sentinel e Cerebro**: não há declaração sobre quando eles consomem os dados. Pergunta: em quais janelas de tempo Sentinel e Cerebro consomem os dados? Consultar os responsáveis por cada dependente.  \n- **Mecanismos de compensação**: não há declaração sobre como lidar com dados perdidos ou duplicados durante a migração. Pergunta: quais são os mecanismos de compensação aceitáveis para garantir consistência? Consultar a equipe de arquitetura.  \n\nVerificação  \n- **Garantia 1**: tratada em \"Invariantes\" e \"Dependentes e o que cada um espera\".  \n- **Garantia 2**: tratada em \"Invariantes\" e \"O que muda do lote para eventos\".  \n- **Garantia 3**: tratada em \"Invariantes\" e \"O que muda do lote para eventos\".  \n- **Janelas de consumo**: a janela de \"madrugada\" para os relatórios de billing da Pepper está em \"Janelas de consumo\". As outras janelas são lacunas.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 1080,
+            "completion": 1543,
+            "cached": 0,
+            "total": 2623,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.8571428571428571,
+        "success": false,
+        "testCase": {
+          "description": "cenário do Forge (lote de 1 h, três dependentes, billing de madrugada)",
+          "vars": {
+            "prompt_dir": "migracao-forge-diagnostico",
+            "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "const titulos = [\"Garantias do cenário\", \"Estado atual\", \"Dependentes e o que cada um espera\", \"Janelas de consumo\", \"Pontos frágeis e riscos\", \"O que muda do lote para eventos\", \"Invariantes\", \"Lacunas\", \"Verificação\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+            },
+            {
+              "type": "not-contains",
+              "value": "```"
+            },
+            {
+              "type": "not-contains",
+              "value": "*"
+            },
+            {
+              "type": "javascript",
+              "value": "const linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nconst a = linhas.indexOf('Janelas de consumo');\nconst b = linhas.indexOf('Pontos frágeis e riscos', a);\nconst secao = linhas.slice(a, b).join('\\n');\nreturn /madrugada/i.test(secao) ? true : { pass: false, score: 0, reason: 'a janela de madrugada não está na seção Janelas de consumo' };\n"
+            },
+            {
+              "type": "javascript",
+              "value": "/Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)"
+            },
+            {
+              "type": "regex",
+              "value": "big-bang|virada única"
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 1080,
+          "completion": 1543,
+          "cached": 0,
+          "total": 2623,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "migracao-forge-diagnostico",
+          "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      }
+    ],
+    "stats": {
+      "successes": 0,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 1080,
+        "completion": 1543,
+        "cached": 0,
+        "total": 2623,
+        "numRequests": 1,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 84243,
+      "evaluationDurationMs": 84243
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "migracao-forge-diagnostico — nove seções, janela de madrugada na seção certa, garantias e dependentes",
+    "prompts": [
+      "file://<repo>/providers/carregar-prompt.js"
+    ],
+    "providers": [
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "qwen3:14b (Alibaba, via Ollama)",
+        "config": {
+          "model": "qwen3:14b",
+          "think": true,
+          "temperature": 0,
+          "num_ctx": 12288
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "cenário do Forge (lote de 1 h, três dependentes, billing de madrugada)",
+        "vars": {
+          "cenario": "file://<repo>/checkpoints/checkpoint-05/entradas/cenario-forge.txt"
+        }
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "checkpoints/checkpoint-10/resultados/migracao-forge-diagnostico.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "vars": {
+        "prompt_dir": "migracao-forge-diagnostico"
+      },
+      "assert": [
+        {
+          "type": "javascript",
+          "value": "const titulos = [\"Garantias do cenário\", \"Estado atual\", \"Dependentes e o que cada um espera\", \"Janelas de consumo\", \"Pontos frágeis e riscos\", \"O que muda do lote para eventos\", \"Invariantes\", \"Lacunas\", \"Verificação\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+        },
+        {
+          "type": "not-contains",
+          "value": "```"
+        },
+        {
+          "type": "not-contains",
+          "value": "*"
+        },
+        {
+          "type": "javascript",
+          "value": "const linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nconst a = linhas.indexOf('Janelas de consumo');\nconst b = linhas.indexOf('Pontos frágeis e riscos', a);\nconst secao = linhas.slice(a, b).join('\\n');\nreturn /madrugada/i.test(secao) ? true : { pass: false, score: 0, reason: 'a janela de madrugada não está na seção Janelas de consumo' };\n"
+        },
+        {
+          "type": "javascript",
+          "value": "/Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)"
+        },
+        {
+          "type": "regex",
+          "value": "big-bang|virada única"
+        },
+        {
+          "type": "cost",
+          "threshold": 0.01
+        }
+      ],
+      "options": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/devops/migracao-forge-diagnostico"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T17:29:41.677Z",
+    "evaluationCreatedAt": "2026-11-17T17:28:17.361Z"
+  },
+  "vars": [
+    "prompt_dir",
+    "cenario"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

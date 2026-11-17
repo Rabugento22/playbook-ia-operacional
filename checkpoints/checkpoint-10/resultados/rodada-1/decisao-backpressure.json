@@ -1,0 +1,410 @@
+{
+  "evalId": "eval-ozr-2026-11-17T17:25:47",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T17:25:47.071Z",
+    "prompts": [
+      {
+        "raw": "function carregarPrompt({ vars }) {\n  const pasta = vars.prompt_dir;\n  if (!pasta) throw new Error('defina a variável prompt_dir (nome da pasta em devops/)');\n  const arquivo = path.join(__dirname, '..', 'devops', pasta, 'prompt.md');\n  const texto = fs.readFileSync(arquivo, 'utf-8');\n  const corpo = texto.replace(/^---\\n[\\s\\S]*?\\n---\\n/, '').replace(/^\\n+/, '');\n  return corpo.replace(/\\{\\{(\\w+)\\}\\}/g, (marca, nome) =>\n    nome in vars ? String(vars[nome]) : marca,\n  );\n}",
+        "label": "providers/carregar-prompt.js",
+        "config": {},
+        "id": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "provider": "qwen3:14b (Alibaba, via Ollama)",
+        "metrics": {
+          "score": 0.5,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "testCacheHitCount": 0,
+          "assertPassCount": 4,
+          "assertFailCount": 4,
+          "totalLatencyMs": 148496,
+          "tokenUsage": {
+            "prompt": 1063,
+            "completion": 2621,
+            "cached": 0,
+            "total": 3684,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "Expected output to match regex \"210[\\s.,]?000[\\s.,]?000|210\\s?(M|milh)\"",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.5,
+          "reason": "Expected output to match regex \"210[\\s.,]?000[\\s.,]?000|210\\s?(M|milh)\"",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const titulos = [\"Reformulação do cenário\", \"Contas\", \"Caminhos propostos\", \"Tabela comparativa\", \"Recomendação\", \"Limites e validação\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "not-contains",
+                "value": "```"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to not contain \"*\"",
+              "assertion": {
+                "type": "not-contains",
+                "value": "*"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "(output.match(/^.*\\|.*$/gm) || []).length >= 3"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Custom function returned false\n(output.match(/^\\s*Caminho\\s*\\d/gim) || []).length >= 3",
+              "assertion": {
+                "type": "javascript",
+                "value": "(output.match(/^\\s*Caminho\\s*\\d/gim) || []).length >= 3"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to match regex \"140[\\s.,]?000|140\\s?k\"",
+              "assertion": {
+                "type": "regex",
+                "value": "140[\\s.,]?000|140\\s?k"
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Expected output to match regex \"210[\\s.,]?000[\\s.,]?000|210\\s?(M|milh)\"",
+              "assertion": {
+                "type": "regex",
+                "value": "210[\\s.,]?000[\\s.,]?000|210\\s?(M|milh)"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            }
+          ]
+        },
+        "id": "33cef71e-0cf9-4a48-b500-f0a04e2b1000",
+        "latencyMs": 148496,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Você é um especialista em arquitetura de sistemas distribuídos e SRE. Sua tarefa é apoiar uma decisão de arquitetura cara e sem resposta única: como segurar o excesso de carga (backpressure) descrito no cenário fornecido ao final deste prompt, comparando caminhos antes de recomendar.\n\nSiga estas etapas, nesta ordem:\n\n1. Reformule o cenário. Separe os fatos, as restrições rígidas (violá-las causa dano contratual ou perda irreversível) e as restrições flexíveis (podem ser negociadas), justificando cada classificação. Não presuma nenhuma tecnologia, produto ou capacidade que o cenário não cite; se um caminho depender de algo assim, apresente isso como condição a verificar.\n\n2. Faça as contas que os dados permitem (por exemplo, excedente de carga, duração, volume acumulado, tempo para recuperar o atraso e comparação com a retenção e com os SLAs), mostrando cada passo com as unidades (mensagens, segundos, minutos, horas) e conferindo a conversão entre elas. Distinga a carga observada (por exemplo, o throughput sustentado) da capacidade máxima do sistema: se a capacidade máxima não estiver nos dados, trate-a como incógnita, mostre a conta em função dela e não a substitua por um valor suposto sem declarar a suposição. Se faltar outro dado, diga qual.\n\n3. Proponha pelo menos três caminhos com mecanismos realmente diferentes; combinações são aceitas. Se o cenário indicar consumidores ou clientes com criticidades diferentes, pelo menos um caminho deve tratar essa diferença.\n\n4. Para cada caminho, descreva: como funciona; como se comporta diante de cada restrição rígida, com justificativa; prós; contras; riscos; custo e complexidade, em termos qualitativos; e o que precisa ser verdade para funcionar. Não diga que um caminho \"garante\" um SLA sem explicar o mecanismo. Um mecanismo que aumenta o atraso não pode ser apresentado como garantia de latência.\n\n5. Monte uma tabela comparativa com colunas separadas por barras verticais: uma linha por restrição ou critério, uma coluna por caminho, com \"atende\", \"parcial\" ou \"não atende\" e uma justificativa curta em cada célula. Não use HTML.\n\n6. Recomende um caminho ou uma combinação. Explique por que ele foi escolhido, por que os demais foram descartados, o que a recomendação sacrifica de forma consciente e como ela se comporta no pico descrito, usando os mesmos números e unidades da etapa 2. Antes de concluir, confira se a recomendação não contradiz as contas nem as restrições rígidas (por exemplo, um atraso calculado acima de um SLA não pode ser declarado dentro dele).\n\n7. Declare os limites da análise: o que o cenário não informa e mudaria a decisão, quais afirmações suas são suposições, como validar a recomendação antes de adotá-la (teste, métrica ou experimento) e em que condições a decisão deve ser revista. Não invente dados, custos ou capacidades ausentes do cenário.\n\nFormato de saída: use exatamente estes títulos, em texto simples. Não use asteriscos (*), negrito nem cercas de código em nenhum ponto da resposta: Reformulação do cenário; Contas; Caminhos propostos; Tabela comparativa; Recomendação; Limites e validação. Não escreva texto fora dessas seções.\n\n<cenario>\nRelay (barramento de eventos):\n- throughput sustentado: 180k msgs/s\n- pico observado no incidente da semana passada: 320k msgs/s por 25min\n- retenção atual: 4h\n- consumidores: Forge (ingestão), Sentinel (alerting em tempo real)\n\nRestrições do time:\n- alerting do Sentinel não pode atrasar mais que 60s (SLA com cliente)\n- ingestão do Forge pode atrasar até 15min sem violar SLA\n- orçamento de infra do trimestre já está 8% acima do previsto\n- Steve Rogers lembra que o barramento antigo perdia mensagens sob pico,\n  e perda de telemetry é inaceitável para um produto de observabilidade\n</cenario>\n",
+          "label": "providers/carregar-prompt.js",
+          "config": {}
+        },
+        "promptId": "3a39b70439a12a7a4b49b5f1eb8f3e2c35b7875da662692e3f7a4d596a0ecbb8",
+        "promptIdx": 0,
+        "provider": {
+          "id": "file://../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama)"
+        },
+        "response": {
+          "output": "Reformulação do cenário  \n**Fatos:**  \n- Relay (barramento de eventos) tem throughput sustentado de 180k msgs/s e pico observado de 320k msgs/s por 25 minutos.  \n- Retenção atual do sistema é de 4 horas.  \n- Consumidores são Forge (ingestão) e Sentinel (alerting em tempo real).  \n\n**Restrições rígidas:**  \n- **SLA do Sentinel:** Atraso máximo de 60s para alertas (violação causa dano contratual).  \n- **Perda de mensagens:** Inaceitável para o produto de observabilidade (violação causa perda irreversível).  \n\n**Restrições flexíveis:**  \n- **SLA do Forge:** Atraso tolerável de até 15 minutos (negociável).  \n- **Orçamento de infra:** 8% acima do previsto (custos podem ser ajustados).  \n\n**Condições a verificar:**  \n- Capacidade máxima do sistema (não informada no cenário).  \n- Possibilidade de escalar recursos (CPU, memória, armazenamento) ou adotar novas tecnologias.  \n\n---\n\nContas  \n1. **Volume de carga no pico:**  \n   - 320k msgs/s * 25 min * 60 s/min = **480.000.000 mensagens**.  \n\n2. **Capacidade do sistema:**  \n   - Não informada. Suposição: se o sistema suporta 180k msgs/s sustentado, sua capacidade máxima é **incógnita** (pode ser maior ou menor que 320k).  \n\n3. **Atraso acumulado no pico:**  \n   - Se o sistema processa 180k msgs/s, o tempo para processar 480M mensagens seria:  \n     - 480.000.000 / 180.000 = **2.666,67 segundos** (~44,44 minutos).  \n   - Isso excede o SLA do Sentinel (60s) e o tolerável do Forge (15min).  \n\n4. **Retenção atual (4h):**  \n   - Capacidade de armazenamento não calculada (depende de taxa de armazenamento e tamanho médio das mensagens).  \n\n---\n\nCaminhos propostos  \n**Caminho 1: Buffer com priorização de mensagens (SLA Sentinel)**  \n- **Como funciona:**  \n  - Mensagens do Sentinel são armazenadas em um buffer de alta prioridade (ex: memória ou disco SSD).  \n  - Mensagens do Forge são armazenadas em buffer de baixa prioridade (ex: disco HDD).  \n  - Durante picos, o sistema prioriza processamento de Sentinel.  \n- **Comportamento diante de restrições rígidas:**  \n  - **SLA Sentinel:** Atende (buffer garante processamento dentro de 60s, desde que capacidade do buffer seja suficiente).  \n  - **Perda de mensagens:** Atende (buffer evita perda, mas depende de capacidade do buffer).  \n- **Prós:**  \n  - Garante SLA do Sentinel.  \n  - Evita perda de mensagens.  \n- **Contras:**  \n  - Complexidade de implementar priorização.  \n  - Custo de armazenamento adicional.  \n- **Riscos:**  \n  - Se o buffer for insuficiente, mensagens podem ser perdidas.  \n- **Custo e complexidade:**  \n  - Médio (requer ajustes no sistema de armazenamento e processamento).  \n- **Condições para funcionar:**  \n  - Capacidade do buffer deve suportar 480M mensagens (ou taxa de processamento suficiente para evitar atraso).  \n\n**Caminho 2: Rate limiting com escala automática (SLA Sentinel e Forge)**  \n- **Como funciona:**  \n  - O sistema limita a taxa de entrada para 180k msgs/s (capacidade sustentada).  \n  - Durante picos, recursos são escalados automaticamente (ex: adicionar instâncias de processamento).  \n- **Comportamento diante de restrições rígidas:**  \n  - **SLA Sentinel:** Parcial (escala automática pode reduzir atraso, mas depende da velocidade de escala).  \n  - **Perda de mensagens:** Atende (rate limiting evita sobrecarga, mas pode rejeitar mensagens se escala for lenta).  \n- **Prós:**  \n  - Escalabilidade automática.  \n  - Reduz custos de infra (escala apenas quando necessário).  \n- **Contras:**  \n  - Latência adicional devido à escala.  \n  - Risco de perda de mensagens se escala for insuficiente.  \n- **Riscos:**  \n  - SLA Sentinel pode ser violado se escala for lenta.  \n- **Custo e complexidade:**  \n  - Alto (requer orquestração de recursos e monitoramento).  \n- **Condições para funcionar:**  \n  - Orçamento permite escala automática (8% acima do previsto).  \n\n**Caminho 3: Híbrido (buffer + rate limiting + SLA Sentinel)**  \n- **Como funciona:**  \n  - Combina buffer prioritário para Sentinel com rate limiting para Forge.  \n  - Durante picos, Forge é limitado a 180k msgs/s, enquanto Sentinel usa buffer para garantir SLA.  \n- **Comportamento diante de restrições rígidas:**  \n  - **SLA Sentinel:** Atende (buffer garante processamento dentro de 60s).  \n  - **Perda de mensagens:** Atende (rate limiting evita sobrecarga).  \n- **Prós:**  \n  - Garante SLA Sentinel.  \n  - Reduz custos com Forge (limita processamento).  \n- **Contras:**  \n  - Complexidade de implementar dois mecanismos.  \n  - Custo de armazenamento para buffer.  \n- **Riscos:**  \n  - Se buffer for insuficiente, SLA Sentinel pode ser violado.  \n- **Custo e complexidade:**  \n  - Alto (combinação de dois mecanismos).  \n- **Condições para funcionar:**  \n  - Orçamento permite custos de buffer e rate limiting.  \n\n---\n\nTabela comparativa  \n| Critério | Caminho 1 | Caminho 2 | Caminho 3 |  \n|--------|----------|----------|----------|  \n| SLA Sentinel | atende | parcial | atende |  \n| Perda de mensagens | atende | atende | atende |  \n| Orçamento | parcial (custo de buffer) | atende (escala automática) | parcial (custo de buffer + rate limiting) |  \n| Complexidade | médio | alto | alto |  \n| Escalabilidade | baixa (depende de buffer) | alta | média |  \n| Latência adicional | baixa | alta | média |  \n\n---\n\nRecomendação  \n**Caminho 1: Buffer com priorização de mensagens** é recomendado, pois:  \n- **Atende as restrições rígidas:** Garante SLA do Sentinel e evita perda de mensagens.  \n- **Sacrifício consciente:** Maior custo de armazenamento e complexidade de implementação.  \n- **Comportamento no pico:**  \n  - Se o buffer suportar 480M mensagens (ou taxa de processamento de 320k msgs/s), o atraso para Sentinel será dentro de 60s.  \n  - Forge pode ter atraso de até 15min (SLA tolerável).  \n- **Por que outros caminhos foram descartados:**  \n  - **Caminho 2:** Risco de violar SLA Sentinel se escala for lenta.  \n  - **Caminho 3:** Maior custo e complexidade, sem ganho significativo em relação ao Caminho 1.  \n\n---\n\nLimites e validação  \n- **O cenário não informa:**  \n  - Capacidade máxima do sistema (necessária para validar se buffer ou escala são suficientes).  \n  - Custo exato de implementar buffer (necessário para avaliar orçamento).  \n- **Suposições:**  \n  - Buffer pode ser implementado com recursos existentes (não confirmado).  \n  - Escala automática é viável com orçamento atual (não confirmado).  \n- **Validação:**  \n  - **Teste:** Simular pico de 320k msgs/s e medir atraso de Sentinel e Forge.  \n  - **Métrica:** Tempo de processamento de mensagens no buffer e taxa de rejeição.  \n- **Condições para revisão:**  \n  - Se capacidade do sistema for menor que 320k msgs/s, Caminho 1 pode falhar.  \n  - Se orçamento não permitir custos de buffer, Caminho 2 ou 3 podem ser considerados.",
+          "cost": 0,
+          "tokenUsage": {
+            "prompt": 1063,
+            "completion": 2621,
+            "cached": 0,
+            "total": 3684,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          }
+        },
+        "score": 0.5,
+        "success": false,
+        "testCase": {
+          "description": "Relay, pico de 320k msgs/s por 25 min, SLA de 60 s e perda inaceitável",
+          "vars": {
+            "prompt_dir": "decisao-backpressure",
+            "cenario": "file://<repo>/checkpoints/checkpoint-04/entradas/cenario-relay.txt"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "const titulos = [\"Reformulação do cenário\", \"Contas\", \"Caminhos propostos\", \"Tabela comparativa\", \"Recomendação\", \"Limites e validação\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+            },
+            {
+              "type": "not-contains",
+              "value": "```"
+            },
+            {
+              "type": "not-contains",
+              "value": "*"
+            },
+            {
+              "type": "javascript",
+              "value": "(output.match(/^.*\\|.*$/gm) || []).length >= 3"
+            },
+            {
+              "type": "javascript",
+              "value": "(output.match(/^\\s*Caminho\\s*\\d/gim) || []).length >= 3"
+            },
+            {
+              "type": "regex",
+              "value": "140[\\s.,]?000|140\\s?k"
+            },
+            {
+              "type": "regex",
+              "value": "210[\\s.,]?000[\\s.,]?000|210\\s?(M|milh)"
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 1063,
+          "completion": 2621,
+          "cached": 0,
+          "total": 3684,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "prompt_dir": "decisao-backpressure",
+          "cenario": "file://<repo>/checkpoints/checkpoint-04/entradas/cenario-relay.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      }
+    ],
+    "stats": {
+      "successes": 0,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 1063,
+        "completion": 2621,
+        "cached": 0,
+        "total": 3684,
+        "numRequests": 1,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 148539,
+      "evaluationDurationMs": 148539
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "decisao-backpressure — seis seções, tabela, três caminhos, contas do pico e sem asteriscos",
+    "prompts": [
+      "file://<repo>/providers/carregar-prompt.js"
+    ],
+    "providers": [
+      {
+        "id": "file://../../providers/ollama-local.js",
+        "label": "qwen3:14b (Alibaba, via Ollama)",
+        "config": {
+          "model": "qwen3:14b",
+          "think": true,
+          "temperature": 0,
+          "num_ctx": 12288
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "Relay, pico de 320k msgs/s por 25 min, SLA de 60 s e perda inaceitável",
+        "vars": {
+          "cenario": "file://<repo>/checkpoints/checkpoint-04/entradas/cenario-relay.txt"
+        }
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "checkpoints/checkpoint-10/resultados/decisao-backpressure.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "vars": {
+        "prompt_dir": "decisao-backpressure"
+      },
+      "assert": [
+        {
+          "type": "javascript",
+          "value": "const titulos = [\"Reformulação do cenário\", \"Contas\", \"Caminhos propostos\", \"Tabela comparativa\", \"Recomendação\", \"Limites e validação\"];\n// o título é uma linha inteira (com ou sem \":\" no fim), e os títulos aparecem em ordem\nconst linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, ''));\nlet pos = -1;\nfor (const t of titulos) {\n  const i = linhas.indexOf(t, pos + 1);\n  if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };\n  pos = i;\n}\nreturn true;\n"
+        },
+        {
+          "type": "not-contains",
+          "value": "```"
+        },
+        {
+          "type": "not-contains",
+          "value": "*"
+        },
+        {
+          "type": "javascript",
+          "value": "(output.match(/^.*\\|.*$/gm) || []).length >= 3"
+        },
+        {
+          "type": "javascript",
+          "value": "(output.match(/^\\s*Caminho\\s*\\d/gim) || []).length >= 3"
+        },
+        {
+          "type": "regex",
+          "value": "140[\\s.,]?000|140\\s?k"
+        },
+        {
+          "type": "regex",
+          "value": "210[\\s.,]?000[\\s.,]?000|210\\s?(M|milh)"
+        },
+        {
+          "type": "cost",
+          "threshold": 0.01
+        }
+      ],
+      "options": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/devops/decisao-backpressure"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T17:28:15.671Z",
+    "evaluationCreatedAt": "2026-11-17T17:25:47.071Z"
+  },
+  "vars": [
+    "prompt_dir",
+    "cenario"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

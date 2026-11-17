@@ -1,0 +1,65 @@
+# Teste do prompt migracao-forge-diagnostico (CP10).
+# Saída aberta: o teste é determinístico só no que dá para verificar sem julgamento (títulos, ordem,
+# formato proibido e fatos que a saída precisa conter). A qualidade do conteúdo não é avaliada aqui.
+# Rodar a partir da raiz do repositório:
+#   promptfoo eval -c devops/migracao-forge-diagnostico/promptfooconfig.yaml --no-cache -j 1
+# Sem assert de latência: o modelo roda com raciocínio ligado (de 1 a 3 minutos por chamada); o limite
+# de 5 s do enunciado vale para os prompts de saída estruturada (CP08).
+description: migracao-forge-diagnostico — nove seções, janela de madrugada na seção certa, garantias e dependentes
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: qwen3:14b (Alibaba, via Ollama)
+    config:
+      model: qwen3:14b
+      think: true
+      temperature: 0
+      num_ctx: 12288
+
+defaultTest:
+  vars:
+    prompt_dir: migracao-forge-diagnostico
+  assert:
+    # os títulos exigidos, todos presentes e na ordem do prompt
+    - type: javascript
+      value: |
+        const titulos = ["Garantias do cenário", "Estado atual", "Dependentes e o que cada um espera", "Janelas de consumo", "Pontos frágeis e riscos", "O que muda do lote para eventos", "Invariantes", "Lacunas", "Verificação"];
+        // o título é uma linha inteira (com ou sem ":" no fim), e os títulos aparecem em ordem
+        const linhas = output.split('\n').map((l) => l.trim().replace(/:$/, ''));
+        let pos = -1;
+        for (const t of titulos) {
+          const i = linhas.indexOf(t, pos + 1);
+          if (i < 0) return { pass: false, score: 0, reason: 'título ausente ou fora de ordem: ' + t };
+          pos = i;
+        }
+        return true;
+    # formato proibido pelo prompt
+    - type: not-contains
+      value: '```'
+    - type: not-contains
+      value: '*'
+    # a janela de madrugada do billing precisa estar na seção "Janelas de consumo"
+    - type: javascript
+      value: |
+        const linhas = output.split('\n').map((l) => l.trim().replace(/:$/, ''));
+        const a = linhas.indexOf('Janelas de consumo');
+        const b = linhas.indexOf('Pontos frágeis e riscos', a);
+        const secao = linhas.slice(a, b).join('\n');
+        return /madrugada/i.test(secao) ? true : { pass: false, score: 0, reason: 'a janela de madrugada não está na seção Janelas de consumo' };
+    # os três dependentes do cenário
+    - type: javascript
+      value: /Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)
+    # a garantia de não haver virada única
+    - type: regex
+      value: 'big-bang|virada única'
+    # custo (o provedor local devolve 0)
+    - type: cost
+      threshold: 0.01
+
+tests:
+  - description: cenário do Forge (lote de 1 h, três dependentes, billing de madrugada)
+    vars:
+      cenario: file://../../checkpoints/checkpoint-05/entradas/cenario-forge.txt

@@ -54,6 +54,7 @@ As execuções completas dos dois modelos estão em [`03-execucao.md`](../../che
 - Papéis como "líder de SRE" ou "time de arquitetura" são suposições do modelo.
 - A janela do billing chega ao roteiro nos dois modelos, mas o `gpt-oss:20b` a cita só na proteção dos dependentes, não nos passos de cada fase.
 - Uma execução da cadeia por modelo; a variação entre execuções não foi medida.
+- **Teste (CP10):** `promptfooconfig.yaml` verifica títulos, formato e fatos da saída, sem avaliar a qualidade do raciocínio; a proibição de asteriscos reprova com o `qwen3:14b`. Detalhes em [`checkpoint-10`](../../checkpoints/checkpoint-10/).
 
 ## Documentação do caminho
 

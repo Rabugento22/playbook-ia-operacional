@@ -1,0 +1,94 @@
+Garantias e lacunas que moldam o plano  
+Garantias do cenário:  
+1. Consumir do Relay continuamente, processando em pequenos blocos no lugar do lote de 1h.  
+2. Manter quem depende do Forge funcionando durante a transição.  
+3. Nada de virada única (big-bang): a migração tem que ir em passos e poder voltar atrás.  
+
+Lacunas do diagnóstico:  
+- **Tolerância dos dependentes**: Não há informações sobre tolerância a atrasos, inconsistências ou falhas parciais. Pergunta a fazer: quais são os limites de tolerância de Sentinel, Cerebro e Pepper para atrasos ou dados incompletos? Consultar os responsáveis por cada dependente.  
+- **Janelas de consumo**: Sentinel e Cerebro não têm janelas declaradas. Pergunta a fazer: em quais momentos Sentinel e Cerebro consomem os dados? Consultar os responsáveis por cada dependente.  
+
+Fases  
+**Fase 1: Ingestão contínua com paralelo do lote antigo**  
+- **Objetivo**: Configurar a ingestão contínua do Relay, mantendo o job de lote antigo ativo.  
+- **O que muda**: O job de ingestão (forge-batch-ingest) é replicado para consumir do Relay em blocos pequenos, com intervalos ajustáveis.  
+- **O que permanece como está**: O job de lote antigo continua rodando, mas com prioridade reduzida.  
+- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente. O consumo de dados pelos dependentes (Sentinel, Cerebro, Pepper) continua usando as tabelas do data warehouse.  
+- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois a ingestão contínua não interfere com os dados já processados.  
+- **Critério de entrada**: O job de ingestão contínua está configurado e validado.  
+- **Critério de saída**: O job de ingestão contínua está processando dados sem falhas, com evidência de logs de consumo e métricas de latência. Limiar a definir: taxa de sucesso do job contínuo (ex: 99,9%).  
+- **Como voltar atrás**: Reativar o job de lote antigo e desativar o job contínuo, garantindo que os dados processados pelo contínuo sejam ignorados.  
+
+**Fase 2: Processamento paralelo com validação de equivalência**  
+- **Objetivo**: Executar as 14 etapas de transformação em paralelo com o Spark antigo, validando resultados.  
+- **O que muda**: Um subconjunto das etapas de transformação (ex: 3 etapas) é reescrito para processar eventos em tempo real, com buffer para tolerância a falhas.  
+- **O que permanece como está**: As 14 etapas de Spark antigo continuam ativas, mas com prioridade reduzida.  
+- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente. Os dados processados pelos dependentes continuam vindo do Spark antigo.  
+- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois os dados processados pelo novo pipeline não são consumidos durante esse período.  
+- **Critério de entrada**: O pipeline de transformação contínua está processando dados sem falhas, com resultados equivalentes aos do Spark antigo.  
+- **Critério de saída**: A validação de equivalência entre os resultados do Spark antigo e do novo pipeline está completa, com evidência de comparações de métricas (ex: 99,9% de concordância). Limiar a definir: percentual de concordância entre resultados (ex: 99,9%).  
+- **Como voltar atrás**: Reativar o Spark antigo e desativar o pipeline de transformação contínua, garantindo que os dados processados pelo novo pipeline sejam ignorados.  
+
+**Fase 3: Armazenamento paralelo com validação de compatibilidade**  
+- **Objetivo**: Gravar os dados processados pelo novo pipeline em tabelas paralelas ao data warehouse antigo, validando compatibilidade.  
+- **O que muda**: Os dados processados pelo novo pipeline são gravados em tabelas com partição por evento (em vez de por hora), com suporte a consultas compatíveis com os dependentes.  
+- **O que permanece como está**: As tabelas do data warehouse antigo continuam ativas, mas com prioridade reduzida.  
+- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente. Os dependentes continuam usando as tabelas do data warehouse antigo.  
+- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois os dados gravados pelo novo pipeline não são consumidos durante esse período.  
+- **Critério de entrada**: As tabelas do novo pipeline estão gravando dados sem falhas, com compatibilidade verificada.  
+- **Critério de saída**: A validação de compatibilidade entre as tabelas do data warehouse antigo e do novo pipeline está completa, com evidência de consultas bem-sucedidas. Limiar a definir: percentual de consultas bem-sucedidas (ex: 99,9%).  
+- **Como voltar atrás**: Reativar as tabelas do data warehouse antigo e desativar as tabelas do novo pipeline, garantindo que os dados gravados pelo novo pipeline sejam ignorados.  
+
+**Fase 4: Decomissão do pipeline antigo**  
+- **Objetivo**: Desativar o job de lote, o Spark antigo e as tabelas do data warehouse antigo, migrando totalmente para o novo pipeline.  
+- **O que muda**: O job de lote, o Spark antigo e as tabelas do data warehouse antigo são desativados.  
+- **O que permanece como está**: Nenhum.  
+- **Dependentes afetados e como são protegidos**: Nenhum dependente é afetado diretamente, pois os dados são fornecidos pelo novo pipeline.  
+- **Janelas protegidas que se aplicam**: A janela de consumo da Pepper (madrugada) é respeitada, pois os dados são fornecidos pelo novo pipeline.  
+- **Critério de entrada**: Todos os dependentes estão usando exclusivamente os dados do novo pipeline, com validação completa.  
+- **Critério de saída**: O novo pipeline está operando sem falhas, com evidência de logs de consumo e métricas de latência. Limiar a definir: taxa de sucesso do novo pipeline (ex: 99,9%).  
+- **Como voltar atrás**: Reativar o job de lote, o Spark antigo e as tabelas do data warehouse antigo, garantindo que os dados do novo pipeline sejam ignorados.  
+
+Ordem e dependências entre fases  
+- **Fase 1 → Fase 2**: A ingestão contínua é pré-requisito para a transformação paralela, pois os dados processados pelo novo pipeline dependem da ingestão contínua.  
+- **Fase 2 → Fase 3**: A transformação paralela é pré-requisito para o armazenamento paralelo, pois os dados gravados pelo novo pipeline dependem da transformação contínua.  
+- **Fase 3 → Fase 4**: O armazenamento paralelo é pré-requisito para a decomissão do pipeline antigo, pois os dependentes dependem dos dados gravados pelo novo pipeline.  
+
+Convivência entre o modelo antigo e o novo  
+- **Coexistência**: Durante as fases 1 a 3, o modelo antigo e o novo coexistem, com os dependentes usando exclusivamente os dados do modelo antigo.  
+- **Validação de equivalência**: Em cada fase, os resultados do novo pipeline são comparados com os do modelo antigo, usando métricas como concordância de dados, latência e consistência.  
+
+Riscos do plano e mitigação  
+- **Risco 1**: Dados perdidos ou fora de ordem no novo pipeline.  
+  - **Mitigação**: Implementar buffer para tolerância a falhas e validar a ordem dos dados em tempo real.  
+- **Risco 2**: Dependentes não tolerando atrasos ou inconsistências.  
+  - **Mitigação**: Consultar os responsáveis pelos dependentes para entender limites de tolerância e ajustar o plano conforme necessário.  
+- **Risco 3**: Falha na reversão de uma fase.  
+  - **Mitigação**: Garantir que cada fase tenha um caminho de reversão claro, com backup dos dados e configurações do modelo antigo.  
+
+Decisões em aberto  
+- **Escolha de ferramenta para processamento contínuo**: Qual tecnologia será usada para substituir o Spark (ex: Apache Flink, Kafka Streams)?  
+- **Definição de limiares para validação**: Quais métricas serão usadas para definir limiares de sucesso (ex: taxa de sucesso, percentual de concordância)?  
+- **Definição de janelas de consumo para Sentinel e Cerebro**: Em quais momentos Sentinel e Cerebro consomem os dados?  
+
+Verificação contra as garantias  
+- **Garantia 1 (consumo contínuo do Relay)**:  
+  - **Fase 1**: Sustentada pela ingestão contínua configurada.  
+  - **Fase 2**: Sustentada pela ingestão contínua mantida.  
+  - **Fase 3**: Sustentada pela ingestão contínua mantida.  
+  - **Fase 4**: Sustentada pela ingestão contínua mantida.  
+- **Garantia 2 (dependentes funcionando)**:  
+  - **Fase 1**: Sustentada pelo uso exclusivo do modelo antigo pelos dependentes.  
+  - **Fase 2**: Sustentada pelo uso exclusivo do modelo antigo pelos dependentes.  
+  - **Fase 3**: Sustentada pelo uso exclusivo do modelo antigo pelos dependentes.  
+  - **Fase 4**: Sustentada pelo uso exclusivo do novo modelo pelos dependentes.  
+- **Garantia 3 (migração em passos reversíveis)**:  
+  - **Fase 1**: Sustentada pela reversão do job contínuo.  
+  - **Fase 2**: Sustentada pela reversão do pipeline de transformação.  
+  - **Fase 3**: Sustentada pela reversão das tabelas do novo pipeline.  
+  - **Fase 4**: Sustentada pela reversão do novo pipeline.  
+- **Janelas protegidas**:  
+  - **Fase 1**: Respeitada pela não alteração da janela de consumo da Pepper.  
+  - **Fase 2**: Respeitada pela não alteração da janela de consumo da Pepper.  
+  - **Fase 3**: Respeitada pela não alteração da janela de consumo da Pepper.  
+  - **Fase 4**: Respeitada pela não alteração da janela de consumo da Pepper.
