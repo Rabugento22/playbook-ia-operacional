@@ -51,11 +51,13 @@ A saída completa dos dois modelos está em [`03-execucao.md`](../../checkpoints
 
 ## Gate de qualidade
 
-Este prompt tem saída aberta, então o teste é um juiz LLM, e não regex. [`promptfooconfig.yaml`](promptfooconfig.yaml) gera a análise (`gpt-oss:20b`) e pede ao juiz (`qwen3:14b`, via Ollama) que a pontue em quatro critérios de 0 a 2 ([`rubrica.txt`](rubrica.txt) e [`juiz.txt`](juiz.txt)). A mudança é barrada quando o total fica abaixo de 6 ou algum critério é 0. A rubrica, a calibração e as execuções estão em [`checkpoints/checkpoint-09/`](../../checkpoints/checkpoint-09/).
+Este prompt tem saída aberta, então o teste é um juiz LLM, e não regex. [`promptfooconfig.yaml`](promptfooconfig.yaml) gera a análise (`qwen3:14b`) e pede ao juiz (`gpt-oss:20b`, via Ollama) que a pontue em quatro critérios de 0 a 2, um por chamada ([`criterio-1.txt`](criterio-1.txt) a [`criterio-4.txt`](criterio-4.txt), com as instruções em [`juiz.txt`](juiz.txt)). A regra de aprovação, em [`gate.js`](gate.js), barra a mudança quando o total fica abaixo de 6 ou algum critério é 0. A rubrica, a calibração e as execuções estão em [`checkpoints/checkpoint-09/`](../../checkpoints/checkpoint-09/).
 
 ```bash
 promptfoo eval -c devops/causa-raiz/promptfooconfig.yaml --no-cache -j 1
 ```
+
+O juiz não é determinístico: duas execuções podem diferir em até 2 pontos por critério. Cada execução leva cerca de 3 a 5 minutos.
 
 ## Documentação do caminho
 

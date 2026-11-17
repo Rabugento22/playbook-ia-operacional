@@ -6,6 +6,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ### Adicionado
 
+- Checkpoint 09: rubrica, juiz LLM como gate em `devops/causa-raiz/` (`promptfooconfig.yaml`, `juiz.txt`, `criterio-1..4.txt`, `gate.js`), amostras, calibração e curadoria.
 - Checkpoint 08: `promptfooconfig.yaml` de `nota-de-triagem`, `triagem-de-pods` e `networkpolicy-sentinel`, com `providers/carregar-prompt.js`, execuções reais, comparativo com o `qwen3:14b` e curadoria.
 - Checkpoint 07: nota de mapeamento do playbook nas convenções do template `prompt-registry`.
 - Estrutura do repositório: `devops/` (biblioteca), `checkpoints/checkpoint-XX/` (caminho) e documentação na raiz.

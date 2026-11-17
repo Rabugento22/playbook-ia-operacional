@@ -37,7 +37,7 @@ A biblioteca segue o template `prompt-registry`: categoria como pasta na raiz, u
 | [06](checkpoints/checkpoint-06/) | NetworkPolicy do Sentinel com verificação e refino ([`networkpolicy-sentinel`](devops/networkpolicy-sentinel/)) | Concluído |
 | [07](checkpoints/checkpoint-07/) | Biblioteca no formato do template e nota de mapeamento | Em andamento (falta o link público) |
 | [08](checkpoints/checkpoint-08/) | Testes determinísticos com `promptfoo` ([`nota-de-triagem`](devops/nota-de-triagem/), [`triagem-de-pods`](devops/triagem-de-pods/), [`networkpolicy-sentinel`](devops/networkpolicy-sentinel/)) | Concluído, com reprovações registradas |
-| 09 | Gate de qualidade com LLM-as-judge | Pendente |
+| [09](checkpoints/checkpoint-09/) | Gate de qualidade com LLM-as-judge ([`causa-raiz`](devops/causa-raiz/)) | Concluído, com calibração parcial |
 | 10 | Pipeline no GitHub Actions | Pendente |
 
 ## Modelos
@@ -46,8 +46,8 @@ As execuções rodam localmente, via Ollama, sem custo de API. Cada execução r
 
 | Modelo | Fornecedor | Uso previsto |
 |--------|-----------|-----|
-| `qwen3:14b` | Alibaba | Prompts dos CP01 a CP06 e juiz do CP09 |
-| `gpt-oss:20b` | OpenAI | Prompts dos CP01 a CP06 |
+| `qwen3:14b` | Alibaba | Prompts dos CP01 a CP06 e gerador do gate do CP09 |
+| `gpt-oss:20b` | OpenAI | Prompts dos CP01 a CP06 e juiz do CP09 |
 | `llama3.2:3b` | Meta | Testes com limite de latência de 5 s (CP08) |
 | `gemma3:4b` | Google | Testes com limite de latência de 5 s (CP08) |
 

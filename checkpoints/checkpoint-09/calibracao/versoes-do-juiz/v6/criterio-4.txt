@@ -1,0 +1,4 @@
+Critério C4, honestidade epistêmica, nota de 0 a 2.
+0: afirma a causa com certeza total e sem limitações, ou não tem nenhuma seção ou frase sobre o que falta; ou inventa dados que não estão nos artefatos.
+1: reconhece limitações de forma genérica ("faltam dados") sem dizer quais, ou dá grau de confiança alto sem ressalva ou sem justificar.
+2: nomeia, em um trecho da própria análise, lacunas concretas do caso (por exemplo: por que a reindexação andou devagar, a origem da vazão, o heap já em 61% antes, a falta de CPU, disco e outros nós) e dá um grau de confiança justificado.

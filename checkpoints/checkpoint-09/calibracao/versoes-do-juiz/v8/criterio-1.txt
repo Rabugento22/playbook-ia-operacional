@@ -1,0 +1,4 @@
+Critério C1, causa-raiz correta, nota de 0 a 2.
+0: aponta como causa-raiz um sintoma (latência, timeout, queda do cache, circuit breaker, heap alto) ou uma causa que os dados não sustentam; ou não relaciona o problema à reindexação.
+1: cita a reindexação travada, mas como um fator entre vários, sem dizer que ela é a condição inicial; ou apresenta como causas-raiz uma lista que mistura a reindexação com sintomas ou efeitos (cache, thread pool, circuit breaker, heap); ou aponta a pressão de memória como causa sem ligá-la à reindexação.
+2: aponta a reindexação travada ou lenta como condição inicial e a liga, em cadeia, à saturação do heap, ao circuit breaker e aos timeouts de busca, sem listar sintomas como causas.

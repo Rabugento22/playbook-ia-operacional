@@ -1,0 +1,4 @@
+Critério C2, correlação × causa, nota de 0 a 2.
+0: trata um efeito como causa (por exemplo, lista o cache de query, o thread pool ou o circuit breaker em uma lista ou tabela de causas, mesmo que a linha diga que o hit ratio caiu; ou diz que o cache hit baixo explica a lentidão), ou não separa causa de consequência.
+1: separa os efeitos principais, mas mistura correlação com causalidade em algum ponto, ou apenas lista efeitos sem declarar o que é correlação.
+2: trata a queda do cache (e a latência) como efeito e diz expressamente o que varia junto sem que a relação causal esteja demonstrada (por exemplo, o salto da vazão de indexação).

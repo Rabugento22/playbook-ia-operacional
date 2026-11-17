@@ -1,0 +1,4 @@
+Critério C3, ação proporcional, nota de 0 a 2.
+0: ação sem relação com o diagnóstico, ou destrutiva e desproporcional (apagar o índice, reiniciar o cluster inteiro como primeira medida); ou ações que não tratam nem a reindexação nem a memória.
+1: ação coerente com o diagnóstico, mas sub ou superdimensionada: só monitorar, ou a primeira ação é aumentar recursos (heap, nós, thread pool, limite do circuit breaker) ou mudar parâmetros, sem pausar, reagendar ou limitar a reindexação.
+2: contenção reversível e de menor alcance ligada à causa (pausar, reagendar ou limitar a reindexação) e correção posterior separada (rever heap, limites, agenda).

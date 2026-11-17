@@ -1,0 +1,41 @@
+Cache is disabled.
+Starting evaluation eval-KeB-2026-11-17T17:01:18
+Running 1 test cases (up to 1 at a time)...
+Grouping model-graded assertions by provider to minimize local-model reload overhead.
+
+┌────────────────────────┬────────────────────────┬────────────────────────┬────────────────────────┬────────────────────────┐
+│ prompt_dir             │ config                 │ metricas               │ logs                   │ [qwen3:14b (Alibaba,   │
+│                        │                        │                        │                        │ via Ollama)]           │
+│                        │                        │                        │                        │ providers/carregar-pr… │
+├────────────────────────┼────────────────────────┼────────────────────────┼────────────────────────┼────────────────────────┤
+│ causa-raiz             │ file:///home/rubens-s… │ file:///home/rubens-s… │ file:///home/rubens-s… │ [PASS] Linha do Tempo: │
+│                        │                        │                        │                        │ - 2026-05-13 08:00     │
+│                        │                        │                        │                        │ UTC: Configuração do   │
+│                        │                        │                        │                        │ reindex_job agendado   │
+│                        │                        │                        │                        │ para 02:00 (Evidência: │
+│                        │                        │                        │                        │ configuração).         │
+│                        │                        │                        │                        │ - 2026-05-13 08:02:11  │
+│                        │                        │                        │                        │ UTC: Início do reindex │
+│                        │                        │                        │                        │ task [88123] (38%      │
+│                        │                        │                        │                        │ concluído) (Evidência: │
+│                        │                        │                        │                        │ logs).                 │
+│                        │                        │                        │                        │ - 2026-05-13 08:14:33  │
+│                        │                        │                        │                        │ UTC: GC you...         │
+└────────────────────────┴────────────────────────┴────────────────────────┴────────────────────────┴────────────────────────┘
+✓ Eval complete (ID: eval-KeB-2026-11-17T17:01:18)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 15.069
+  Provider: 5.340 (2.715 prompt, 2.625 completion)
+  Grading: 9.729 (8.613 prompt, 1.116 completion)
+
+Results:
+  ✓ 1 passed (100%)
+  0 failed (0%)
+  0 errors (0%)
+Duration: 3m 30s (concurrency: 1)
+
+Writing output to /tmp/claude-1000/-home-rubens-silva-pos-graduacao-desafios-playbook-ia-operacional/79fd2e84-b58f-48b7-b064-c1526f2ae82d/scratchpad/cp09/gate-run.json

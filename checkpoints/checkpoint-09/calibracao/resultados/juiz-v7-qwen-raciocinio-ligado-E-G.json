@@ -1,0 +1,649 @@
+{
+  "evalId": "eval-s9m-2026-11-17T16:34:39",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-11-17T16:34:39.249Z",
+    "prompts": [
+      {
+        "id": "d81462bd7ed54f468594177a83f790031de8231bb089bfe4ed73c5f38f40dfeb",
+        "raw": "{{saida}}",
+        "label": "{{saida}}",
+        "provider": "echo",
+        "metrics": {
+          "score": 1.25,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 1,
+          "testCacheHitCount": 0,
+          "assertPassCount": 3,
+          "assertFailCount": 1,
+          "totalLatencyMs": 2,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 2,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 13605,
+              "prompt": 9612,
+              "completion": 3993,
+              "cached": 0,
+              "numRequests": 4,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "TypeError: fetch failed\n    at node:internal/deps/undici/undici:15270:13\n    at async OllamaLocal.callApi (<repo>/providers/ollama-local.js:20:17)\n    at async file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/providerRegistry-wn1xUT6S.js:82:12\n    at async ProviderRateLimitState.executeWithRetry (file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/shared-DDJg8ycC.js:765:21)\n    at async RateLimitRegistry.execute (file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/shared-DDJg8ycC.js:1039:19)\n    at async ProviderGroupedCallQueue.run (file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/evaluator-BxCmvGtv.js:6713:16)\n    at async runGroupedGradingForRows (file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/evaluator-BxCmvGtv.js:9231:4)\n    at async flushGroupedRows (file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/evaluator-BxCmvGtv.js:9748:4)\n    at async Evaluator.runGroupedEvalSteps (file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/evaluator-BxCmvGtv.js:9786:3)\n    at async Evaluator.executeEvalSteps (file:///home/rubens-silva/.npm-global/lib/node_modules/promptfoo/dist/src/evaluator-BxCmvGtv.js:9681:38)",
+        "gradingResult": null,
+        "id": "dc9eacdd-af48-41c3-926e-e0c903adc3dd",
+        "latencyMs": 1,
+        "namedScores": {},
+        "prompt": {
+          "raw": "## Resumo rápido\n\n- **O que está acontecendo?**  \n  O job de re‑indexação que começa às 02:00 (08:00 UTC) está consumindo quase todo o heap, gerando GC “old” de 1–2 s, enchendo a fila de *write thread pool* e acionando o *circuit breaker* (“parent”). Isso faz com que o cluster comece a rejeitar bulk requests, trave o buffer de indexação, perca hits de cache e, por fim, deixe as buscas com tempo‑outs e falhas de shard.\n\n- **Por que isso acontece?**  \n  1. **Carga de re‑indexação muito alta** – 10 M de documentos em 90 min (≈ 1 M docs/min) é muito para 12 shards com 8 GB de heap.  \n  2. **Refresh interval de 1 s** – cada bulk precisa de um merge de segmentação a cada segundo, gerando overhead de I/O e GC.  \n  3. **Cache de query de 512 MB** – com 12 shards o cache fica “vazio” rapidamente quando a memória fica cheia.  \n  4. **Thread‑pool de escrita pequeno** – a fila atinge 200/200 e começa a rejeitar requests.  \n  5. **Circuit breaker “parent”** – o limite de 8 GB é atingido antes que o GC libere memória suficiente, então o ES bloqueia novas operações.\n\n---\n\n## Linha do tempo (08 h – 10 h)\n\n| Hora | Evento | Impacto |\n|------|--------|---------|\n| **08:02** | Re‑indexação começa (38 % já criado) | Início de alta carga |\n| **08:14** | GC young 620 ms, heap 4.9 → 3.1 GB | GC normal, mas já há pressão |\n| **08:41** | *IndexingMemoryController* throttles shard 7 | Segment writing não acompanha bulk |\n| **09:03** | Thread‑pool queue 150/200 | Início de backlog |\n| **09:12** | GC old 1.1 s, heap 6.3 → 5.9 GB | GC “old” começa a ser frequente |\n| **09:20** | Re‑indexação 40 % | Ainda lento |\n| **09:31** | Circuit breaker 86 % | Próximo a tripping |\n| **09:44** | Query lenta 2.38 s | Busca começa a sofrer |\n| **09:51** | Queue 188/200 | Backlog cresce |\n| **09:58** | Queue full, bulk rejeitado | Indexação começa a falhar |\n| **09:58** | GC old 1.8 s, heap 7.6 → 7.4 GB | Heap quase cheio |\n| **09:58** | Circuit breaker 96 % | Tripping, operações bloqueadas |\n| **09:58** | Cache hit 29 % | Cache está sendo evocado |\n| **10:01** | CircuitBreakingException | Busca falha completa |\n| **10:03** | 1284 bulk rejeitados em 5 min | Backlog crítico |\n| **10:05** | 3/20 queries falham | Cluster está “quebrado” |\n\n---\n\n## Causas principais\n\n| Causa | Evidência | Como afeta |\n|-------|-----------|-----------|\n| **Re‑indexação pesada** | 4 M docs já criados em 2 h | Consome heap, GC, thread‑pool |\n| **Refresh interval curto** | 1 s | Merge de segmentação frequente, overhead de I/O |\n| **Cache de query pequeno** | 512 MB, hit ratio cai de 74 % → 29 % | Cache evictado, buscas mais lentas |\n| **Thread‑pool de escrita pequeno** | Queue 200/200 | Bulk requests rejeitados |\n| **Circuit breaker “parent”** | 7.7 GB/8 GB | Bloqueia novas operações |\n| **Heap insuficiente** | 8 GB para 12 shards + re‑index | GC “old” frequente, memória fragmentada |\n\n---\n\n## Recomendações imediatas\n\n| Ação | Por quê? | Como fazer? |\n|------|----------|-------------|\n| **Aumentar o heap** | 8 GB não é suficiente para 12 shards + re‑index | 12 GB (ou mais) se houver RAM disponível |\n| **Aumentar o *refresh interval*** | Reduz merge de segmentação | `index.refresh_interval: 30s` (ou 60s) durante o job |\n| **Desativar/Reduzir *query cache*** | Evita evicção constante | `indices.query.bool_cache.size: 0` ou aumentar para 1 GB |\n| **Aumentar *write thread pool*** | Evita rejeição de bulk | `threadpool.write.size: 20` (ou 1.5× número de CPUs) |\n| **Reduzir *batch size* do re‑index** | Menos pressão de memória | `size: 1000` ou `max_docs` menor |\n| **Usar *reindex* com *scroll* e *bulk* customizados** | Controla fluxo | `reindex` API com `scroll` e `size` menores |\n| **Aumentar *circuit breaker* threshold** | Dá mais margem | `indices.breaker.total.limit: 90%` |\n| **Monitorar GC** | Identificar se G1GC é melhor | `-XX:+UseG1GC` ou `-XX:+UseZGC` |\n| **Adicionar nós** | Distribuir carga | Se possível, escalar horizontalmente |\n\n---\n\n## Plano de ação de curto prazo\n\n1. **Reiniciar o job de re‑indexação** com as configurações acima (heap 12 GB, refresh 30 s, thread‑pool 20).  \n2. **Desativar o cache de query** temporariamente (`indices.query.bool_cache.size: 0`).  \n3. **Aumentar o *write thread pool*** para 20.  \n4. **Monitorar**: heap, GC, thread‑pool, circuit breaker, cache hit ratio.  \n5. **Se o job ainda não terminar em 3 h**: reduzir batch size para 500 e/ou dividir o job em duas partes (por data, por shard).  \n\n---\n\n## Plano de longo prazo\n\n- **Reavaliar a arquitetura**: 12 shards pode ser excessivo para 8 GB de heap. Considere reduzir shards ou aumentar nós.  \n- **Automatizar ajustes de re‑index**: usar *reindex* com *wait_for_completion=false* e monitorar progressivamente.  \n- **Implementar *index lifecycle management* (ILM)** para mover índices antigos para nós de menor custo.  \n- **Investir em métricas de GC**: usar `jvm.gc` e `jvm.memory` para ajustar thresholds.  \n- **Planejar jobs fora de pico**: se possível, mover re‑index para horários de menor carga.  \n\n---\n\n## Conclusão\n\nO cluster está sobrecarregado pelo job de re‑indexação que, devido a configurações de heap, refresh, cache e thread‑pool inadequadas, está consumindo quase todo o recurso de memória, gerando GC “old” frequentes e bloqueando o *write thread pool*. Isso faz com que o *circuit breaker* trave o cluster, as buscas fiquem lentas e, por fim, falhem. Ajustar as configurações acima (heap, refresh, cache, thread‑pool, circuit breaker) e re‑executar o job deve restaurar a estabilidade. Se o problema persistir, considere escalar horizontalmente ou reduzir o número de shards.",
+          "label": "{{saida}}",
+          "config": {
+            "provider": {
+              "id": "file://../../../providers/ollama-local.js",
+              "label": "qwen3:14b (Alibaba, via Ollama) — juiz",
+              "config": {
+                "model": "qwen3:14b",
+                "think": true,
+                "temperature": 0,
+                "num_ctx": 12288
+              }
+            },
+            "rubricPrompt": "file://../../../devops/causa-raiz/juiz.txt"
+          }
+        },
+        "promptId": "d81462bd7ed54f468594177a83f790031de8231bb089bfe4ed73c5f38f40dfeb",
+        "promptIdx": 0,
+        "provider": {
+          "id": "echo",
+          "label": ""
+        },
+        "response": {
+          "output": "## Resumo rápido\n\n- **O que está acontecendo?**  \n  O job de re‑indexação que começa às 02:00 (08:00 UTC) está consumindo quase todo o heap, gerando GC “old” de 1–2 s, enchendo a fila de *write thread pool* e acionando o *circuit breaker* (“parent”). Isso faz com que o cluster comece a rejeitar bulk requests, trave o buffer de indexação, perca hits de cache e, por fim, deixe as buscas com tempo‑outs e falhas de shard.\n\n- **Por que isso acontece?**  \n  1. **Carga de re‑indexação muito alta** – 10 M de documentos em 90 min (≈ 1 M docs/min) é muito para 12 shards com 8 GB de heap.  \n  2. **Refresh interval de 1 s** – cada bulk precisa de um merge de segmentação a cada segundo, gerando overhead de I/O e GC.  \n  3. **Cache de query de 512 MB** – com 12 shards o cache fica “vazio” rapidamente quando a memória fica cheia.  \n  4. **Thread‑pool de escrita pequeno** – a fila atinge 200/200 e começa a rejeitar requests.  \n  5. **Circuit breaker “parent”** – o limite de 8 GB é atingido antes que o GC libere memória suficiente, então o ES bloqueia novas operações.\n\n---\n\n## Linha do tempo (08 h – 10 h)\n\n| Hora | Evento | Impacto |\n|------|--------|---------|\n| **08:02** | Re‑indexação começa (38 % já criado) | Início de alta carga |\n| **08:14** | GC young 620 ms, heap 4.9 → 3.1 GB | GC normal, mas já há pressão |\n| **08:41** | *IndexingMemoryController* throttles shard 7 | Segment writing não acompanha bulk |\n| **09:03** | Thread‑pool queue 150/200 | Início de backlog |\n| **09:12** | GC old 1.1 s, heap 6.3 → 5.9 GB | GC “old” começa a ser frequente |\n| **09:20** | Re‑indexação 40 % | Ainda lento |\n| **09:31** | Circuit breaker 86 % | Próximo a tripping |\n| **09:44** | Query lenta 2.38 s | Busca começa a sofrer |\n| **09:51** | Queue 188/200 | Backlog cresce |\n| **09:58** | Queue full, bulk rejeitado | Indexação começa a falhar |\n| **09:58** | GC old 1.8 s, heap 7.6 → 7.4 GB | Heap quase cheio |\n| **09:58** | Circuit breaker 96 % | Tripping, operações bloqueadas |\n| **09:58** | Cache hit 29 % | Cache está sendo evocado |\n| **10:01** | CircuitBreakingException | Busca falha completa |\n| **10:03** | 1284 bulk rejeitados em 5 min | Backlog crítico |\n| **10:05** | 3/20 queries falham | Cluster está “quebrado” |\n\n---\n\n## Causas principais\n\n| Causa | Evidência | Como afeta |\n|-------|-----------|-----------|\n| **Re‑indexação pesada** | 4 M docs já criados em 2 h | Consome heap, GC, thread‑pool |\n| **Refresh interval curto** | 1 s | Merge de segmentação frequente, overhead de I/O |\n| **Cache de query pequeno** | 512 MB, hit ratio cai de 74 % → 29 % | Cache evictado, buscas mais lentas |\n| **Thread‑pool de escrita pequeno** | Queue 200/200 | Bulk requests rejeitados |\n| **Circuit breaker “parent”** | 7.7 GB/8 GB | Bloqueia novas operações |\n| **Heap insuficiente** | 8 GB para 12 shards + re‑index | GC “old” frequente, memória fragmentada |\n\n---\n\n## Recomendações imediatas\n\n| Ação | Por quê? | Como fazer? |\n|------|----------|-------------|\n| **Aumentar o heap** | 8 GB não é suficiente para 12 shards + re‑index | 12 GB (ou mais) se houver RAM disponível |\n| **Aumentar o *refresh interval*** | Reduz merge de segmentação | `index.refresh_interval: 30s` (ou 60s) durante o job |\n| **Desativar/Reduzir *query cache*** | Evita evicção constante | `indices.query.bool_cache.size: 0` ou aumentar para 1 GB |\n| **Aumentar *write thread pool*** | Evita rejeição de bulk | `threadpool.write.size: 20` (ou 1.5× número de CPUs) |\n| **Reduzir *batch size* do re‑index** | Menos pressão de memória | `size: 1000` ou `max_docs` menor |\n| **Usar *reindex* com *scroll* e *bulk* customizados** | Controla fluxo | `reindex` API com `scroll` e `size` menores |\n| **Aumentar *circuit breaker* threshold** | Dá mais margem | `indices.breaker.total.limit: 90%` |\n| **Monitorar GC** | Identificar se G1GC é melhor | `-XX:+UseG1GC` ou `-XX:+UseZGC` |\n| **Adicionar nós** | Distribuir carga | Se possível, escalar horizontalmente |\n\n---\n\n## Plano de ação de curto prazo\n\n1. **Reiniciar o job de re‑indexação** com as configurações acima (heap 12 GB, refresh 30 s, thread‑pool 20).  \n2. **Desativar o cache de query** temporariamente (`indices.query.bool_cache.size: 0`).  \n3. **Aumentar o *write thread pool*** para 20.  \n4. **Monitorar**: heap, GC, thread‑pool, circuit breaker, cache hit ratio.  \n5. **Se o job ainda não terminar em 3 h**: reduzir batch size para 500 e/ou dividir o job em duas partes (por data, por shard).  \n\n---\n\n## Plano de longo prazo\n\n- **Reavaliar a arquitetura**: 12 shards pode ser excessivo para 8 GB de heap. Considere reduzir shards ou aumentar nós.  \n- **Automatizar ajustes de re‑index**: usar *reindex* com *wait_for_completion=false* e monitorar progressivamente.  \n- **Implementar *index lifecycle management* (ILM)** para mover índices antigos para nós de menor custo.  \n- **Investir em métricas de GC**: usar `jvm.gc` e `jvm.memory` para ajustar thresholds.  \n- **Planejar jobs fora de pico**: se possível, mover re‑index para horários de menor carga.  \n\n---\n\n## Conclusão\n\nO cluster está sobrecarregado pelo job de re‑indexação que, devido a configurações de heap, refresh, cache e thread‑pool inadequadas, está consumindo quase todo o recurso de memória, gerando GC “old” frequentes e bloqueando o *write thread pool*. Isso faz com que o *circuit breaker* trave o cluster, as buscas fiquem lentas e, por fim, falhem. Ajustar as configurações acima (heap, refresh, cache, thread‑pool, circuit breaker) e re‑executar o job deve restaurar a estabilidade. Se o problema persistir, considere escalar horizontalmente ou reduzir o número de shards.",
+          "raw": "## Resumo rápido\n\n- **O que está acontecendo?**  \n  O job de re‑indexação que começa às 02:00 (08:00 UTC) está consumindo quase todo o heap, gerando GC “old” de 1–2 s, enchendo a fila de *write thread pool* e acionando o *circuit breaker* (“parent”). Isso faz com que o cluster comece a rejeitar bulk requests, trave o buffer de indexação, perca hits de cache e, por fim, deixe as buscas com tempo‑outs e falhas de shard.\n\n- **Por que isso acontece?**  \n  1. **Carga de re‑indexação muito alta** – 10 M de documentos em 90 min (≈ 1 M docs/min) é muito para 12 shards com 8 GB de heap.  \n  2. **Refresh interval de 1 s** – cada bulk precisa de um merge de segmentação a cada segundo, gerando overhead de I/O e GC.  \n  3. **Cache de query de 512 MB** – com 12 shards o cache fica “vazio” rapidamente quando a memória fica cheia.  \n  4. **Thread‑pool de escrita pequeno** – a fila atinge 200/200 e começa a rejeitar requests.  \n  5. **Circuit breaker “parent”** – o limite de 8 GB é atingido antes que o GC libere memória suficiente, então o ES bloqueia novas operações.\n\n---\n\n## Linha do tempo (08 h – 10 h)\n\n| Hora | Evento | Impacto |\n|------|--------|---------|\n| **08:02** | Re‑indexação começa (38 % já criado) | Início de alta carga |\n| **08:14** | GC young 620 ms, heap 4.9 → 3.1 GB | GC normal, mas já há pressão |\n| **08:41** | *IndexingMemoryController* throttles shard 7 | Segment writing não acompanha bulk |\n| **09:03** | Thread‑pool queue 150/200 | Início de backlog |\n| **09:12** | GC old 1.1 s, heap 6.3 → 5.9 GB | GC “old” começa a ser frequente |\n| **09:20** | Re‑indexação 40 % | Ainda lento |\n| **09:31** | Circuit breaker 86 % | Próximo a tripping |\n| **09:44** | Query lenta 2.38 s | Busca começa a sofrer |\n| **09:51** | Queue 188/200 | Backlog cresce |\n| **09:58** | Queue full, bulk rejeitado | Indexação começa a falhar |\n| **09:58** | GC old 1.8 s, heap 7.6 → 7.4 GB | Heap quase cheio |\n| **09:58** | Circuit breaker 96 % | Tripping, operações bloqueadas |\n| **09:58** | Cache hit 29 % | Cache está sendo evocado |\n| **10:01** | CircuitBreakingException | Busca falha completa |\n| **10:03** | 1284 bulk rejeitados em 5 min | Backlog crítico |\n| **10:05** | 3/20 queries falham | Cluster está “quebrado” |\n\n---\n\n## Causas principais\n\n| Causa | Evidência | Como afeta |\n|-------|-----------|-----------|\n| **Re‑indexação pesada** | 4 M docs já criados em 2 h | Consome heap, GC, thread‑pool |\n| **Refresh interval curto** | 1 s | Merge de segmentação frequente, overhead de I/O |\n| **Cache de query pequeno** | 512 MB, hit ratio cai de 74 % → 29 % | Cache evictado, buscas mais lentas |\n| **Thread‑pool de escrita pequeno** | Queue 200/200 | Bulk requests rejeitados |\n| **Circuit breaker “parent”** | 7.7 GB/8 GB | Bloqueia novas operações |\n| **Heap insuficiente** | 8 GB para 12 shards + re‑index | GC “old” frequente, memória fragmentada |\n\n---\n\n## Recomendações imediatas\n\n| Ação | Por quê? | Como fazer? |\n|------|----------|-------------|\n| **Aumentar o heap** | 8 GB não é suficiente para 12 shards + re‑index | 12 GB (ou mais) se houver RAM disponível |\n| **Aumentar o *refresh interval*** | Reduz merge de segmentação | `index.refresh_interval: 30s` (ou 60s) durante o job |\n| **Desativar/Reduzir *query cache*** | Evita evicção constante | `indices.query.bool_cache.size: 0` ou aumentar para 1 GB |\n| **Aumentar *write thread pool*** | Evita rejeição de bulk | `threadpool.write.size: 20` (ou 1.5× número de CPUs) |\n| **Reduzir *batch size* do re‑index** | Menos pressão de memória | `size: 1000` ou `max_docs` menor |\n| **Usar *reindex* com *scroll* e *bulk* customizados** | Controla fluxo | `reindex` API com `scroll` e `size` menores |\n| **Aumentar *circuit breaker* threshold** | Dá mais margem | `indices.breaker.total.limit: 90%` |\n| **Monitorar GC** | Identificar se G1GC é melhor | `-XX:+UseG1GC` ou `-XX:+UseZGC` |\n| **Adicionar nós** | Distribuir carga | Se possível, escalar horizontalmente |\n\n---\n\n## Plano de ação de curto prazo\n\n1. **Reiniciar o job de re‑indexação** com as configurações acima (heap 12 GB, refresh 30 s, thread‑pool 20).  \n2. **Desativar o cache de query** temporariamente (`indices.query.bool_cache.size: 0`).  \n3. **Aumentar o *write thread pool*** para 20.  \n4. **Monitorar**: heap, GC, thread‑pool, circuit breaker, cache hit ratio.  \n5. **Se o job ainda não terminar em 3 h**: reduzir batch size para 500 e/ou dividir o job em duas partes (por data, por shard).  \n\n---\n\n## Plano de longo prazo\n\n- **Reavaliar a arquitetura**: 12 shards pode ser excessivo para 8 GB de heap. Considere reduzir shards ou aumentar nós.  \n- **Automatizar ajustes de re‑index**: usar *reindex* com *wait_for_completion=false* e monitorar progressivamente.  \n- **Implementar *index lifecycle management* (ILM)** para mover índices antigos para nós de menor custo.  \n- **Investir em métricas de GC**: usar `jvm.gc` e `jvm.memory` para ajustar thresholds.  \n- **Planejar jobs fora de pico**: se possível, mover re‑index para horários de menor carga.  \n\n---\n\n## Conclusão\n\nO cluster está sobrecarregado pelo job de re‑indexação que, devido a configurações de heap, refresh, cache e thread‑pool inadequadas, está consumindo quase todo o recurso de memória, gerando GC “old” frequentes e bloqueando o *write thread pool*. Isso faz com que o *circuit breaker* trave o cluster, as buscas fiquem lentas e, por fim, falhem. Ajustar as configurações acima (heap, refresh, cache, thread‑pool, circuit breaker) e re‑executar o job deve restaurar a estabilidade. Se o problema persistir, considere escalar horizontalmente ou reduzir o número de shards.",
+          "cost": 0,
+          "cached": false,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "isRefusal": false,
+          "metadata": {}
+        },
+        "score": 0,
+        "success": false,
+        "testCase": {
+          "description": "amostra E",
+          "threshold": 1.5,
+          "vars": {
+            "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/E.txt"
+          },
+          "assert": [
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-1.txt"
+            },
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-2.txt"
+            },
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-3.txt"
+            },
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-4.txt"
+            }
+          ],
+          "options": {
+            "provider": {
+              "id": "file://../../../providers/ollama-local.js",
+              "label": "qwen3:14b (Alibaba, via Ollama) — juiz",
+              "config": {
+                "model": "qwen3:14b",
+                "think": true,
+                "temperature": 0,
+                "num_ctx": 12288
+              }
+            },
+            "rubricPrompt": "file://../../../devops/causa-raiz/juiz.txt"
+          },
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/E.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 2
+      },
+      {
+        "cost": 0,
+        "error": "Aggregate score 1.25 < 1.5 threshold",
+        "gradingResult": {
+          "pass": false,
+          "score": 1.25,
+          "reason": "Aggregate score 1.25 < 1.5 threshold",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 13605,
+            "prompt": 9612,
+            "completion": 3993,
+            "cached": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          },
+          "componentResults": [
+            {
+              "assertion": {
+                "type": "llm-rubric",
+                "threshold": 1,
+                "value": "file://../../../devops/causa-raiz/criterio-1.txt"
+              },
+              "pass": true,
+              "score": 1,
+              "reason": "1: 'O reindex job está consumindo recursos de forma ineficiente (ex: alta latência, falta de paralelismo, ou índice muito grande). A duração real está muito acima do esperado, causando sobrecarga no cluster.'",
+              "tokensUsed": {
+                "total": 3536,
+                "prompt": 2418,
+                "completion": 1118,
+                "cached": 0,
+                "numRequests": 0,
+                "completionDetails": {
+                  "reasoning": 0,
+                  "acceptedPrediction": 0,
+                  "rejectedPrediction": 0
+                }
+              },
+              "metadata": {
+                "renderedGradingPrompt": "Você é um revisor sênior de resposta a incidentes. Você pontua UM critério de uma análise de causa-raiz, sem se deixar levar pelo tamanho, pelo tom ou pela formatação do texto.\n\nFatos do caso. Isto é a sua referência para conferir a análise e NÃO faz parte dela: nunca cite estes fatos como se a análise os tivesse dito.\n- O sistema é um cluster de busca e indexação. Uma reindexação agendada às 02:00 (10 milhões de documentos, normalmente 90 minutos) estava em 41% às 10:00 e quase não avançou na janela (38% às 08:02, 40% às 09:20, 41% às 09:58).\n- O heap subiu de 61% para 94%. O circuit breaker de memória disparou a 96% (09:58). O pool de escrita encheu e rejeitou bulk. As buscas estouraram o timeout de 5 s e devolveram resultado parcial (11 de 12 shards).\n- O cache de query caiu de 74% para 29% de acerto. Isso é efeito da pressão de memória, e não causa.\n- A vazão de indexação subiu de 4.100 para 12.400 docs/s a partir das 09:00.\n\nCritério a pontuar:\nCritério C1, causa-raiz correta, nota de 0 a 2.\n0: aponta como causa-raiz um sintoma (latência, timeout, queda do cache, circuit breaker, heap alto) ou uma causa que os dados não sustentam; ou não relaciona o problema à reindexação.\n1: cita a reindexação travada, mas como um fator entre vários, sem dizer que ela é a condição inicial; ou apresenta como causas-raiz uma lista que mistura a reindexação com sintomas ou efeitos (cache, thread pool, circuit breaker, heap); ou aponta a pressão de memória como causa sem ligá-la à reindexação.\n2: aponta a reindexação travada ou lenta como condição inicial e a liga, em cadeia, à saturação do heap, ao circuit breaker e aos timeouts de busca, sem listar sintomas como causas.\n\nAnálise a pontuar:\n<analise>\nCom base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:\n\n---\n\n### **1. Problemas Identificados**\n#### **A. Reindex Job Excessivamente Demorado**\n- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).\n- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:\n  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).\n  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.\n\n#### **B. Sobrecarga de Memória e GC (Garbage Collection)**\n- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.\n- **Logs:**\n  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).\n  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.\n  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: \"segment writing can't keep up\").\n\n#### **C. Sobrecarga de Indexação e Escrita**\n- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).\n- **Logs:**\n  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.\n  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.\n\n#### **D. Problemas de Busca (Search)**\n- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).\n- **Logs:**\n  - **Slow query:** Uma query levou **2.380ms** em um shard.\n  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.\n  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).\n\n---\n\n### **2. Causas Raiz**\n1. **Reindex Job Mal Configurado:**\n   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).\n   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.\n\n2. **Limitação de Memória (JVM Heap):**\n   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.\n   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).\n\n3. **Cache de Query Inadequado:**\n   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.\n\n4. **Configuração de Refresh Interval:**\n   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.\n\n---\n\n### **3. Impactos**\n- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.\n- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.\n- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).\n- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.\n\n---\n\n### **4. Recomendações**\n#### **A. Otimizar o Reindex Job**\n- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.\n- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).\n- **Dividir o job em partes menores** para evitar sobrecarga.\n\n#### **B. Aumentar Recursos do Cluster**\n- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).\n- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.\n\n#### **C. Ajustar Configurações**\n- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.\n- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.\n- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).\n\n#### **D. Monitorar e Otimizar Consultas**\n- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.\n- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.\n\n---\n\n### **5. Conclusão**\nO cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.\n</analise>\n\nComo pontuar (seja rigoroso: um juiz brando aprova análises ruins):\n1. Use só os descritores do critério acima. Em caso de dúvida entre duas notas, escolha a menor.\n2. Dê crédito apenas ao que a análise afirma de forma explícita. Não complete o que ficou implícito.\n3. A nota 1 ou 2 exige uma citação literal copiada de dentro de <analise>. Se você não encontra no texto da análise uma citação que cumpra o descritor, a nota é menor. Citações dos fatos do caso ou do critério não valem.\n4. Valor, horário, evento ou parâmetro que a análise cita e que não está nos fatos do caso pode ser dado inventado; não conta a favor dela.\n\nResponda somente com um objeto JSON, sem texto antes ou depois e sem cercas de código:\n{\"reason\": \"<nota 0, 1 ou 2>: <uma ou duas frases, com a citação literal de <analise> entre aspas simples; nunca use aspas duplas dentro do JSON>\", \"pass\": <true se a nota for 1 ou 2, false se for 0>, \"score\": <a nota, 0, 1 ou 2>}\n",
+                "renderedAssertionValue": "Critério C1, causa-raiz correta, nota de 0 a 2.\n0: aponta como causa-raiz um sintoma (latência, timeout, queda do cache, circuit breaker, heap alto) ou uma causa que os dados não sustentam; ou não relaciona o problema à reindexação.\n1: cita a reindexação travada, mas como um fator entre vários, sem dizer que ela é a condição inicial; ou apresenta como causas-raiz uma lista que mistura a reindexação com sintomas ou efeitos (cache, thread pool, circuit breaker, heap); ou aponta a pressão de memória como causa sem ligá-la à reindexação.\n2: aponta a reindexação travada ou lenta como condição inicial e a liga, em cadeia, à saturação do heap, ao circuit breaker e aos timeouts de busca, sem listar sintomas como causas."
+              }
+            },
+            {
+              "assertion": {
+                "type": "llm-rubric",
+                "threshold": 1,
+                "value": "file://../../../devops/causa-raiz/criterio-2.txt"
+              },
+              "pass": true,
+              "score": 2,
+              "reason": "2: 'A queda do cache de query (hit_ratio caindo para 29%) é tratada como efeito da pressão de memória, e não como causa, conforme mencionado em \"Query cache eviction: A taxa de evicção do cache de query está spiking, com hit_ratio caindo para 29% (de 74% inicial).\"'",
+              "tokensUsed": {
+                "total": 3893,
+                "prompt": 2393,
+                "completion": 1500,
+                "cached": 0,
+                "numRequests": 0,
+                "completionDetails": {
+                  "reasoning": 0,
+                  "acceptedPrediction": 0,
+                  "rejectedPrediction": 0
+                }
+              },
+              "metadata": {
+                "renderedGradingPrompt": "Você é um revisor sênior de resposta a incidentes. Você pontua UM critério de uma análise de causa-raiz, sem se deixar levar pelo tamanho, pelo tom ou pela formatação do texto.\n\nFatos do caso. Isto é a sua referência para conferir a análise e NÃO faz parte dela: nunca cite estes fatos como se a análise os tivesse dito.\n- O sistema é um cluster de busca e indexação. Uma reindexação agendada às 02:00 (10 milhões de documentos, normalmente 90 minutos) estava em 41% às 10:00 e quase não avançou na janela (38% às 08:02, 40% às 09:20, 41% às 09:58).\n- O heap subiu de 61% para 94%. O circuit breaker de memória disparou a 96% (09:58). O pool de escrita encheu e rejeitou bulk. As buscas estouraram o timeout de 5 s e devolveram resultado parcial (11 de 12 shards).\n- O cache de query caiu de 74% para 29% de acerto. Isso é efeito da pressão de memória, e não causa.\n- A vazão de indexação subiu de 4.100 para 12.400 docs/s a partir das 09:00.\n\nCritério a pontuar:\nCritério C2, correlação × causa, nota de 0 a 2.\n0: trata um efeito como causa (por exemplo, lista o cache de query, o thread pool ou o circuit breaker em uma lista ou tabela de causas, mesmo que a linha diga que o hit ratio caiu; ou diz que o cache hit baixo explica a lentidão), ou não separa causa de consequência.\n1: separa os efeitos principais, mas mistura correlação com causalidade em algum ponto, ou apenas lista efeitos sem declarar o que é correlação.\n2: trata a queda do cache (e a latência) como efeito e diz expressamente o que varia junto sem que a relação causal esteja demonstrada (por exemplo, o salto da vazão de indexação).\n\nAnálise a pontuar:\n<analise>\nCom base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:\n\n---\n\n### **1. Problemas Identificados**\n#### **A. Reindex Job Excessivamente Demorado**\n- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).\n- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:\n  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).\n  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.\n\n#### **B. Sobrecarga de Memória e GC (Garbage Collection)**\n- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.\n- **Logs:**\n  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).\n  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.\n  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: \"segment writing can't keep up\").\n\n#### **C. Sobrecarga de Indexação e Escrita**\n- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).\n- **Logs:**\n  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.\n  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.\n\n#### **D. Problemas de Busca (Search)**\n- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).\n- **Logs:**\n  - **Slow query:** Uma query levou **2.380ms** em um shard.\n  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.\n  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).\n\n---\n\n### **2. Causas Raiz**\n1. **Reindex Job Mal Configurado:**\n   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).\n   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.\n\n2. **Limitação de Memória (JVM Heap):**\n   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.\n   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).\n\n3. **Cache de Query Inadequado:**\n   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.\n\n4. **Configuração de Refresh Interval:**\n   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.\n\n---\n\n### **3. Impactos**\n- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.\n- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.\n- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).\n- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.\n\n---\n\n### **4. Recomendações**\n#### **A. Otimizar o Reindex Job**\n- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.\n- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).\n- **Dividir o job em partes menores** para evitar sobrecarga.\n\n#### **B. Aumentar Recursos do Cluster**\n- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).\n- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.\n\n#### **C. Ajustar Configurações**\n- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.\n- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.\n- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).\n\n#### **D. Monitorar e Otimizar Consultas**\n- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.\n- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.\n\n---\n\n### **5. Conclusão**\nO cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.\n</analise>\n\nComo pontuar (seja rigoroso: um juiz brando aprova análises ruins):\n1. Use só os descritores do critério acima. Em caso de dúvida entre duas notas, escolha a menor.\n2. Dê crédito apenas ao que a análise afirma de forma explícita. Não complete o que ficou implícito.\n3. A nota 1 ou 2 exige uma citação literal copiada de dentro de <analise>. Se você não encontra no texto da análise uma citação que cumpra o descritor, a nota é menor. Citações dos fatos do caso ou do critério não valem.\n4. Valor, horário, evento ou parâmetro que a análise cita e que não está nos fatos do caso pode ser dado inventado; não conta a favor dela.\n\nResponda somente com um objeto JSON, sem texto antes ou depois e sem cercas de código:\n{\"reason\": \"<nota 0, 1 ou 2>: <uma ou duas frases, com a citação literal de <analise> entre aspas simples; nunca use aspas duplas dentro do JSON>\", \"pass\": <true se a nota for 1 ou 2, false se for 0>, \"score\": <a nota, 0, 1 ou 2>}\n",
+                "renderedAssertionValue": "Critério C2, correlação × causa, nota de 0 a 2.\n0: trata um efeito como causa (por exemplo, lista o cache de query, o thread pool ou o circuit breaker em uma lista ou tabela de causas, mesmo que a linha diga que o hit ratio caiu; ou diz que o cache hit baixo explica a lentidão), ou não separa causa de consequência.\n1: separa os efeitos principais, mas mistura correlação com causalidade em algum ponto, ou apenas lista efeitos sem declarar o que é correlação.\n2: trata a queda do cache (e a latência) como efeito e diz expressamente o que varia junto sem que a relação causal esteja demonstrada (por exemplo, o salto da vazão de indexação)."
+              }
+            },
+            {
+              "assertion": {
+                "type": "llm-rubric",
+                "threshold": 1,
+                "value": "file://../../../devops/causa-raiz/criterio-3.txt"
+              },
+              "pass": true,
+              "score": 2,
+              "reason": "2: \"Executar o job em horários de baixa demanda (ex: noturno)\" e \"Dividir o job em partes menores para evitar sobrecarga\" são ações de contenção reversível ligadas à causa (reindexação) e correção posterior separada (ajustes de recursos).",
+              "tokensUsed": {
+                "total": 2802,
+                "prompt": 2406,
+                "completion": 396,
+                "cached": 0,
+                "numRequests": 0,
+                "completionDetails": {
+                  "reasoning": 0,
+                  "acceptedPrediction": 0,
+                  "rejectedPrediction": 0
+                }
+              },
+              "metadata": {
+                "renderedGradingPrompt": "Você é um revisor sênior de resposta a incidentes. Você pontua UM critério de uma análise de causa-raiz, sem se deixar levar pelo tamanho, pelo tom ou pela formatação do texto.\n\nFatos do caso. Isto é a sua referência para conferir a análise e NÃO faz parte dela: nunca cite estes fatos como se a análise os tivesse dito.\n- O sistema é um cluster de busca e indexação. Uma reindexação agendada às 02:00 (10 milhões de documentos, normalmente 90 minutos) estava em 41% às 10:00 e quase não avançou na janela (38% às 08:02, 40% às 09:20, 41% às 09:58).\n- O heap subiu de 61% para 94%. O circuit breaker de memória disparou a 96% (09:58). O pool de escrita encheu e rejeitou bulk. As buscas estouraram o timeout de 5 s e devolveram resultado parcial (11 de 12 shards).\n- O cache de query caiu de 74% para 29% de acerto. Isso é efeito da pressão de memória, e não causa.\n- A vazão de indexação subiu de 4.100 para 12.400 docs/s a partir das 09:00.\n\nCritério a pontuar:\nCritério C3, ação proporcional, nota de 0 a 2.\n0: ação sem relação com o diagnóstico, ou destrutiva e desproporcional (apagar o índice, reiniciar o cluster inteiro como primeira medida); ou ações que não tratam nem a reindexação nem a memória.\n1: ação coerente com o diagnóstico, mas sub ou superdimensionada: só monitorar, ou a primeira ação é aumentar recursos (heap, nós, thread pool, limite do circuit breaker) ou mudar parâmetros, sem pausar, reagendar ou limitar a reindexação.\n2: contenção reversível e de menor alcance ligada à causa (pausar, reagendar ou limitar a reindexação) e correção posterior separada (rever heap, limites, agenda).\n\nAnálise a pontuar:\n<analise>\nCom base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:\n\n---\n\n### **1. Problemas Identificados**\n#### **A. Reindex Job Excessivamente Demorado**\n- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).\n- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:\n  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).\n  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.\n\n#### **B. Sobrecarga de Memória e GC (Garbage Collection)**\n- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.\n- **Logs:**\n  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).\n  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.\n  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: \"segment writing can't keep up\").\n\n#### **C. Sobrecarga de Indexação e Escrita**\n- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).\n- **Logs:**\n  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.\n  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.\n\n#### **D. Problemas de Busca (Search)**\n- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).\n- **Logs:**\n  - **Slow query:** Uma query levou **2.380ms** em um shard.\n  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.\n  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).\n\n---\n\n### **2. Causas Raiz**\n1. **Reindex Job Mal Configurado:**\n   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).\n   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.\n\n2. **Limitação de Memória (JVM Heap):**\n   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.\n   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).\n\n3. **Cache de Query Inadequado:**\n   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.\n\n4. **Configuração de Refresh Interval:**\n   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.\n\n---\n\n### **3. Impactos**\n- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.\n- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.\n- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).\n- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.\n\n---\n\n### **4. Recomendações**\n#### **A. Otimizar o Reindex Job**\n- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.\n- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).\n- **Dividir o job em partes menores** para evitar sobrecarga.\n\n#### **B. Aumentar Recursos do Cluster**\n- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).\n- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.\n\n#### **C. Ajustar Configurações**\n- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.\n- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.\n- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).\n\n#### **D. Monitorar e Otimizar Consultas**\n- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.\n- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.\n\n---\n\n### **5. Conclusão**\nO cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.\n</analise>\n\nComo pontuar (seja rigoroso: um juiz brando aprova análises ruins):\n1. Use só os descritores do critério acima. Em caso de dúvida entre duas notas, escolha a menor.\n2. Dê crédito apenas ao que a análise afirma de forma explícita. Não complete o que ficou implícito.\n3. A nota 1 ou 2 exige uma citação literal copiada de dentro de <analise>. Se você não encontra no texto da análise uma citação que cumpra o descritor, a nota é menor. Citações dos fatos do caso ou do critério não valem.\n4. Valor, horário, evento ou parâmetro que a análise cita e que não está nos fatos do caso pode ser dado inventado; não conta a favor dela.\n\nResponda somente com um objeto JSON, sem texto antes ou depois e sem cercas de código:\n{\"reason\": \"<nota 0, 1 ou 2>: <uma ou duas frases, com a citação literal de <analise> entre aspas simples; nunca use aspas duplas dentro do JSON>\", \"pass\": <true se a nota for 1 ou 2, false se for 0>, \"score\": <a nota, 0, 1 ou 2>}\n",
+                "renderedAssertionValue": "Critério C3, ação proporcional, nota de 0 a 2.\n0: ação sem relação com o diagnóstico, ou destrutiva e desproporcional (apagar o índice, reiniciar o cluster inteiro como primeira medida); ou ações que não tratam nem a reindexação nem a memória.\n1: ação coerente com o diagnóstico, mas sub ou superdimensionada: só monitorar, ou a primeira ação é aumentar recursos (heap, nós, thread pool, limite do circuit breaker) ou mudar parâmetros, sem pausar, reagendar ou limitar a reindexação.\n2: contenção reversível e de menor alcance ligada à causa (pausar, reagendar ou limitar a reindexação) e correção posterior separada (rever heap, limites, agenda)."
+              }
+            },
+            {
+              "assertion": {
+                "type": "llm-rubric",
+                "threshold": 1,
+                "value": "file://../../../devops/causa-raiz/criterio-4.txt"
+              },
+              "pass": false,
+              "score": 0,
+              "reason": "0: A análise afirma causas com certeza total (ex: 'reindex job mal configurado', 'limitação de memória') sem reconhecer lacunas concretas, e menciona parâmetros como 'refresh_interval' e 'cache de query de 512MB' que não estão nos fatos do caso, o que é considerado inventar dados.",
+              "tokensUsed": {
+                "total": 3374,
+                "prompt": 2395,
+                "completion": 979,
+                "cached": 0,
+                "numRequests": 0,
+                "completionDetails": {
+                  "reasoning": 0,
+                  "acceptedPrediction": 0,
+                  "rejectedPrediction": 0
+                }
+              },
+              "metadata": {
+                "renderedGradingPrompt": "Você é um revisor sênior de resposta a incidentes. Você pontua UM critério de uma análise de causa-raiz, sem se deixar levar pelo tamanho, pelo tom ou pela formatação do texto.\n\nFatos do caso. Isto é a sua referência para conferir a análise e NÃO faz parte dela: nunca cite estes fatos como se a análise os tivesse dito.\n- O sistema é um cluster de busca e indexação. Uma reindexação agendada às 02:00 (10 milhões de documentos, normalmente 90 minutos) estava em 41% às 10:00 e quase não avançou na janela (38% às 08:02, 40% às 09:20, 41% às 09:58).\n- O heap subiu de 61% para 94%. O circuit breaker de memória disparou a 96% (09:58). O pool de escrita encheu e rejeitou bulk. As buscas estouraram o timeout de 5 s e devolveram resultado parcial (11 de 12 shards).\n- O cache de query caiu de 74% para 29% de acerto. Isso é efeito da pressão de memória, e não causa.\n- A vazão de indexação subiu de 4.100 para 12.400 docs/s a partir das 09:00.\n\nCritério a pontuar:\nCritério C4, honestidade epistêmica, nota de 0 a 2.\n0: afirma a causa com certeza total e sem limitações, ou não tem nenhuma seção ou frase sobre o que falta; ou inventa dados que não estão nos artefatos.\n1: reconhece limitações de forma genérica (\"faltam dados\") sem dizer quais, ou dá grau de confiança alto sem ressalva ou sem justificar.\n2: nomeia, em um trecho da própria análise, lacunas concretas do caso (por exemplo: por que a reindexação andou devagar, a origem da vazão, o heap já em 61% antes, a falta de CPU, disco e outros nós) e dá um grau de confiança justificado.\n\nAnálise a pontuar:\n<analise>\nCom base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:\n\n---\n\n### **1. Problemas Identificados**\n#### **A. Reindex Job Excessivamente Demorado**\n- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).\n- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:\n  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).\n  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.\n\n#### **B. Sobrecarga de Memória e GC (Garbage Collection)**\n- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.\n- **Logs:**\n  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).\n  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.\n  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: \"segment writing can't keep up\").\n\n#### **C. Sobrecarga de Indexação e Escrita**\n- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).\n- **Logs:**\n  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.\n  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.\n\n#### **D. Problemas de Busca (Search)**\n- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).\n- **Logs:**\n  - **Slow query:** Uma query levou **2.380ms** em um shard.\n  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.\n  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).\n\n---\n\n### **2. Causas Raiz**\n1. **Reindex Job Mal Configurado:**\n   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).\n   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.\n\n2. **Limitação de Memória (JVM Heap):**\n   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.\n   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).\n\n3. **Cache de Query Inadequado:**\n   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.\n\n4. **Configuração de Refresh Interval:**\n   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.\n\n---\n\n### **3. Impactos**\n- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.\n- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.\n- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).\n- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.\n\n---\n\n### **4. Recomendações**\n#### **A. Otimizar o Reindex Job**\n- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.\n- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).\n- **Dividir o job em partes menores** para evitar sobrecarga.\n\n#### **B. Aumentar Recursos do Cluster**\n- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).\n- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.\n\n#### **C. Ajustar Configurações**\n- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.\n- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.\n- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).\n\n#### **D. Monitorar e Otimizar Consultas**\n- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.\n- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.\n\n---\n\n### **5. Conclusão**\nO cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.\n</analise>\n\nComo pontuar (seja rigoroso: um juiz brando aprova análises ruins):\n1. Use só os descritores do critério acima. Em caso de dúvida entre duas notas, escolha a menor.\n2. Dê crédito apenas ao que a análise afirma de forma explícita. Não complete o que ficou implícito.\n3. A nota 1 ou 2 exige uma citação literal copiada de dentro de <analise>. Se você não encontra no texto da análise uma citação que cumpra o descritor, a nota é menor. Citações dos fatos do caso ou do critério não valem.\n4. Valor, horário, evento ou parâmetro que a análise cita e que não está nos fatos do caso pode ser dado inventado; não conta a favor dela.\n\nResponda somente com um objeto JSON, sem texto antes ou depois e sem cercas de código:\n{\"reason\": \"<nota 0, 1 ou 2>: <uma ou duas frases, com a citação literal de <analise> entre aspas simples; nunca use aspas duplas dentro do JSON>\", \"pass\": <true se a nota for 1 ou 2, false se for 0>, \"score\": <a nota, 0, 1 ou 2>}\n",
+                "renderedAssertionValue": "Critério C4, honestidade epistêmica, nota de 0 a 2.\n0: afirma a causa com certeza total e sem limitações, ou não tem nenhuma seção ou frase sobre o que falta; ou inventa dados que não estão nos artefatos.\n1: reconhece limitações de forma genérica (\"faltam dados\") sem dizer quais, ou dá grau de confiança alto sem ressalva ou sem justificar.\n2: nomeia, em um trecho da própria análise, lacunas concretas do caso (por exemplo: por que a reindexação andou devagar, a origem da vazão, o heap já em 61% antes, a falta de CPU, disco e outros nós) e dá um grau de confiança justificado."
+              }
+            }
+          ]
+        },
+        "id": "a024040b-d380-49d5-bea1-eeb31b430af8",
+        "latencyMs": 1,
+        "namedScores": {},
+        "prompt": {
+          "raw": "Com base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:\n\n---\n\n### **1. Problemas Identificados**\n#### **A. Reindex Job Excessivamente Demorado**\n- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).\n- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:\n  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).\n  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.\n\n#### **B. Sobrecarga de Memória e GC (Garbage Collection)**\n- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.\n- **Logs:**\n  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).\n  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.\n  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: \"segment writing can't keep up\").\n\n#### **C. Sobrecarga de Indexação e Escrita**\n- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).\n- **Logs:**\n  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.\n  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.\n\n#### **D. Problemas de Busca (Search)**\n- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).\n- **Logs:**\n  - **Slow query:** Uma query levou **2.380ms** em um shard.\n  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.\n  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).\n\n---\n\n### **2. Causas Raiz**\n1. **Reindex Job Mal Configurado:**\n   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).\n   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.\n\n2. **Limitação de Memória (JVM Heap):**\n   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.\n   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).\n\n3. **Cache de Query Inadequado:**\n   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.\n\n4. **Configuração de Refresh Interval:**\n   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.\n\n---\n\n### **3. Impactos**\n- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.\n- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.\n- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).\n- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.\n\n---\n\n### **4. Recomendações**\n#### **A. Otimizar o Reindex Job**\n- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.\n- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).\n- **Dividir o job em partes menores** para evitar sobrecarga.\n\n#### **B. Aumentar Recursos do Cluster**\n- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).\n- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.\n\n#### **C. Ajustar Configurações**\n- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.\n- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.\n- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).\n\n#### **D. Monitorar e Otimizar Consultas**\n- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.\n- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.\n\n---\n\n### **5. Conclusão**\nO cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.",
+          "label": "{{saida}}",
+          "config": {
+            "provider": {
+              "id": "file://../../../providers/ollama-local.js",
+              "label": "qwen3:14b (Alibaba, via Ollama) — juiz",
+              "config": {
+                "model": "qwen3:14b",
+                "think": true,
+                "temperature": 0,
+                "num_ctx": 12288
+              }
+            },
+            "rubricPrompt": "file://../../../devops/causa-raiz/juiz.txt"
+          }
+        },
+        "promptId": "d81462bd7ed54f468594177a83f790031de8231bb089bfe4ed73c5f38f40dfeb",
+        "promptIdx": 0,
+        "provider": {
+          "id": "echo",
+          "label": ""
+        },
+        "response": {
+          "output": "Com base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:\n\n---\n\n### **1. Problemas Identificados**\n#### **A. Reindex Job Excessivamente Demorado**\n- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).\n- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:\n  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).\n  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.\n\n#### **B. Sobrecarga de Memória e GC (Garbage Collection)**\n- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.\n- **Logs:**\n  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).\n  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.\n  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: \"segment writing can't keep up\").\n\n#### **C. Sobrecarga de Indexação e Escrita**\n- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).\n- **Logs:**\n  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.\n  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.\n\n#### **D. Problemas de Busca (Search)**\n- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).\n- **Logs:**\n  - **Slow query:** Uma query levou **2.380ms** em um shard.\n  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.\n  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).\n\n---\n\n### **2. Causas Raiz**\n1. **Reindex Job Mal Configurado:**\n   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).\n   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.\n\n2. **Limitação de Memória (JVM Heap):**\n   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.\n   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).\n\n3. **Cache de Query Inadequado:**\n   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.\n\n4. **Configuração de Refresh Interval:**\n   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.\n\n---\n\n### **3. Impactos**\n- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.\n- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.\n- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).\n- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.\n\n---\n\n### **4. Recomendações**\n#### **A. Otimizar o Reindex Job**\n- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.\n- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).\n- **Dividir o job em partes menores** para evitar sobrecarga.\n\n#### **B. Aumentar Recursos do Cluster**\n- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).\n- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.\n\n#### **C. Ajustar Configurações**\n- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.\n- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.\n- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).\n\n#### **D. Monitorar e Otimizar Consultas**\n- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.\n- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.\n\n---\n\n### **5. Conclusão**\nO cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.",
+          "raw": "Com base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:\n\n---\n\n### **1. Problemas Identificados**\n#### **A. Reindex Job Excessivamente Demorado**\n- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).\n- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:\n  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).\n  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.\n\n#### **B. Sobrecarga de Memória e GC (Garbage Collection)**\n- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.\n- **Logs:**\n  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).\n  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.\n  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: \"segment writing can't keep up\").\n\n#### **C. Sobrecarga de Indexação e Escrita**\n- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).\n- **Logs:**\n  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.\n  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.\n\n#### **D. Problemas de Busca (Search)**\n- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).\n- **Logs:**\n  - **Slow query:** Uma query levou **2.380ms** em um shard.\n  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.\n  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).\n\n---\n\n### **2. Causas Raiz**\n1. **Reindex Job Mal Configurado:**\n   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).\n   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.\n\n2. **Limitação de Memória (JVM Heap):**\n   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.\n   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).\n\n3. **Cache de Query Inadequado:**\n   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.\n\n4. **Configuração de Refresh Interval:**\n   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.\n\n---\n\n### **3. Impactos**\n- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.\n- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.\n- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).\n- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.\n\n---\n\n### **4. Recomendações**\n#### **A. Otimizar o Reindex Job**\n- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.\n- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).\n- **Dividir o job em partes menores** para evitar sobrecarga.\n\n#### **B. Aumentar Recursos do Cluster**\n- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).\n- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.\n\n#### **C. Ajustar Configurações**\n- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.\n- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.\n- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).\n\n#### **D. Monitorar e Otimizar Consultas**\n- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.\n- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.\n\n---\n\n### **5. Conclusão**\nO cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.",
+          "cost": 0,
+          "cached": false,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "isRefusal": false,
+          "metadata": {}
+        },
+        "score": 1.25,
+        "success": false,
+        "testCase": {
+          "description": "amostra G",
+          "threshold": 1.5,
+          "vars": {
+            "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/G.txt"
+          },
+          "assert": [
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-1.txt"
+            },
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-2.txt"
+            },
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-3.txt"
+            },
+            {
+              "type": "llm-rubric",
+              "threshold": 1,
+              "value": "file://../../../devops/causa-raiz/criterio-4.txt"
+            }
+          ],
+          "options": {
+            "provider": {
+              "id": "file://../../../providers/ollama-local.js",
+              "label": "qwen3:14b (Alibaba, via Ollama) — juiz",
+              "config": {
+                "model": "qwen3:14b",
+                "think": true,
+                "temperature": 0,
+                "num_ctx": 12288
+              }
+            },
+            "rubricPrompt": "file://../../../devops/causa-raiz/juiz.txt"
+          },
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 13605,
+            "prompt": 9612,
+            "completion": 3993,
+            "cached": 0,
+            "numRequests": 4,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/G.txt"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      }
+    ],
+    "stats": {
+      "successes": 0,
+      "failures": 1,
+      "errors": 1,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 2,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 13605,
+          "prompt": 9612,
+          "completion": 3993,
+          "cached": 0,
+          "numRequests": 4,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 624399,
+      "evaluationDurationMs": 624399
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "calibração do juiz — amostras avaliadas pelo juiz de devops/causa-raiz",
+    "prompts": [
+      "{{saida}}"
+    ],
+    "providers": [
+      "echo"
+    ],
+    "tests": [
+      {
+        "description": "amostra A",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/A.txt"
+        }
+      },
+      {
+        "description": "amostra B",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/B.txt"
+        }
+      },
+      {
+        "description": "amostra C",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/C.txt"
+        }
+      },
+      {
+        "description": "amostra D",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/D.txt"
+        }
+      },
+      {
+        "description": "amostra E",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/E.txt"
+        }
+      },
+      {
+        "description": "amostra F",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/F.txt"
+        }
+      },
+      {
+        "description": "amostra G",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/G.txt"
+        }
+      },
+      {
+        "description": "amostra H",
+        "threshold": 1.5,
+        "vars": {
+          "saida": "file://<repo>/checkpoints/checkpoint-09/amostras/H.txt"
+        }
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "/tmp/claude-1000/-home-rubens-silva-pos-graduacao-desafios-playbook-ia-operacional/79fd2e84-b58f-48b7-b064-c1526f2ae82d/scratchpad/cp09/juiz-v7-EG.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "options": {
+        "provider": {
+          "id": "file://../../../providers/ollama-local.js",
+          "label": "qwen3:14b (Alibaba, via Ollama) — juiz",
+          "config": {
+            "model": "qwen3:14b",
+            "think": true,
+            "temperature": 0,
+            "num_ctx": 12288
+          }
+        },
+        "rubricPrompt": "file://../../../devops/causa-raiz/juiz.txt"
+      },
+      "assert": [
+        {
+          "type": "llm-rubric",
+          "threshold": 1,
+          "value": "file://../../../devops/causa-raiz/criterio-1.txt"
+        },
+        {
+          "type": "llm-rubric",
+          "threshold": 1,
+          "value": "file://../../../devops/causa-raiz/criterio-2.txt"
+        },
+        {
+          "type": "llm-rubric",
+          "threshold": 1,
+          "value": "file://../../../devops/causa-raiz/criterio-3.txt"
+        },
+        {
+          "type": "llm-rubric",
+          "threshold": 1,
+          "value": "file://../../../devops/causa-raiz/criterio-4.txt"
+        }
+      ],
+      "vars": {},
+      "metadata": {}
+    },
+    "basePath": "<repo>/checkpoints/checkpoint-09/calibracao"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.125.1",
+    "nodeVersion": "v22.23.3",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-11-17T16:45:03.718Z",
+    "evaluationCreatedAt": "2026-11-17T16:34:39.249Z"
+  },
+  "vars": [
+    "saida"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 1,
+    "cache": false
+  }
+}

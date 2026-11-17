@@ -61,6 +61,16 @@ for cp in sorted(glob.glob("checkpoints/checkpoint-*")):
     n = os.path.basename(cp)
     p02 = f"{cp}/02-prompt.md"
     p02t = f"{cp}/02-testes.md"
+    p02r = f"{cp}/02-rubrica.md"
+    if os.path.isfile(p02r):
+        for f in ["README.md", "01-contexto.md", "03-execucao.md", "04-curadoria.md"]:
+            if not os.path.isfile(f"{cp}/{f}"): erro(f"{n}: falta {f}")
+        txt = open(p02r, encoding="utf-8").read()
+        for arq in ["promptfooconfig.yaml", "gate.js", "juiz.txt", "criterio-1.txt", "criterio-2.txt", "criterio-3.txt", "criterio-4.txt"]:
+            caminho = f"devops/causa-raiz/{arq}"
+            conteudo = open(caminho, encoding="utf-8").read().strip()
+            erro(f"{n}: {caminho} não aparece idêntico em 02-rubrica.md") if conteudo not in txt else ok(f"{n}: 02-rubrica.md idêntico a {caminho}")
+        continue
     if os.path.isfile(p02t):
         for f in ["README.md", "01-contexto.md", "03-execucao.md", "04-curadoria.md"]:
             if not os.path.isfile(f"{cp}/{f}"): erro(f"{n}: falta {f}")

@@ -11,7 +11,7 @@ O CP08 cobriu o que se verifica sem opinião (formato, latência, custo). A aná
 
 ## Decisões
 
-- **Juiz:** `qwen3:14b` (Alibaba), via Ollama (D14). O modelo é o mesmo que gera a análise em alguns testes; isso favorece o juiz (um modelo tende a gostar do texto que ele mesmo escreveria) e é uma limitação registrada na curadoria.
-- **Quem pontua à mão:** o Rubens. A calibração só vale se as notas de referência forem humanas; as minhas não entram como referência.
-- **Amostras para calibrar:** saídas reais, sem edição, do prompt de causa-raiz e de variações dele, com modelos de qualidades diferentes, para que a rubrica seja exercitada em notas altas e baixas. Cada amostra recebe um código neutro; o Rubens pontua sem ver a nota do juiz.
-- **Cálculo do total fora do juiz:** o juiz devolve as quatro notas; a aprovação é calculada pela regra da rubrica (ver [`02-rubrica.md`](02-rubrica.md)).
+- **Juiz:** começou como `qwen3:14b` (Alibaba), via Ollama, como previsto na D14. Terminou como **`gpt-oss:20b`** (OpenAI), porque, na calibração, o `qwen3:14b` se afastou mais das notas de referência (ver [`04-curadoria.md`](04-curadoria.md)). O gerador do gate passou a ser o `qwen3:14b`; assim juiz e gerador são de famílias diferentes, para reduzir o favorecimento do próprio texto.
+- **Quem pontua à mão:** o enunciado pede que o próprio aluno pontue. O Rubens delegou a pontuação ao Claude, então **as notas de referência são do Claude, e não de um humano**. Isso está dito no arquivo das notas e na curadoria, e o Rubens pode revisá-las.
+- **Amostras para calibrar:** saídas reais, sem edição, do prompt de causa-raiz e de variações dele, com modelos de qualidades diferentes, para que a rubrica seja exercitada em notas altas e baixas. Cada amostra recebe um código neutro. A pontuação de referência não foi cega: o Claude já tinha visto os totais da primeira rodada do juiz.
+- **Cálculo do total fora do juiz:** o juiz devolve as notas, e a aprovação sai de um `gate.js` (ver [`02-rubrica.md`](02-rubrica.md)).

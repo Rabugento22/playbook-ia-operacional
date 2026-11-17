@@ -1,9 +1,10 @@
 # Gate de qualidade do prompt causa-raiz com juiz LLM (CP09).
 # Rodar a partir da raiz do repositório:
 #   promptfoo eval -c devops/causa-raiz/promptfooconfig.yaml --no-cache -j 1
-# O prompt gera a análise (gpt-oss:20b); o juiz (qwen3:14b) aplica a rubrica e dá as notas.
-# Aprova com total >= 6 e nenhum critério zerado: o juiz zera "pass" se algum critério for 0,
-# e o "threshold: 6" do assert barra totais abaixo de 6.
+# O prompt gera a análise (qwen3:14b); o juiz (gpt-oss:20b) pontua cada um dos quatro critérios
+# da rubrica de 0 a 2 (criterio-1.txt a criterio-4.txt, instruções em juiz.txt).
+# Aprovação: total >= 6 e nenhum critério zerado.
+# A regra está em gate.js (assertScoringFunction): soma das quatro notas >= 6 e nenhuma nota 0.
 description: causa-raiz — gate de qualidade com LLM-as-judge (rubrica de 4 critérios, 0 a 2, corte 6)
 
 prompts:
@@ -11,22 +12,24 @@ prompts:
 
 providers:
   - id: file://../../providers/ollama-local.js
-    label: gpt-oss:20b (OpenAI, via Ollama)
+    label: qwen3:14b (Alibaba, via Ollama)
     config:
-      model: gpt-oss:20b
-      think: medium
+      model: qwen3:14b
+      think: true
       temperature: 0
       num_ctx: 12288
 
 defaultTest:
+  # regra de aprovação: soma >= 6 e nenhum critério zerado (gate.js)
+  assertScoringFunction: file://gate.js
   options:
-    # o juiz: outro modelo e outra família que o gerador, para reduzir o favorecimento do próprio texto
+    # o juiz: outra família que o gerador, para reduzir o favorecimento do próprio texto
     provider:
       id: file://../../providers/ollama-local.js
-      label: qwen3:14b (Alibaba, via Ollama) — juiz
+      label: gpt-oss:20b (OpenAI, via Ollama) — juiz
       config:
-        model: qwen3:14b
-        think: false
+        model: gpt-oss:20b
+        think: low
         temperature: 0
         num_ctx: 12288
     rubricPrompt: file://juiz.txt
@@ -39,6 +42,7 @@ tests:
       metricas: file://../../checkpoints/checkpoint-03/entradas/artefato-2-metricas.txt
       logs: file://../../checkpoints/checkpoint-03/entradas/artefato-3-logs.txt
     assert:
-      - type: llm-rubric
-        threshold: 6
-        value: file://rubrica.txt
+      - {type: llm-rubric, value: file://criterio-1.txt}
+      - {type: llm-rubric, value: file://criterio-2.txt}
+      - {type: llm-rubric, value: file://criterio-3.txt}
+      - {type: llm-rubric, value: file://criterio-4.txt}

@@ -10,20 +10,23 @@ providers:
   - echo
 
 defaultTest:
+  # regra de aprovação: soma >= 6 e nenhum critério zerado (gate.js)
+  assertScoringFunction: file://../../../devops/causa-raiz/gate.js
   options:
     provider:
       id: file://../../../providers/ollama-local.js
-      label: qwen3:14b (Alibaba, via Ollama) — juiz
+      label: gpt-oss:20b (OpenAI, via Ollama) — juiz
       config:
-        model: qwen3:14b
-        think: false
+        model: gpt-oss:20b
+        think: low
         temperature: 0
         num_ctx: 12288
     rubricPrompt: file://../../../devops/causa-raiz/juiz.txt
   assert:
-    - type: llm-rubric
-      threshold: 6
-      value: file://../../../devops/causa-raiz/rubrica.txt
+    - {type: llm-rubric, value: "file://../../../devops/causa-raiz/criterio-1.txt"}
+    - {type: llm-rubric, value: "file://../../../devops/causa-raiz/criterio-2.txt"}
+    - {type: llm-rubric, value: "file://../../../devops/causa-raiz/criterio-3.txt"}
+    - {type: llm-rubric, value: "file://../../../devops/causa-raiz/criterio-4.txt"}
 
 tests:
   - description: amostra A
