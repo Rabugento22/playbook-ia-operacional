@@ -6,6 +6,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ### Adicionado
 
+- Checkpoint 07: nota de mapeamento do playbook nas convenções do template `prompt-registry`.
 - Estrutura do repositório: `devops/` (biblioteca), `checkpoints/checkpoint-XX/` (caminho) e documentação na raiz.
 - Provedor `providers/ollama-local.js` para o `promptfoo` com o Ollama local.
 - Entradas dos checkpoints 01 a 06, transcritas do enunciado.

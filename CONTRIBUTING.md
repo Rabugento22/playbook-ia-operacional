@@ -6,7 +6,7 @@ Este repositório trata os prompts como código: toda mudança tem versão, comm
 
 Veja a árvore no [`README.md`](README.md). O prompt vive em `devops/<nome-do-prompt>/` (`prompt.md`, `README.md` e, a partir do CP08, `promptfooconfig.yaml`). O caminho percorrido vive em `checkpoints/checkpoint-XX/` (`README.md` e quatro arquivos numerados), e o `02-prompt.md` repete o texto final do prompt, idêntico ao `prompt.md`.
 
-Um prompt novo entra com `versao: 1.0.0`, é listado no `README.md` de `devops/` e no índice da raiz.
+Um prompt novo entra com `versao: 1.0.0`, é listado no `README.md` de `devops/` e no índice da raiz. Toda mudança em um prompt existente sobe a `versao` (semver: correção de texto é patch, regra nova que muda o comportamento é minor, mudança de parâmetros é major) e entra em um commit semântico com o escopo `devops`.
 
 ## Frontmatter
 

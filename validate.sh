@@ -59,8 +59,8 @@ for d in sorted(glob.glob("devops/*/")):
 print("   Checkpoints")
 for cp in sorted(glob.glob("checkpoints/checkpoint-*")):
     n = os.path.basename(cp)
-    if not os.path.isdir(f"{cp}/entradas"): aviso(f"{n}: sem entradas/")
     p02 = f"{cp}/02-prompt.md"
+    if os.path.isfile(p02) and not os.path.isdir(f"{cp}/entradas"): aviso(f"{n}: sem entradas/")
     if not os.path.isfile(p02):
         print(f"  --  {n}: ainda não produzido")
         continue

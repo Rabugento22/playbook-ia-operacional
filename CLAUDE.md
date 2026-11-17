@@ -33,6 +33,7 @@ Na raiz: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `validate.sh
 - **`prompt.md`** tem só o frontmatter e o texto do prompt. O texto é autocontido e não cita outros arquivos do repositório.
 - **`checkpoints/checkpoint-XX/02-prompt.md`** traz o prompt final com texto idêntico ao corpo de `devops/<prompt>/prompt.md` e aponta para ele; o `validate.sh` confere.
 - **Prioridade:** o enunciado do PDF tem precedência sobre qualquer outra convenção; havendo conflito, vale o PDF.
+- **Versão do prompt:** nasce em `1.0.0`; qualquer mudança no texto sobe a `versao` no `prompt.md` e no `README.md` (iguais) e vai em commit semântico.
 - **Idioma:** pt-BR em prompts e documentação.
 - **Nada fabricado:** output de modelo, resultado de teste e execução de pipeline só entram no repositório se foram realmente obtidos. Registrar sempre o modelo e o fornecedor usados.
 - **Execuções** via Ollama, sem API paga. O provedor `providers/ollama-local.js` devolve `cost: 0` para o assert `cost` do `promptfoo`.
