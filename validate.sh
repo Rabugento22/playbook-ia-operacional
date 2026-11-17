@@ -61,6 +61,21 @@ for cp in sorted(glob.glob("checkpoints/checkpoint-*")):
     n = os.path.basename(cp)
     p02 = f"{cp}/02-prompt.md"
     p02t = f"{cp}/02-testes.md"
+    p02p = f"{cp}/02-pipeline.md"
+    if os.path.isfile(p02p):
+        txt = open(p02p, encoding="utf-8").read()
+        for arq in [".github/workflows/prompts.yml", ".github/scripts/selecionar.sh", ".github/scripts/rodar-suite.sh", ".github/scripts/resumir.js", ".github/scripts/comparar.js"]:
+            conteudo = open(arq, encoding="utf-8").read().strip()
+            erro(f"{n}: {arq} não aparece idêntico em 02-pipeline.md") if conteudo not in txt else ok(f"{n}: 02-pipeline.md idêntico a {arq}")
+        for f in ["README.md", "01-contexto.md", "03-execucao.md", "04-curadoria.md"]:
+            if not os.path.isfile(f"{cp}/{f}"): erro(f"{n}: falta {f}")
+        if not os.path.isfile(f"{cp}/02-testes.md"): erro(f"{n}: falta 02-testes.md")
+        else:
+            txt2 = open(f"{cp}/02-testes.md", encoding="utf-8").read()
+            for cfg in sorted(c for c in glob.glob("devops/*/promptfooconfig.yaml") if c in txt2):
+                conteudo = open(cfg, encoding="utf-8").read().strip()
+                erro(f"{n}: {cfg} não aparece idêntico em 02-testes.md") if conteudo not in txt2 else ok(f"{n}: 02-testes.md idêntico a {cfg}")
+        continue
     p02r = f"{cp}/02-rubrica.md"
     if os.path.isfile(p02r):
         for f in ["README.md", "01-contexto.md", "03-execucao.md", "04-curadoria.md"]:

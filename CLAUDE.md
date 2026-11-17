@@ -22,7 +22,10 @@ devops/
 checkpoints/checkpoint-XX/     # o caminho de cada checkpoint
   README.md  01-contexto.md  02-prompt.md  03-execucao.md  04-curadoria.md
   entradas/                    # dados do enunciado, transcritos
-providers/ollama-local.js
+providers/ollama-local.js  carregar-prompt.js
+.github/
+  workflows/prompts.yml        # suíte de prompts em PR e push (runner self-hosted)
+  scripts/  baseline/          # gate: compara com a linha de base e falha só em regressão
 ```
 
 Na raiz: `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `validate.sh`. O `NAVIGATION.md`, o `SUMMARY.md`, `assets/` (Mermaid), `references.md` e `lessons-learned.md` entram no fechamento do projeto. A única categoria é `devops/`; não se criam categorias vazias.

@@ -1,0 +1,278 @@
+[
+  {
+    "caso": "alerta 1 — Sentinel",
+    "modelo": "llama3.2:3b (Meta, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:ALERTA:",
+        "ok": true
+      },
+      {
+        "id": "contains:IMPACTO:",
+        "ok": true
+      },
+      {
+        "id": "contains:HIPÓTESE INICIAL:",
+        "ok": true
+      },
+      {
+        "id": "contains:AÇÃO IMEDIATA:",
+        "ok": true
+      },
+      {
+        "id": "contains:ESCALAR PARA:",
+        "ok": true
+      },
+      {
+        "id": "regex:ESCALAR PARA:.*@\\w+",
+        "ok": true
+      },
+      {
+        "id": "javascript:output.trim().split('\\n').length <= 8",
+        "ok": true
+      },
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:@sentinel-core",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "alerta 1 — Sentinel",
+    "modelo": "gemma3:4b (Google, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:ALERTA:",
+        "ok": true
+      },
+      {
+        "id": "contains:IMPACTO:",
+        "ok": true
+      },
+      {
+        "id": "contains:HIPÓTESE INICIAL:",
+        "ok": true
+      },
+      {
+        "id": "contains:AÇÃO IMEDIATA:",
+        "ok": true
+      },
+      {
+        "id": "contains:ESCALAR PARA:",
+        "ok": true
+      },
+      {
+        "id": "regex:ESCALAR PARA:.*@\\w+",
+        "ok": true
+      },
+      {
+        "id": "javascript:output.trim().split('\\n').length <= 8",
+        "ok": true
+      },
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:@sentinel-core",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "alerta 2 — Relay",
+    "modelo": "gemma3:4b (Google, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:ALERTA:",
+        "ok": true
+      },
+      {
+        "id": "contains:IMPACTO:",
+        "ok": true
+      },
+      {
+        "id": "contains:HIPÓTESE INICIAL:",
+        "ok": true
+      },
+      {
+        "id": "contains:AÇÃO IMEDIATA:",
+        "ok": true
+      },
+      {
+        "id": "contains:ESCALAR PARA:",
+        "ok": true
+      },
+      {
+        "id": "regex:ESCALAR PARA:.*@\\w+",
+        "ok": true
+      },
+      {
+        "id": "javascript:output.trim().split('\\n').length <= 8",
+        "ok": true
+      },
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:@relay-core",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "caso": "alerta 2 — Relay",
+    "modelo": "llama3.2:3b (Meta, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:ALERTA:",
+        "ok": true
+      },
+      {
+        "id": "contains:IMPACTO:",
+        "ok": true
+      },
+      {
+        "id": "contains:HIPÓTESE INICIAL:",
+        "ok": true
+      },
+      {
+        "id": "contains:AÇÃO IMEDIATA:",
+        "ok": true
+      },
+      {
+        "id": "contains:ESCALAR PARA:",
+        "ok": true
+      },
+      {
+        "id": "regex:ESCALAR PARA:.*@\\w+",
+        "ok": true
+      },
+      {
+        "id": "javascript:output.trim().split('\\n').length <= 8",
+        "ok": true
+      },
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:@relay-core",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "alerta 3 — Forge",
+    "modelo": "llama3.2:3b (Meta, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:ALERTA:",
+        "ok": true
+      },
+      {
+        "id": "contains:IMPACTO:",
+        "ok": true
+      },
+      {
+        "id": "contains:HIPÓTESE INICIAL:",
+        "ok": true
+      },
+      {
+        "id": "contains:AÇÃO IMEDIATA:",
+        "ok": true
+      },
+      {
+        "id": "contains:ESCALAR PARA:",
+        "ok": true
+      },
+      {
+        "id": "regex:ESCALAR PARA:.*@\\w+",
+        "ok": true
+      },
+      {
+        "id": "javascript:output.trim().split('\\n').length <= 8",
+        "ok": true
+      },
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:@data-platform",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "alerta 3 — Forge",
+    "modelo": "gemma3:4b (Google, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:ALERTA:",
+        "ok": true
+      },
+      {
+        "id": "contains:IMPACTO:",
+        "ok": true
+      },
+      {
+        "id": "contains:HIPÓTESE INICIAL:",
+        "ok": true
+      },
+      {
+        "id": "contains:AÇÃO IMEDIATA:",
+        "ok": true
+      },
+      {
+        "id": "contains:ESCALAR PARA:",
+        "ok": true
+      },
+      {
+        "id": "regex:ESCALAR PARA:.*@\\w+",
+        "ok": true
+      },
+      {
+        "id": "javascript:output.trim().split('\\n').length <= 8",
+        "ok": true
+      },
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:@data-platform",
+        "ok": true
+      }
+    ]
+  }
+]

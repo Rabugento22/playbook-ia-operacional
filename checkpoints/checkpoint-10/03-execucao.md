@@ -504,3 +504,14 @@ Checklist final contra as garantias
 - **Dois asserts estavam rígidos demais na primeira rodada** ([`resultados/rodada-1/`](resultados/rodada-1/)): o de "Caminho N" não aceitava a linha com negrito (`**Caminho 1`) e o de "limite de tempo" não aceitava a maiúscula ("Limite de tempo"). Corrigi os dois para aceitar essas variações, que não são defeito do prompt, e rodei de novo `decisao-backpressure` e `migracao-forge-execucao`. Os outros dois não foram repetidos porque os asserts deles não mudaram.
 - **O que estes testes não medem:** a qualidade do raciocínio. Não existe juiz para estes quatro prompts (o juiz do CP09 foi calibrado só para a `causa-raiz`). Um juiz para cada um exigiria uma rubrica própria e uma calibração como a do CP09, com a mesma limitação de ruído.
 - **Uma execução, um modelo.** Cada prompt rodou uma vez com o `qwen3:14b`. A saída de um modelo de raciocínio varia entre execuções, então um assert perto do limite (por exemplo, "madrugada" pelo menos 2 vezes no plano) pode oscilar.
+
+## T051: o pipeline testado localmente
+
+O workflow ainda não rodou no GitHub (o repositório não foi publicado e o runner não foi registrado). O que foi testado na máquina:
+
+- **Os scripts de ponta a ponta:** `PROMPTS="nota-de-triagem" .github/scripts/rodar-suite.sh` aqueceu os modelos, rodou o `promptfoo`, comparou com a linha de base e terminou com código 0 (`sem regressão em relação à linha de base`, 60 asserts comparados, 1 defeito conhecido que não bloqueia).
+- **Uma regressão provocada, de verdade:** troquei o `prompt.md` do `nota-de-triagem` pelo texto da versão `1.0.0` (o formato que fazia o `llama3.2:3b` tratar os rótulos como títulos) e rodei a suíte. O `comparar.js` terminou com **código 1**: `REGRESSÃO: o build falha`, com 12 asserts que passavam na linha de base e passaram a falhar (os rótulos, o handle e o limite de linhas). O prompt foi restaurado em seguida. Resultado bruto e relatório em [`resultados/regressao-provocada-local/`](resultados/regressao-provocada-local/). Isso prova o gate; **não substitui** o run vermelho no GitHub que o enunciado pede (T054).
+- **O seletor:** `selecionar.sh` devolve só os prompts cuja pasta mudou (e os elos seguintes da cadeia do Forge), e todos quando muda o provedor ou o pipeline.
+
+O que depende do GitHub e ainda não foi visto: o disparo por pull request e por push, o comentário no PR, o artefato, e o comportamento do runner self-hosted.
+

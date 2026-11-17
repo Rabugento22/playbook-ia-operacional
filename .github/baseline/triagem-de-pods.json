@@ -1,0 +1,158 @@
+[
+  {
+    "caso": "entrada 1 — pod reiniciando (OOMKilled)",
+    "modelo": "gemma3:4b (Google, via Ollama)",
+    "asserts": [
+      {
+        "id": "latency:5000",
+        "ok": false
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:sentinel-api-7d9c8b6f4-h4m2t",
+        "ok": true
+      },
+      {
+        "id": "icontains-any:OOMKilled,memória,memoria",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "entrada 1 — pod reiniciando (OOMKilled)",
+    "modelo": "llama3.2:3b (Meta, via Ollama)",
+    "asserts": [
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:sentinel-api-7d9c8b6f4-h4m2t",
+        "ok": true
+      },
+      {
+        "id": "icontains-any:OOMKilled,memória,memoria",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "entrada 2 — dois pods que não sobem (imagem e CPU)",
+    "modelo": "llama3.2:3b (Meta, via Ollama)",
+    "asserts": [
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:sentinel-api-7d9c8b6f4-zzp10",
+        "ok": true
+      },
+      {
+        "id": "contains:sentinel-ingest-8f7a9c5b-4dkqm",
+        "ok": true
+      },
+      {
+        "id": "icontains-any:2.9.2,ImagePullBackOff",
+        "ok": true
+      },
+      {
+        "id": "icontains-any:Insufficient,cpu",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "entrada 2 — dois pods que não sobem (imagem e CPU)",
+    "modelo": "gemma3:4b (Google, via Ollama)",
+    "asserts": [
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "contains:sentinel-api-7d9c8b6f4-zzp10",
+        "ok": true
+      },
+      {
+        "id": "contains:sentinel-ingest-8f7a9c5b-4dkqm",
+        "ok": true
+      },
+      {
+        "id": "icontains-any:2.9.2,ImagePullBackOff",
+        "ok": true
+      },
+      {
+        "id": "icontains-any:Insufficient,cpu",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "entrada 3 — tudo saudável (nenhum pod problemático)",
+    "modelo": "llama3.2:3b (Meta, via Ollama)",
+    "asserts": [
+      {
+        "id": "latency:5000",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "regex:Pods problemáticos:\\**\\s*0",
+        "ok": false
+      },
+      {
+        "id": "not-contains:NOME:",
+        "ok": false
+      },
+      {
+        "id": "not-icontains-any:CrashLoopBackOff,ImagePullBackOff,OOMKilled,Pending,Pods problemáticos: 1,Pods problemáticos: 2",
+        "ok": false
+      }
+    ]
+  },
+  {
+    "caso": "entrada 3 — tudo saudável (nenhum pod problemático)",
+    "modelo": "gemma3:4b (Google, via Ollama)",
+    "asserts": [
+      {
+        "id": "latency:5000",
+        "ok": false
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      },
+      {
+        "id": "regex:Pods problemáticos:\\**\\s*0",
+        "ok": false
+      },
+      {
+        "id": "not-contains:NOME:",
+        "ok": false
+      },
+      {
+        "id": "not-icontains-any:CrashLoopBackOff,ImagePullBackOff,OOMKilled,Pending,Pods problemáticos: 1,Pods problemáticos: 2",
+        "ok": false
+      }
+    ]
+  }
+]

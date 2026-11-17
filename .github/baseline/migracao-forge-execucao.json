@@ -1,0 +1,40 @@
+[
+  {
+    "caso": "cenário do Forge com o plano real do CP05 (qwen3:14b)",
+    "modelo": "qwen3:14b (Alibaba, via Ollama)",
+    "asserts": [
+      {
+        "id": "javascript:const titulos = [\"Garantias do cenário\", \"Pré-requisitos globais\", \"Roteiro por fase\", \"Proteção dos dependentes\", \"Comu",
+        "ok": true
+      },
+      {
+        "id": "not-contains:```",
+        "ok": true
+      },
+      {
+        "id": "not-contains:*",
+        "ok": false
+      },
+      {
+        "id": "javascript:(output.match(/madrugada/gi) || []).length >= 1",
+        "ok": true
+      },
+      {
+        "id": "regex:go/no-go",
+        "ok": true
+      },
+      {
+        "id": "javascript:/gatilho/i.test(output)",
+        "ok": true
+      },
+      {
+        "id": "javascript:/limite de tempo/i.test(output)",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      }
+    ]
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "caso": "manifesto permissivo + padrão Aegis + mapa de serviços",
+    "modelo": "llama3.2:3b (Meta, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:kind: NetworkPolicy",
+        "ok": false
+      },
+      {
+        "id": "javascript:const blocos = [...output.matchAll(/policyTypes:([^\\n]*(?:\\n\\s*-[^\\n]*)*)/g)].map(m => m[1]).join(' '); return /Ingress/",
+        "ok": false
+      },
+      {
+        "id": "not-contains:- {}",
+        "ok": false
+      },
+      {
+        "id": "contains:5432",
+        "ok": true
+      },
+      {
+        "id": "contains:9200",
+        "ok": true
+      },
+      {
+        "id": "regex:app:\\s*\"?relay\"?",
+        "ok": true
+      },
+      {
+        "id": "javascript:const regras = (output.match(/^\\s*-\\s*(from|to):/gm) || []).length; const comentarios = (output.match(/#/g) || []).lengt",
+        "ok": false
+      },
+      {
+        "id": "latency:5000",
+        "ok": false
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      }
+    ]
+  },
+  {
+    "caso": "manifesto permissivo + padrão Aegis + mapa de serviços",
+    "modelo": "gemma3:4b (Google, via Ollama)",
+    "asserts": [
+      {
+        "id": "contains:kind: NetworkPolicy",
+        "ok": true
+      },
+      {
+        "id": "javascript:const blocos = [...output.matchAll(/policyTypes:([^\\n]*(?:\\n\\s*-[^\\n]*)*)/g)].map(m => m[1]).join(' '); return /Ingress/",
+        "ok": true
+      },
+      {
+        "id": "not-contains:- {}",
+        "ok": true
+      },
+      {
+        "id": "contains:5432",
+        "ok": true
+      },
+      {
+        "id": "contains:9200",
+        "ok": true
+      },
+      {
+        "id": "regex:app:\\s*\"?relay\"?",
+        "ok": true
+      },
+      {
+        "id": "javascript:const regras = (output.match(/^\\s*-\\s*(from|to):/gm) || []).length; const comentarios = (output.match(/#/g) || []).lengt",
+        "ok": false
+      },
+      {
+        "id": "latency:5000",
+        "ok": false
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      }
+    ]
+  }
+]

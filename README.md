@@ -38,7 +38,7 @@ A biblioteca segue o template `prompt-registry`: categoria como pasta na raiz, u
 | [07](checkpoints/checkpoint-07/) | Biblioteca no formato do template e nota de mapeamento | Em andamento (falta o link público) |
 | [08](checkpoints/checkpoint-08/) | Testes determinísticos com `promptfoo` ([`nota-de-triagem`](devops/nota-de-triagem/), [`triagem-de-pods`](devops/triagem-de-pods/), [`networkpolicy-sentinel`](devops/networkpolicy-sentinel/)) | Concluído, com reprovações registradas |
 | [09](checkpoints/checkpoint-09/) | Gate de qualidade com LLM-as-judge ([`causa-raiz`](devops/causa-raiz/)) | Concluído, com calibração parcial |
-| 10 | Pipeline no GitHub Actions | Pendente |
+| [10](checkpoints/checkpoint-10/) | Pipeline no GitHub Actions ([`.github/workflows/prompts.yml`](.github/workflows/prompts.yml)) | Em andamento: workflow pronto e testado localmente, falta rodar no GitHub |
 
 ## Modelos
 

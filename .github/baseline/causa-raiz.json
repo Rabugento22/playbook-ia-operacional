@@ -1,0 +1,12 @@
+[
+  {
+    "caso": "degradação do Cerebro — reindexação travada, heap, circuit breaker e timeouts",
+    "modelo": "qwen3:14b (Alibaba, via Ollama)",
+    "notas": [
+      2,
+      2,
+      1,
+      2
+    ]
+  }
+]

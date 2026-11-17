@@ -1,0 +1,115 @@
+# Suíte de avaliação dos prompts do playbook (CP10).
+# Roda em todo pull request e push que mexe na biblioteca, no provedor ou no próprio pipeline, e falha o
+# build quando um prompt REGRIDE em relação à linha de base (.github/baseline/). O desenho do gate está em
+# checkpoints/checkpoint-10/04-curadoria.md.
+#
+# Roda num runner self-hosted nesta máquina (Ollama local, sem API paga, custo zero). O runner é iniciado
+# à mão pelo mantenedor (./run.sh) e precisa ter o rótulo "ollama".
+name: Suíte de prompts
+
+on:
+  pull_request:
+    paths:
+      - 'devops/**'
+      - 'providers/**'
+      - '.github/**'
+      - 'validate.sh'
+  push:
+    branches: [main]
+    paths:
+      - 'devops/**'
+      - 'providers/**'
+      - '.github/**'
+      - 'validate.sh'
+  workflow_dispatch:
+    inputs:
+      escopo:
+        description: 'todos ou uma lista de prompts separados por espaço'
+        default: 'todos'
+
+# um run por ramo; um novo push cancela o anterior (o runner é um só e cada suíte leva minutos)
+concurrency:
+  group: suite-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  suite:
+    # O runner é self-hosted: um pull request de fork não pode executar código nele.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: [self-hosted, ollama]
+    timeout-minutes: 120
+    steps:
+      - name: Código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Estrutura do repositório (validate.sh)
+        run: ./validate.sh
+
+      - name: Escolher os prompts a testar
+        id: escopo
+        # os valores do evento entram por variáveis de ambiente, e não dentro do script (evita injeção de comando)
+        env:
+          EVENTO: ${{ github.event_name }}
+          ESCOPO: ${{ inputs.escopo }}
+          BASE_PR: ${{ github.event.pull_request.base.sha }}
+          HEAD_PR: ${{ github.event.pull_request.head.sha }}
+          BASE_PUSH: ${{ github.event.before }}
+          HEAD_PUSH: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENTO" = "workflow_dispatch" ]; then
+            if [ "$ESCOPO" = "todos" ]; then lista="$(.github/scripts/selecionar.sh todos)"; else lista="$ESCOPO"; fi
+          elif [ "$EVENTO" = "pull_request" ]; then
+            lista="$(.github/scripts/selecionar.sh "$BASE_PR" "$HEAD_PR")"
+          else
+            lista="$(.github/scripts/selecionar.sh "$BASE_PUSH" "$HEAD_PUSH")"
+          fi
+          lista="$(echo "$lista" | tr '\n' ' ' | xargs)"
+          echo "prompts=$lista" >> "$GITHUB_OUTPUT"
+          echo "Prompts a testar: ${lista:-nenhum}"
+
+      - name: Rodar a suíte e comparar com a linha de base
+        id: suite
+        if: steps.escopo.outputs.prompts != ''
+        env:
+          PROMPTS: ${{ steps.escopo.outputs.prompts }}
+          SAIDA: resultados
+        run: .github/scripts/rodar-suite.sh
+
+      - name: Resumo no run
+        if: always() && steps.escopo.outputs.prompts != ''
+        env:
+          PROMPTS: ${{ steps.escopo.outputs.prompts }}
+        run: |
+          { echo "# Suíte de prompts"; echo; echo "Prompts testados: $PROMPTS"; echo;
+            cat resultados/relatorio.md 2>/dev/null || echo "sem relatório"; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comentar no pull request
+        if: always() && github.event_name == 'pull_request' && steps.escopo.outputs.prompts != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const corpo = fs.existsSync('resultados/relatorio.md') ? fs.readFileSync('resultados/relatorio.md', 'utf8') : 'sem relatório';
+            const marca = '<!-- suite-de-prompts -->';
+            const texto = `${marca}\n## Suíte de prompts\n\nPrompts testados: ${process.env.PROMPTS}\n\n${corpo}`;
+            const { data: comentarios } = await github.rest.issues.listComments({ ...context.repo, issue_number: context.issue.number });
+            const existente = comentarios.find((c) => c.body.startsWith(marca));
+            if (existente) await github.rest.issues.updateComment({ ...context.repo, comment_id: existente.id, body: texto });
+            else await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body: texto });
+        env:
+          PROMPTS: ${{ steps.escopo.outputs.prompts }}
+
+      - name: Guardar os resultados brutos
+        if: always() && steps.escopo.outputs.prompts != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultados-promptfoo
+          path: resultados/
+          retention-days: 30

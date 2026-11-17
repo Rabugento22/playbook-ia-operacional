@@ -6,6 +6,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 
 ### Adicionado
 
+- Pipeline `.github/workflows/prompts.yml` com os scripts de seleção, execução, resumo e comparação com a linha de base (`.github/baseline/`), e o checkpoint 10 (testes dos prompts de saída aberta e documentação do pipeline).
 - Checkpoint 09: rubrica, juiz LLM como gate em `devops/causa-raiz/` (`promptfooconfig.yaml`, `juiz.txt`, `criterio-1..4.txt`, `gate.js`), amostras, calibração e curadoria.
 - Checkpoint 08: `promptfooconfig.yaml` de `nota-de-triagem`, `triagem-de-pods` e `networkpolicy-sentinel`, com `providers/carregar-prompt.js`, execuções reais, comparativo com o `qwen3:14b` e curadoria.
 - Checkpoint 07: nota de mapeamento do playbook nas convenções do template `prompt-registry`.

@@ -1,0 +1,40 @@
+[
+  {
+    "caso": "Relay, pico de 320k msgs/s por 25 min, SLA de 60 s e perda inaceitável",
+    "modelo": "qwen3:14b (Alibaba, via Ollama)",
+    "asserts": [
+      {
+        "id": "javascript:const titulos = [\"Reformulação do cenário\", \"Contas\", \"Caminhos propostos\", \"Tabela comparativa\", \"Recomendação\", \"Limit",
+        "ok": true
+      },
+      {
+        "id": "not-contains:```",
+        "ok": true
+      },
+      {
+        "id": "not-contains:*",
+        "ok": false
+      },
+      {
+        "id": "javascript:(output.match(/^.*\\|.*$/gm) || []).length >= 3",
+        "ok": true
+      },
+      {
+        "id": "javascript:(output.match(/^[\\s*]*Caminho\\s*\\d/gim) || []).length >= 3",
+        "ok": true
+      },
+      {
+        "id": "regex:140[\\s.,]?000|140\\s?k",
+        "ok": false
+      },
+      {
+        "id": "regex:210[\\s.,]?000[\\s.,]?000|210\\s?(M|milh)",
+        "ok": false
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      }
+    ]
+  }
+]

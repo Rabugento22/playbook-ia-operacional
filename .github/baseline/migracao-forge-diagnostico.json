@@ -1,0 +1,36 @@
+[
+  {
+    "caso": "cenário do Forge (lote de 1 h, três dependentes, billing de madrugada)",
+    "modelo": "qwen3:14b (Alibaba, via Ollama)",
+    "asserts": [
+      {
+        "id": "javascript:const titulos = [\"Garantias do cenário\", \"Estado atual\", \"Dependentes e o que cada um espera\", \"Janelas de consumo\", \"Po",
+        "ok": true
+      },
+      {
+        "id": "not-contains:```",
+        "ok": true
+      },
+      {
+        "id": "not-contains:*",
+        "ok": false
+      },
+      {
+        "id": "javascript:const linhas = output.split('\\n').map((l) => l.trim().replace(/:$/, '')); const a = linhas.indexOf('Janelas de consumo')",
+        "ok": true
+      },
+      {
+        "id": "javascript:/Sentinel/.test(output) && /Cerebro/.test(output) && /billing/i.test(output)",
+        "ok": true
+      },
+      {
+        "id": "regex:big-bang|virada única",
+        "ok": true
+      },
+      {
+        "id": "cost:0.01",
+        "ok": true
+      }
+    ]
+  }
+]

@@ -41,3 +41,7 @@ Confere os arquivos obrigatórios, a estrutura dos checkpoints, o frontmatter, o
 ## Registro de execuções
 
 Toda execução registra o modelo, o fornecedor, os parâmetros e o output real, sem edição. Se um teste falhar, o registro mostra a falha e o que foi ajustado.
+
+## Pipeline
+
+Todo pull request e push que mexe em `devops/`, `providers/`, `.github/` ou `validate.sh` roda a suíte de prompts (`.github/workflows/prompts.yml`) e falha quando um prompt regride em relação à linha de base de `.github/baseline/`. Depois de melhorar um prompt de propósito, atualize a linha de base: `PROMPTS="<prompt>" .github/scripts/rodar-suite.sh --atualizar-baseline` e commite o arquivo. Detalhes e o motivo do desenho em [`checkpoints/checkpoint-10/`](checkpoints/checkpoint-10/).

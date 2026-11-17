@@ -6,3 +6,6 @@
 /PROMPT-INICIAL.md
 /arquivo/
 /PLAYBOOK-DE-IA-OPERACIONAL.pdf
+
+# Saída local da suíte (rodar-suite.sh); no pipeline vai como artefato
+/resultados/
