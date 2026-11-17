@@ -55,7 +55,7 @@ Todos rodam pelo Ollama, em uma máquina local; os fornecedores são quatro (Ali
 
 - **Custo:** zero de API nos quatro modelos; o custo real é energia e hardware. O provedor do `promptfoo` devolve `cost: 0`.
 - **Latência:** `qwen3:14b` e `gpt-oss:20b` não cumprem 5 s (17 s e de 79 a 158 s no prompt de NetworkPolicy), então ficam nos checkpoints 01 a 06, sem limite; só `llama3.2:3b` (3,2 a 4,0 s) e `gemma3:4b` (3,7 a 8,2 s, a primeira chamada estoura sem aquecimento) cabem no limite do CP08.
-- **Qualidade:** `qwen3:14b` e `gpt-oss:20b` são os mais capazes que cabem na GPU local e vêm de famílias diferentes, o que permite comparar as respostas. Os modelos pequenos têm menos capacidade, e por isso o CP08 testa a estrutura da saída e o CP09 usa o `qwen3:14b` como juiz.
+- **Qualidade:** `qwen3:14b` e `gpt-oss:20b` são os mais capazes que cabem na GPU local e vêm de famílias diferentes, o que permite comparar as respostas. Os modelos pequenos têm menos capacidade, e por isso o CP08 testa a estrutura da saída e o CP09 usa o `gpt-oss:20b` como juiz (o `qwen3:14b` gera a análise).
 - **Privacidade:** a execução é local e nenhum dado sai da máquina; os dados dos cenários são fictícios, e o checkpoint 03 registra a sanitização que seria feita com dados reais.
 
 ## Como reproduzir
