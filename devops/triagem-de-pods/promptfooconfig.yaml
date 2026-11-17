@@ -1,0 +1,65 @@
+# Teste determinístico do prompt triagem-de-pods (CP08).
+# Rodar a partir da raiz do repositório (aqueça os modelos antes; ver checkpoints/checkpoint-08/README.md):
+#   promptfoo eval -c devops/triagem-de-pods/promptfooconfig.yaml --no-cache -j 1
+description: triagem-de-pods — pods citados com a causa, entrada saudável sem pod em falha, latência e custo
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: llama3.2:3b (Meta, via Ollama)
+    config:
+      model: llama3.2:3b
+      temperature: 0
+      num_ctx: 8192
+  - id: file://../../providers/ollama-local.js
+    label: gemma3:4b (Google, via Ollama)
+    config:
+      model: gemma3:4b
+      temperature: 0
+      num_ctx: 8192
+
+defaultTest:
+  vars:
+    prompt_dir: triagem-de-pods
+  assert:
+    # limites operacionais
+    - type: latency
+      threshold: 5000
+    - type: cost
+      threshold: 0.01
+
+tests:
+  - description: entrada 1 — pod reiniciando (OOMKilled)
+    vars:
+      snapshot: file://../../checkpoints/checkpoint-01/entradas/entrada-1-pod-reiniciando.txt
+    assert:
+      - type: contains
+        value: sentinel-api-7d9c8b6f4-h4m2t
+      - type: icontains-any
+        value: [OOMKilled, memória, memoria]
+  - description: entrada 2 — dois pods que não sobem (imagem e CPU)
+    vars:
+      snapshot: file://../../checkpoints/checkpoint-01/entradas/entrada-2-pods-nao-sobem.txt
+    assert:
+      - type: contains
+        value: sentinel-api-7d9c8b6f4-zzp10
+      - type: contains
+        value: sentinel-ingest-8f7a9c5b-4dkqm
+      - type: icontains-any
+        value: ['2.9.2', ImagePullBackOff]
+      - type: icontains-any
+        value: [Insufficient, cpu]
+  - description: entrada 3 — tudo saudável (nenhum pod problemático)
+    vars:
+      snapshot: file://../../checkpoints/checkpoint-01/entradas/entrada-3-tudo-saudavel.txt
+    assert:
+      # o prompt manda abrir com "Pods problemáticos: N"; N deve ser 0
+      - type: regex
+        value: 'Pods problemáticos:\**\s*0'
+      # nenhum pod listado como problemático e nenhum status de falha atribuído a um pod
+      - type: not-contains
+        value: 'NOME:'
+      - type: not-icontains-any
+        value: [CrashLoopBackOff, ImagePullBackOff, OOMKilled, Pending, 'Pods problemáticos: 1', 'Pods problemáticos: 2']

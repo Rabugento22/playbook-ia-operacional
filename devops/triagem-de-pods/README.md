@@ -50,6 +50,7 @@ As três execuções completas, nos dois modelos, estão em [`03-execucao.md`](.
 - Uma execução por modelo e entrada; não se mediu a variação entre execuções.
 - Sem log ou evento no snapshot, a causa deve sair como "Causa não confirmada"; esse caminho não foi exercitado nas três entradas.
 - Em produção, o snapshot traz nomes internos (pods, registry, nós); avalie o que mascarar antes de enviar a um modelo externo.
+- **Teste com modelos pequenos (CP08):** `llama3.2:3b` e `gemma3:4b` identificam os pods das entradas 1 e 2, mas inventam pods problemáticos no snapshot saudável (entrada 3). Para o limite de 5 s do CP08 só cabem modelos pequenos, então este prompt deve ser executado em um modelo maior (`qwen3:14b` passou nos asserts de conteúdo das três entradas, em 3 a 13 s). Detalhes em [`checkpoint-08`](../../checkpoints/checkpoint-08/).
 
 ## Documentação do caminho
 

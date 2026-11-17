@@ -1,0 +1,61 @@
+# Teste determinístico do prompt networkpolicy-sentinel (CP08).
+# Rodar a partir da raiz do repositório (aqueça os modelos antes; ver checkpoints/checkpoint-08/README.md):
+#   promptfoo eval -c devops/networkpolicy-sentinel/promptfooconfig.yaml --no-cache -j 1
+description: networkpolicy-sentinel — NetworkPolicy válida, sem allow-all, portas do Forge e Cerebro, ingress do Relay, comentário em cada regra, latência e custo
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: llama3.2:3b (Meta, via Ollama)
+    config:
+      model: llama3.2:3b
+      temperature: 0
+      num_ctx: 8192
+  - id: file://../../providers/ollama-local.js
+    label: gemma3:4b (Google, via Ollama)
+    config:
+      model: gemma3:4b
+      temperature: 0
+      num_ctx: 8192
+
+defaultTest:
+  vars:
+    prompt_dir: networkpolicy-sentinel
+    manifesto: file://../../checkpoints/checkpoint-06/entradas/manifesto-permissivo.yaml
+    padrao: file://../../checkpoints/checkpoint-06/entradas/padrao-aegis.txt
+    mapa: file://../../checkpoints/checkpoint-06/entradas/mapa-de-servicos.txt
+  assert:
+    # YAML com kind NetworkPolicy
+    - type: contains
+      value: 'kind: NetworkPolicy'
+    # policyTypes contendo Ingress e Egress (policyTypes em lista ou em linha)
+    - type: javascript
+      value: |
+        const blocos = [...output.matchAll(/policyTypes:([^\n]*(?:\n\s*-[^\n]*)*)/g)].map(m => m[1]).join(' ');
+        return /Ingress/.test(blocos) && /Egress/.test(blocos);
+    # sem regra allow-all
+    - type: not-contains
+      value: '- {}'
+    # egress libera Forge (5432) e Cerebro (9200); ingress libera o Relay (app: relay)
+    - type: contains
+      value: '5432'
+    - type: contains
+      value: '9200'
+    - type: regex
+      value: 'app:\s*"?relay"?'
+    # toda regra tem comentário: pelo menos um # por regra de ingress ou egress
+    - type: javascript
+      value: |
+        const regras = (output.match(/^\s*-\s*(from|to):/gm) || []).length;
+        const comentarios = (output.match(/#/g) || []).length;
+        return regras > 0 && comentarios >= regras;
+    # limites operacionais
+    - type: latency
+      threshold: 5000
+    - type: cost
+      threshold: 0.01
+
+tests:
+  - description: manifesto permissivo + padrão Aegis + mapa de serviços

@@ -1,7 +1,7 @@
 ---
 nome: Nota de triagem de alerta
 descricao: Transforma um alerta cru do Sentinel em uma nota de triagem padronizada de cinco rótulos para o plantonista do turno seguinte.
-versao: 1.0.0
+versao: 1.0.1
 tags: [alertas, triagem, plantao, sentinel]
 inputs:
   - nome: alerta_cru
@@ -54,6 +54,7 @@ As seis execuções da versão final estão em [`03-execucao.md`](../../checkpoi
 - A ação imediata é uma hipótese de trabalho, e não um procedimento validado; os modelos às vezes sugerem reiniciar serviços sem evidência de que isso resolva.
 - Termos do alerta em inglês podem aparecer na nota (ex.: `ingest reject rate`), porque o prompt manda copiá-los fielmente.
 - Uma execução por modelo e alerta; não se mediu a variação entre execuções.
+- **Teste com modelos pequenos (CP08):** com `llama3.2:3b` e `gemma3:4b` o formato e a concisão passam nos 3 alertas; o `gemma3:4b` escolheu o handle de outro time em 1 dos 3. A versão `1.0.1` mudou o formato para linhas preenchíveis porque o `llama3.2:3b` tratava os rótulos como títulos. Detalhes em [`checkpoint-08`](../../checkpoints/checkpoint-08/).
 
 ## Documentação do caminho
 

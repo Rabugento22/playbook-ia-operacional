@@ -71,6 +71,7 @@ As iterações completas (v1 até v4) dos dois modelos estão em [`03-execucao.m
 - O mapa não informa o label do namespace nem a porta de entrada; o prompt `1.0.1` manda declarar as duas lacunas. O `gpt-oss:20b` declarou na primeira execução; o `qwen3:14b` só depois de refino dirigido.
 - As versões finais foram aplicadas em um cluster `kind` (8 fluxos testados, em `checkpoints/checkpoint-06/teste-cluster/`); isso não substitui um teste no seu CNI.
 - Uma execução por modelo; a variação entre execuções não foi medida.
+- **Teste com modelos pequenos (CP08):** `llama3.2:3b` e `gemma3:4b` não produzem uma política utilizável (o primeiro inventa o esquema do YAML; o segundo omite os comentários) e levam de 5,8 a 9,2 s. O `qwen3:14b` passa nos asserts de conteúdo, em 38 s. Use um modelo de 14 bilhões de parâmetros ou mais e valide o YAML antes de aplicar. Detalhes em [`checkpoint-08`](../../checkpoints/checkpoint-08/).
 
 ## Documentação do caminho
 

@@ -1,0 +1,73 @@
+# Teste determinístico do prompt nota-de-triagem (CP08).
+# Rodar a partir da raiz do repositório:
+#   promptfoo eval -c devops/nota-de-triagem/promptfooconfig.yaml --no-cache -j 1
+# Antes, aqueça os modelos (ver checkpoints/checkpoint-08/README.md): a primeira
+# chamada de um modelo frio inclui o carregamento e estoura o limite de latência.
+description: nota-de-triagem — cinco rótulos, handle @palavra, no máximo 8 linhas, latência e custo
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: llama3.2:3b (Meta, via Ollama)
+    config:
+      model: llama3.2:3b
+      temperature: 0
+      num_ctx: 8192
+  - id: file://../../providers/ollama-local.js
+    label: gemma3:4b (Google, via Ollama)
+    config:
+      model: gemma3:4b
+      temperature: 0
+      num_ctx: 8192
+
+defaultTest:
+  vars:
+    prompt_dir: nota-de-triagem
+  assert:
+    # os cinco rótulos
+    - type: contains
+      value: 'ALERTA:'
+    - type: contains
+      value: 'IMPACTO:'
+    - type: contains
+      value: 'HIPÓTESE INICIAL:'
+    - type: contains
+      value: 'AÇÃO IMEDIATA:'
+    - type: contains
+      value: 'ESCALAR PARA:'
+    # handle no formato @palavra no campo de escalonamento
+    - type: regex
+      value: 'ESCALAR PARA:.*@\w+'
+    # concisão: no máximo 8 linhas
+    - type: javascript
+      value: output.trim().split('\n').length <= 8
+    # limites operacionais
+    - type: latency
+      threshold: 5000
+    - type: cost
+      threshold: 0.01
+
+tests:
+  - description: alerta 1 — Sentinel
+    vars:
+      alerta_cru: file://../../checkpoints/checkpoint-02/entradas/alerta-1-sentinel.txt
+    assert:
+      # extra, além do PDF: o handle do time dono do sistema, conforme a tabela do prompt
+      - type: contains
+        value: '@sentinel-core'
+  - description: alerta 2 — Relay
+    vars:
+      alerta_cru: file://../../checkpoints/checkpoint-02/entradas/alerta-2-relay.txt
+    assert:
+      # extra, além do PDF: o handle do time dono do sistema, conforme a tabela do prompt
+      - type: contains
+        value: '@relay-core'
+  - description: alerta 3 — Forge
+    vars:
+      alerta_cru: file://../../checkpoints/checkpoint-02/entradas/alerta-3-forge.txt
+    assert:
+      # extra, além do PDF: o handle do time dono do sistema, conforme a tabela do prompt
+      - type: contains
+        value: '@data-platform'
