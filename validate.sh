@@ -17,7 +17,7 @@ def erro(m): erros.append(m); print(f" ERRO {m}")
 def aviso(m): avisos.append(m); print(f"aviso {m}")
 
 print("[1/5] Arquivos obrigatórios na raiz")
-for f in ["README.md", "CLAUDE.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE", "validate.sh", "providers/ollama-local.js", "devops/README.md"]:
+for f in ["README.md", "CHANGELOG.md", "CONTRIBUTING.md", "LICENSE", "validate.sh", "providers/ollama-local.js", "devops/README.md"]:
     ok(f) if os.path.isfile(f) else erro(f"falta {f}")
 
 print("[2/5] Categorias: só devops/ (sem resíduos do template)")

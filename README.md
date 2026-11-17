@@ -6,7 +6,7 @@ Biblioteca de prompts parametrizáveis, versionada, testada e tratada como códi
 
 ```text
 playbook-ia-operacional/
-├── README.md  CLAUDE.md  CHANGELOG.md  CONTRIBUTING.md  LICENSE
+├── README.md  CHANGELOG.md  CONTRIBUTING.md  LICENSE
 ├── validate.sh                      # valida a estrutura e os prompts
 ├── devops/                          # a biblioteca de prompts (convenções do template prompt-registry)
 │   ├── README.md                    # escopo da categoria e índice dos prompts
