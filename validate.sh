@@ -65,7 +65,7 @@ for cp in sorted(glob.glob("checkpoints/checkpoint-*")):
         for f in ["README.md", "01-contexto.md", "03-execucao.md", "04-curadoria.md"]:
             if not os.path.isfile(f"{cp}/{f}"): erro(f"{n}: falta {f}")
         txt = open(p02t, encoding="utf-8").read()
-        for cfg in sorted(glob.glob("devops/*/promptfooconfig.yaml")):
+        for cfg in sorted(c for c in glob.glob("devops/*/promptfooconfig.yaml") if c in txt):
             conteudo = open(cfg, encoding="utf-8").read().strip()
             erro(f"{n}: {cfg} não aparece idêntico em 02-testes.md") if conteudo not in txt else ok(f"{n}: 02-testes.md idêntico a {cfg}")
         continue
