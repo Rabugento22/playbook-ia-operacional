@@ -1,0 +1,81 @@
+Com base na configuração, métricas e logs fornecidos, o cluster Elasticsearch está enfrentando **uma crise de recursos causada por uma carga de trabalho intensa, especialmente durante a execução do reindex job**. Abaixo está a análise detalhada:
+
+---
+
+### **1. Problemas Identificados**
+#### **A. Reindex Job Excessivamente Demorado**
+- **Configuração:** O reindex job está programado para rodar diariamente às 02:00, com duração média de 90 minutos (terminando ~03:30).
+- **Realidade:** No log, o reindex job (tarefa 88123) está **executando desde 08:00 UTC** (8 horas após o início esperado) e só está em **40% de progresso** (4,1M/10M documentos). Isso indica que:
+  - **O job está consumindo recursos de forma ineficiente** (ex: alta latência, falta de paralelismo, ou índice muito grande).
+  - **A duração real está muito acima do esperado**, causando sobrecarga no cluster.
+
+#### **B. Sobrecarga de Memória e GC (Garbage Collection)**
+- **Métricas:** Heap_used_pct cresce de 61% (08:00) para 94% (10:00), com picos de 7,7GB/8GB.
+- **Logs:**
+  - **GC warnings:** GCs de **jovem (young)** e **velho (old)** estão ocorrendo com frequência (ex: GC old de 1,8s em 60s).
+  - **Circuit Breaker tripped:** O uso de memória atingiu **96% do limite (7,7GB/8GB)**, causando **EsRejectedExecutionException** e **CircuitBreakingException**.
+  - **Indexing Memory Controller:** O sistema está **throttling** a indexação devido à falta de memória (ex: "segment writing can't keep up").
+
+#### **C. Sobrecarga de Indexação e Escrita**
+- **Métricas:** `indexed_docs_per_s` aumenta de 4.200 para 12.400 (quase triplicando).
+- **Logs:**
+  - **Write thread pool queue full:** O pool de threads de escrita está **cheio (200/200)**, rejeitando **1.284 bulk requests** em 5 minutos.
+  - **Indexing buffer above limit:** O buffer de indexação está acima do limite, causando **throttling**.
+
+#### **D. Problemas de Busca (Search)**
+- **Métricas:** `search_p99_ms` aumenta de 850ms para **6.700ms** (mais de 7x).
+- **Logs:**
+  - **Slow query:** Uma query levou **2.380ms** em um shard.
+  - **Search partial results:** 11/12 shards foram bem-sucedidos, mas **1 shard falhou**.
+  - **Query cache eviction:** A taxa de evicção do cache de query está **spiking**, com hit_ratio caindo para **29%** (de 74% inicial).
+
+---
+
+### **2. Causas Raiz**
+1. **Reindex Job Mal Configurado:**
+   - O job está **consumindo recursos excessivos** (ex: alta latência, falta de paralelismo).
+   - A duração real está **muito acima do esperado**, causando sobrecarga no cluster.
+
+2. **Limitação de Memória (JVM Heap):**
+   - O heap está configurado para **8GB**, mas a carga de indexação e busca está **excedendo esse limite**.
+   - O **circuit breaker** está sendo acionado devido ao uso de memória acima do limite (7,7GB/8GB).
+
+3. **Cache de Query Inadequado:**
+   - O cache de query está configurado para **512MB**, mas a carga de busca está **evicting** rapidamente, reduzindo o hit_ratio.
+
+4. **Configuração de Refresh Interval:**
+   - O `refresh_interval` está configurado para **1s**, o que pode estar **aumentando a carga de I/O e CPU**.
+
+---
+
+### **3. Impactos**
+- **Latência elevada:** As buscas estão demorando **até 6,7 segundos** (p99), prejudicando a experiência do usuário.
+- **Rejeição de operações:** O write thread pool está **rejeitando bulk requests**, causando **perda de dados** ou **atrasos**.
+- **Falhas parciais:** As buscas estão retornando **resultados incompletos** (11/12 shards).
+- **Risco de instabilidade:** O circuit breaker e GCs frequentes podem levar a **crashs** ou **perda de dados**.
+
+---
+
+### **4. Recomendações**
+#### **A. Otimizar o Reindex Job**
+- **Reduzir a carga do job:** Verificar se o índice está muito grande ou se há operações redundantes.
+- **Ajustar o schedule:** Executar o job em **horários de baixa demanda** (ex: noturno).
+- **Dividir o job em partes menores** para evitar sobrecarga.
+
+#### **B. Aumentar Recursos do Cluster**
+- **Aumentar o heap do JVM:** Se possível, aumentar o heap para **12GB** (não exceder 50% da memória física).
+- **Adicionar nós:** Adicionar mais nós para distribuir a carga de indexação e busca.
+
+#### **C. Ajustar Configurações**
+- **Aumentar o cache de query:** Aumentar `size_mb` para **1GB ou mais**.
+- **Ajustar `refresh_interval`:** Considerar aumentar para **30s** ou **1m** para reduzir a carga de I/O.
+- **Configurar circuit breaker:** Aumentar o limite de memória para o circuit breaker (ex: `breaker: parent: limit: 90%`).
+
+#### **D. Monitorar e Otimizar Consultas**
+- **Identificar e otimizar queries lentas:** Usar ferramentas como **Elasticsearch Profiling** para encontrar queries demoradas.
+- **Indexar campos relevantes:** Garantir que campos usados em consultas sejam indexados.
+
+---
+
+### **5. Conclusão**
+O cluster está **sobrecarregado devido ao reindex job mal configurado, limitação de memória e alta carga de indexação/busca**. A solução envolve **otimizar o job, aumentar recursos e ajustar configurações críticas**. Sem intervenção, o cluster pode sofrer **perda de dados, latência extrema e instabilidade**.

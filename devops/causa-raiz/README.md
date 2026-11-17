@@ -49,6 +49,14 @@ A saída completa dos dois modelos está em [`03-execucao.md`](../../checkpoints
 - Uma execução por modelo; não se mediu a variação entre execuções.
 - Os artefatos de um único nó limitam a conclusão sobre o cluster inteiro.
 
+## Gate de qualidade
+
+Este prompt tem saída aberta, então o teste é um juiz LLM, e não regex. [`promptfooconfig.yaml`](promptfooconfig.yaml) gera a análise (`gpt-oss:20b`) e pede ao juiz (`qwen3:14b`, via Ollama) que a pontue em quatro critérios de 0 a 2 ([`rubrica.txt`](rubrica.txt) e [`juiz.txt`](juiz.txt)). A mudança é barrada quando o total fica abaixo de 6 ou algum critério é 0. A rubrica, a calibração e as execuções estão em [`checkpoints/checkpoint-09/`](../../checkpoints/checkpoint-09/).
+
+```bash
+promptfoo eval -c devops/causa-raiz/promptfooconfig.yaml --no-cache -j 1
+```
+
 ## Documentação do caminho
 
 Contexto, decisão de sanitização, evolução do prompt, execuções e curadoria estão em [`checkpoints/checkpoint-03/`](../../checkpoints/checkpoint-03/).

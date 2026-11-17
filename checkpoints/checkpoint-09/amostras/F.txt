@@ -1,0 +1,91 @@
+## Análise da Degradação do Sistema Elasticsearch
+
+**Linha do Tempo:**
+
+- 2026-05-13 08:00 UTC: Métricas iniciais com `search_p99_ms` alto (850ms), `indexed_docs_per_s` alto (4200), `heap_used_pct` alto (61%), `cache_hit_pct` relativamente alto (74%).
+- 2026-05-13 08:30 UTC: Métricas com `search_p99_ms` ainda alto (1100ms), `indexed_docs_per_s` alto (4100), `heap_used_pct` aumenta (68%), `cache_hit_pct` diminui (71%).
+- 2026-05-13 09:00 UTC: `search_p99_ms` dispara (2300ms), `indexed_docs_per_s` continua alto (9800), `heap_used_pct` aumenta (79%), `cache_hit_pct` diminui significativamente (58%).
+- 2026-05-13 09:30 UTC: `search_p99_ms` continua alto (4100ms), `indexed_docs_per_s` alto (11200), `heap_used_pct` aumenta (88%), `cache_hit_pct` continua baixo (41%).
+- 2026-05-13 10:00 UTC: `search_p99_ms` continua alto (6700ms), `indexed_docs_per_s` alto (12400), `heap_used_pct` alto (94%), `cache_hit_pct` baixo (29%).
+- 2026-05-13 08:02 UTC: Início da tarefa de reindexação agendada.
+- 2026-05-13 08:41 UTC: O `IndexingMemoryController` reporta que a escrita de segmentos está atrasada.
+- 2026-05-13 09:03 UTC: O thread pool de escrita está congestionado.
+- 2026-05-13 09:12 UTC: GC (Old Generation) com duração longa e alta utilização de heap.
+- 2026-05-13 09:20 UTC: Início da segunda execução da tarefa de reindexação.
+- 2026-05-13 09:31 UTC: O circuito de proteção (Circuit Breaker) do shard `logs-2026.05` está se aproximando do limite.
+- 2026-05-13 09:44 UTC: Consulta lenta no shard `logs-2026.05`.
+- 2026-05-13 09:51 UTC: Congestionamento no thread pool de escrita.
+- 2026-05-13 09:58 UTC: O thread pool de escrita fica cheio, rejeitando requisições. O circuito de proteção do shard `logs-2026.05` é acionado.
+- 2026-05-13 09:58 UTC: O cache de consultas (query cache) apresenta alta taxa de evasão.
+- 2026-05-13 09:58 UTC: Exceção `CircuitBreakingException` devido ao tamanho excessivo dos dados.
+- 2026-05-13 09:58 UTC: O thread pool rejeita 1284 requisições.
+- 2026-05-13 10:03 UTC: Aumento da taxa de falha dos shards.
+- 2026-05-13 10:05 UTC: Todas as shards falham para o índice `logs-2026.05`.
+
+**Causa-Raiz:**
+
+- Reindexação excessiva e mal gerenciada, combinada com alta carga de indexação e recursos insuficientes. (Grau de Confiança: Alta - A evidência é consistente em logs, métricas e a cronologia dos eventos aponta para isso).
+
+**Mecanismo:**
+
+1.  Tarefa de reindexação agendada (02:00) inicia, consumindo recursos.
+2.  A alta taxa de indexação (4200 docs/s) sobrecarrega o cluster, especialmente o shard `logs-2026.05`.
+3.  O `IndexingMemoryController` detecta que a escrita de segmentos não consegue acompanhar a taxa de indexação.
+4.  O thread pool de escrita fica congestionado, resultando em atrasos e requisições rejeitadas.
+5.  O circuito de proteção do shard `logs-2026.05` é acionado devido ao uso excessivo de recursos.
+6.  A alta utilização do heap e a necessidade de coleta de lixo (GC) impactam o desempenho.
+7.  A tarefa de reindexação continua, exacerbando a situação.
+8.  A consulta lenta no shard `logs-2026.05` e a falha em todas as shards indicam um ponto de ruptura.
+9.  A alta taxa de evasão do cache de consultas contribui para o problema.
+10. A exceção `CircuitBreakingException` interrompe o fluxo de dados.
+
+**Efeitos/Consequências:**
+
+-   Aumento significativo do `search_p99_ms` (de 850ms para 6700ms).
+-   Redução do `cache_hit_pct` (de 74% para 29%).
+-   Congestionamento do thread pool de escrita.
+-   Acionamento do circuito de proteção do shard `logs-2026.05`.
+-   Falha em todas as shards do índice `logs-2026.05`.
+-   Aumento da latência geral do sistema.
+
+**Correlações:**
+
+-   Aumento do `heap_used_pct` e da frequência de GC está correlacionado com a alta taxa de indexação e o consumo de recursos.
+-   A taxa de evasão do cache de consultas está correlacionada com a alta carga no cluster.
+-   O congestionamento do thread pool de escrita está correlacionado com a incapacidade de escrever segmentos de forma eficiente.
+
+**Grau de Confiança:**
+
+-   Alta (A evidência é convergente e a causa-raiz é consistente com todos os dados coletados).
+
+**Limitações dos Dados:**
+
+-   Falta de logs de outros nós do cluster.
+-   Ausência de informações sobre a carga de indexação antes do início dos problemas.
+-   Não há dados sobre o tamanho do volume de dados indexados durante a tarefa de reindexação.
+-   Não há informações sobre a configuração do hardware (CPU, memória, disco) do nó `cerebro-node-3`.
+
+**Hipóteses Alternativas Não Descartadas:**
+
+-   Problema de configuração do Elasticsearch (ex.: tamanho do heap, número de shards).
+-   Problema de rede entre o nó `cerebro-node-3` e outros nós do cluster.
+-   Problema de hardware no nó `cerebro-node-3`.
+
+**Dados Adicionais Necessários:**
+
+-   Logs de outros nós do cluster.
+-   Informações sobre a carga de indexação antes do início dos problemas.
+-   Informações sobre a configuração do hardware do nó `cerebro-node-3`.
+-   Monitoramento da utilização da rede entre os nós.
+
+**Ações:**
+
+-   Conter agora:
+    -   Suspender a tarefa de reindexação (se possível).
+    -   Reduzir a taxa de indexação (se a tarefa de reindexação for essencial).
+-   Corrigir depois:
+    -   Analisar a configuração do Elasticsearch (heap, shards, refresh_interval) e otimizar de acordo com a carga de trabalho.
+    -   Verificar a utilização da rede entre os nós.
+    -   Monitorar o uso de recursos do nó `cerebro-node-3`.
+    -   Considerar aumentar os recursos do nó `cerebro-node-3` (CPU, memória, disco) se a carga de trabalho for persistente.
+    -   Reavaliar a estratégia de reindexação, otimizando o processo e monitorando de perto o impacto no cluster.

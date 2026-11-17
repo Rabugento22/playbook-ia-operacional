@@ -1,0 +1,44 @@
+# Gate de qualidade do prompt causa-raiz com juiz LLM (CP09).
+# Rodar a partir da raiz do repositório:
+#   promptfoo eval -c devops/causa-raiz/promptfooconfig.yaml --no-cache -j 1
+# O prompt gera a análise (gpt-oss:20b); o juiz (qwen3:14b) aplica a rubrica e dá as notas.
+# Aprova com total >= 6 e nenhum critério zerado: o juiz zera "pass" se algum critério for 0,
+# e o "threshold: 6" do assert barra totais abaixo de 6.
+description: causa-raiz — gate de qualidade com LLM-as-judge (rubrica de 4 critérios, 0 a 2, corte 6)
+
+prompts:
+  - file://../../providers/carregar-prompt.js
+
+providers:
+  - id: file://../../providers/ollama-local.js
+    label: gpt-oss:20b (OpenAI, via Ollama)
+    config:
+      model: gpt-oss:20b
+      think: medium
+      temperature: 0
+      num_ctx: 12288
+
+defaultTest:
+  options:
+    # o juiz: outro modelo e outra família que o gerador, para reduzir o favorecimento do próprio texto
+    provider:
+      id: file://../../providers/ollama-local.js
+      label: qwen3:14b (Alibaba, via Ollama) — juiz
+      config:
+        model: qwen3:14b
+        think: false
+        temperature: 0
+        num_ctx: 12288
+    rubricPrompt: file://juiz.txt
+
+tests:
+  - description: degradação do Cerebro — reindexação travada, heap, circuit breaker e timeouts
+    vars:
+      prompt_dir: causa-raiz
+      config: file://../../checkpoints/checkpoint-03/entradas/artefato-1-cerebro.yaml
+      metricas: file://../../checkpoints/checkpoint-03/entradas/artefato-2-metricas.txt
+      logs: file://../../checkpoints/checkpoint-03/entradas/artefato-3-logs.txt
+    assert:
+      - type: llm-rubric
+        threshold: 6
+        value: file://rubrica.txt

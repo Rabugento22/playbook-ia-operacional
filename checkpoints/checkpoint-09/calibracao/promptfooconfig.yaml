@@ -1,0 +1,52 @@
+# Calibração do juiz do CP09: aplica o MESMO juiz e a MESMA rubrica de devops/causa-raiz
+# a saídas já geradas (amostras), sem chamar de novo o modelo que as gerou.
+#   promptfoo eval -c checkpoints/checkpoint-09/calibracao/promptfooconfig.yaml --no-cache -j 1
+description: calibração do juiz — amostras avaliadas pelo juiz de devops/causa-raiz
+
+prompts:
+  - '{{saida}}'
+
+providers:
+  - echo
+
+defaultTest:
+  options:
+    provider:
+      id: file://../../../providers/ollama-local.js
+      label: qwen3:14b (Alibaba, via Ollama) — juiz
+      config:
+        model: qwen3:14b
+        think: false
+        temperature: 0
+        num_ctx: 12288
+    rubricPrompt: file://../../../devops/causa-raiz/juiz.txt
+  assert:
+    - type: llm-rubric
+      threshold: 6
+      value: file://../../../devops/causa-raiz/rubrica.txt
+
+tests:
+  - description: amostra A
+    vars:
+      saida: file://../amostras/A.txt
+  - description: amostra B
+    vars:
+      saida: file://../amostras/B.txt
+  - description: amostra C
+    vars:
+      saida: file://../amostras/C.txt
+  - description: amostra D
+    vars:
+      saida: file://../amostras/D.txt
+  - description: amostra E
+    vars:
+      saida: file://../amostras/E.txt
+  - description: amostra F
+    vars:
+      saida: file://../amostras/F.txt
+  - description: amostra G
+    vars:
+      saida: file://../amostras/G.txt
+  - description: amostra H
+    vars:
+      saida: file://../amostras/H.txt

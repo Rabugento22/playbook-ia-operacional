@@ -1,0 +1,17 @@
+Com base nas informações fornecidas, é possível identificar alguns problemas e tendências nos logs e métricas do Elasticsearch:
+
+1. **Reindexamento**: O reindexamento está sendo realizado regularmente às 02:00, mas está apresentando problemas de desempenho. O log `[2026-05-13T09:58:46,512][ERROR][o.e.s.SearchService                  ][cerebro-node-3] search returned partial results: 11/12 shards succeeded` indica que apenas 11 dos 12 shards foram concluídos, o que sugere que há um problema de desempenho ou falha nos shards.
+2. **Circuit Breaker**: O Circuit Breaker está sendo ativado devido ao uso excessivo de memória (96% do limite). Isso pode ser um problema de desempenho e pode afetar a capacidade do Elasticsearch de lidar com consultas.
+3. **Query Cache**: O hit ratio do Query Cache está baixo (0.29), o que pode indicar que o cache está sendo evitado excessivamente. Isso pode ser um problema de desempenho e pode afetar a capacidade do Elasticsearch de lidar com consultas.
+4. **Heap Used**: O uso do heap está aumentando gradualmente, o que pode indicar que há um problema de memória no Elasticsearch. O log `[2026-05-13T09:58:44,005][INFO ][o.e.t.LoggingTaskListener            ][cerebro-node-3] reindex task [88123] (scheduled 02:00) still running, created [4.1M]/[10M] docs (41%), ETA unknown` mostra que o reindexamento está criando mais documentos do que o esperado, o que pode estar contribuindo para o aumento do uso do heap.
+5. **Write Thread Pool**: O write thread pool está cheio (200/200) e está rejeitando bulk requests, o que pode indicar que há um problema de desempenho e concorrência nos shards.
+
+Para resolver esses problemas, é recomendável:
+
+* Verificar se há algum problema de desempenho ou falha nos shards que está afetando o reindexamento.
+* Ajustar o Circuit Breaker para reduzir o uso excessivo de memória.
+* Ajustar o Query Cache para melhorar o hit ratio.
+* Verificar se há algum problema de memória no Elasticsearch e ajustar as configurações de memória se necessário.
+* Ajustar o write thread pool para reduzir a concorrência nos shards.
+
+Além disso, é recomendável monitorar as métricas do Elasticsearch regularmente para detectar problemas de desempenho e falhas antes que elas se tornem críticas.

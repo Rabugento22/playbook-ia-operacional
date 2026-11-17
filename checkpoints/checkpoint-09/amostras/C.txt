@@ -1,0 +1,70 @@
+**Linha do Tempo:**
+
+- 2026-05-13 02:00 UTC: Reindex task [88123] (scheduled) criado [3.8M]/[10M] docs (38%) (Evidência: configuração, métricas)
+- 2026-05-13 02:00 UTC: Reindex task [88123] (scheduled) começou (Evidência: logs)
+- 2026-05-13 08:02 UTC: Reindex task [88123] (scheduled) progress, created [3.8M]/[10M] docs (38%) (Evidência: logs)
+- 2026-05-13 08:14 UTC: Heap usado 4.9GB, disponível 3.1GB (Evidência: logs)
+- 2026-05-13 08:41 UTC: Indexing buffer acima do limite, throttling shard [logs-2026.05][7] (Evidência: logs)
+- 2026-05-13 09:03 UTC: Write thread pool queue at 150/200 (Evidência: logs)
+- 2026-05-13 09:12 UTC: Heap usado 6.3GB, disponível 5.9GB (Evidência: logs)
+- 2026-05-13 09:20 UTC: Reindex task [88123] (scheduled) progress, created [4.0M]/[10M] docs (40%) (Evidência: logs)
+- 2026-05-13 09:31 UTC: Hierarchy Circuit Breaker Service: uso 6.9GB/8GB (86%), aproximando o limite (Evidência: logs)
+- 2026-05-13 09:44 UTC: Slow query on shard [logs-2026.05][7] tomou 2380ms (Evidência: logs)
+- 2026-05-13 09:58 UTC: Write thread pool queue full [200/200], rejeitando bulk (Evidência: logs)
+- 2026-05-13 09:58 UTC: Indexing buffer acima do limite, throttling shard [logs-2026.05][7] (Evidência: logs)
+- 2026-05-13 09:58 UTC: CircuitBreakingException: Data too large, seria [7.9GB/8GB] (Evidência: logs)
+- 2026-05-13 10:01 UTC: Write thread pool rejeitando [1284] bulk requests em último 5min (Evidência: logs)
+- 2026-05-13 10:03 UTC: Todos os shards falharam para index [logs-2026.05] em 3 de último 20 queries (Evidência: logs)
+
+**Causa-Raiz:**
+A causa-raiz é a configuração do cluster Elasticsearch, especificamente a quantidade de memória disponível para o heap e a reindex job. A configuração de heap de 8GB não é suficiente para o uso intenso do cluster, especialmente durante a reindexação, que pode consumir até 8GB de memória.
+
+**Mecanismo:**
+
+1. Reindex task [88123] (scheduled) criado [3.8M]/[10M] docs (38%) (Evidência: configuração, métricas)
+2. Reindex task [88123] (scheduled) começou (Evidência: logs)
+3. Heap usado 4.9GB, disponível 3.1GB (Evidência: logs)
+4. Indexing buffer acima do limite, throttling shard [logs-2026.05][7] (Evidência: logs)
+5. Write thread pool queue at 150/200 (Evidência: logs)
+6. Heap usado 6.3GB, disponível 5.9GB (Evidência: logs)
+7. Reindex task [88123] (scheduled) progress, created [4.0M]/[10M] docs (40%) (Evidência: logs)
+8. Hierarchy Circuit Breaker Service: uso 6.9GB/8GB (86%), aproximando o limite (Evidência: logs)
+9. Slow query on shard [logs-2026.05][7] tomou 2380ms (Evidência: logs)
+10. Write thread pool queue full [200/200], rejeitando bulk (Evidência: logs)
+11. Indexing buffer acima do limite, throttling shard [logs-2026.05][7] (Evidência: logs)
+12. CircuitBreakingException: Data too large, seria [7.9GB/8GB] (Evidência: logs)
+13. Write thread pool rejeitando [1284] bulk requests em último 5min (Evidência: logs)
+14. Todos os shards falharam para index [logs-2026.05] em 3 de último 20 queries (Evidência: logs)
+
+**Efeitos/Consequências:**
+
+- Reindexação não concluída devido à falta de memória disponível.
+- Throttling de shard [logs-2026.05][7] devido ao uso excessivo de memória.
+- Write thread pool queue full, rejeitando bulk.
+- Indexing buffer acima do limite, impedindo a escrita de documentos.
+- CircuitBreakingException: Data too large, impedindo a busca em shards.
+
+**Correlações:**
+
+- Aumento da quantidade de documentos indexados durante a reindexação.
+- Aumento da quantidade de memória usada pelo heap.
+- Aumento da quantidade de documentos que não podem ser indexados devido ao uso excessivo de memória.
+- Aumento da quantidade de bulk rejeitado devido ao write thread pool queue full.
+
+**Grau de Confiança: Alta**
+A causa-raiz é a configuração do cluster Elasticsearch, especificamente a quantidade de memória disponível para o heap e a reindex job. A configuração de heap de 8GB não é suficiente para o uso intenso do cluster, especialmente durante a reindexação, que pode consumir até 8GB de memória. A evidência dos logs e métricas confirma que a falta de memória disponível é a causa principal do problema.
+
+**Limitações dos Dados:**
+
+- Ausência de logs de outro nó do cluster.
+- Hipótese alternativa: a configuração do cluster não é a causa do problema.
+- Dados adicionais necessários: mais informações sobre a configuração do cluster e a quantidade de memória usada pelo heap.
+
+**Ações:**
+
+- Conter agora:
+  - Aumentar a quantidade de memória disponível para o heap para 16GB.
+  - Reduzir a quantidade de documentos indexados durante a reindexação.
+- Corrigir depois:
+  - Ajustar a configuração do cluster para reduzir a quantidade de memória usada pelo heap.
+  - Implementar uma estratégia de reindexação mais eficiente para reduzir a quantidade de memória usada.

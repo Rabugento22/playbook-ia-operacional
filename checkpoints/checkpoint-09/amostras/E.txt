@@ -1,0 +1,89 @@
+## Resumo rápido
+
+- **O que está acontecendo?**  
+  O job de re‑indexação que começa às 02:00 (08:00 UTC) está consumindo quase todo o heap, gerando GC “old” de 1–2 s, enchendo a fila de *write thread pool* e acionando o *circuit breaker* (“parent”). Isso faz com que o cluster comece a rejeitar bulk requests, trave o buffer de indexação, perca hits de cache e, por fim, deixe as buscas com tempo‑outs e falhas de shard.
+
+- **Por que isso acontece?**  
+  1. **Carga de re‑indexação muito alta** – 10 M de documentos em 90 min (≈ 1 M docs/min) é muito para 12 shards com 8 GB de heap.  
+  2. **Refresh interval de 1 s** – cada bulk precisa de um merge de segmentação a cada segundo, gerando overhead de I/O e GC.  
+  3. **Cache de query de 512 MB** – com 12 shards o cache fica “vazio” rapidamente quando a memória fica cheia.  
+  4. **Thread‑pool de escrita pequeno** – a fila atinge 200/200 e começa a rejeitar requests.  
+  5. **Circuit breaker “parent”** – o limite de 8 GB é atingido antes que o GC libere memória suficiente, então o ES bloqueia novas operações.
+
+---
+
+## Linha do tempo (08 h – 10 h)
+
+| Hora | Evento | Impacto |
+|------|--------|---------|
+| **08:02** | Re‑indexação começa (38 % já criado) | Início de alta carga |
+| **08:14** | GC young 620 ms, heap 4.9 → 3.1 GB | GC normal, mas já há pressão |
+| **08:41** | *IndexingMemoryController* throttles shard 7 | Segment writing não acompanha bulk |
+| **09:03** | Thread‑pool queue 150/200 | Início de backlog |
+| **09:12** | GC old 1.1 s, heap 6.3 → 5.9 GB | GC “old” começa a ser frequente |
+| **09:20** | Re‑indexação 40 % | Ainda lento |
+| **09:31** | Circuit breaker 86 % | Próximo a tripping |
+| **09:44** | Query lenta 2.38 s | Busca começa a sofrer |
+| **09:51** | Queue 188/200 | Backlog cresce |
+| **09:58** | Queue full, bulk rejeitado | Indexação começa a falhar |
+| **09:58** | GC old 1.8 s, heap 7.6 → 7.4 GB | Heap quase cheio |
+| **09:58** | Circuit breaker 96 % | Tripping, operações bloqueadas |
+| **09:58** | Cache hit 29 % | Cache está sendo evocado |
+| **10:01** | CircuitBreakingException | Busca falha completa |
+| **10:03** | 1284 bulk rejeitados em 5 min | Backlog crítico |
+| **10:05** | 3/20 queries falham | Cluster está “quebrado” |
+
+---
+
+## Causas principais
+
+| Causa | Evidência | Como afeta |
+|-------|-----------|-----------|
+| **Re‑indexação pesada** | 4 M docs já criados em 2 h | Consome heap, GC, thread‑pool |
+| **Refresh interval curto** | 1 s | Merge de segmentação frequente, overhead de I/O |
+| **Cache de query pequeno** | 512 MB, hit ratio cai de 74 % → 29 % | Cache evictado, buscas mais lentas |
+| **Thread‑pool de escrita pequeno** | Queue 200/200 | Bulk requests rejeitados |
+| **Circuit breaker “parent”** | 7.7 GB/8 GB | Bloqueia novas operações |
+| **Heap insuficiente** | 8 GB para 12 shards + re‑index | GC “old” frequente, memória fragmentada |
+
+---
+
+## Recomendações imediatas
+
+| Ação | Por quê? | Como fazer? |
+|------|----------|-------------|
+| **Aumentar o heap** | 8 GB não é suficiente para 12 shards + re‑index | 12 GB (ou mais) se houver RAM disponível |
+| **Aumentar o *refresh interval*** | Reduz merge de segmentação | `index.refresh_interval: 30s` (ou 60s) durante o job |
+| **Desativar/Reduzir *query cache*** | Evita evicção constante | `indices.query.bool_cache.size: 0` ou aumentar para 1 GB |
+| **Aumentar *write thread pool*** | Evita rejeição de bulk | `threadpool.write.size: 20` (ou 1.5× número de CPUs) |
+| **Reduzir *batch size* do re‑index** | Menos pressão de memória | `size: 1000` ou `max_docs` menor |
+| **Usar *reindex* com *scroll* e *bulk* customizados** | Controla fluxo | `reindex` API com `scroll` e `size` menores |
+| **Aumentar *circuit breaker* threshold** | Dá mais margem | `indices.breaker.total.limit: 90%` |
+| **Monitorar GC** | Identificar se G1GC é melhor | `-XX:+UseG1GC` ou `-XX:+UseZGC` |
+| **Adicionar nós** | Distribuir carga | Se possível, escalar horizontalmente |
+
+---
+
+## Plano de ação de curto prazo
+
+1. **Reiniciar o job de re‑indexação** com as configurações acima (heap 12 GB, refresh 30 s, thread‑pool 20).  
+2. **Desativar o cache de query** temporariamente (`indices.query.bool_cache.size: 0`).  
+3. **Aumentar o *write thread pool*** para 20.  
+4. **Monitorar**: heap, GC, thread‑pool, circuit breaker, cache hit ratio.  
+5. **Se o job ainda não terminar em 3 h**: reduzir batch size para 500 e/ou dividir o job em duas partes (por data, por shard).  
+
+---
+
+## Plano de longo prazo
+
+- **Reavaliar a arquitetura**: 12 shards pode ser excessivo para 8 GB de heap. Considere reduzir shards ou aumentar nós.  
+- **Automatizar ajustes de re‑index**: usar *reindex* com *wait_for_completion=false* e monitorar progressivamente.  
+- **Implementar *index lifecycle management* (ILM)** para mover índices antigos para nós de menor custo.  
+- **Investir em métricas de GC**: usar `jvm.gc` e `jvm.memory` para ajustar thresholds.  
+- **Planejar jobs fora de pico**: se possível, mover re‑index para horários de menor carga.  
+
+---
+
+## Conclusão
+
+O cluster está sobrecarregado pelo job de re‑indexação que, devido a configurações de heap, refresh, cache e thread‑pool inadequadas, está consumindo quase todo o recurso de memória, gerando GC “old” frequentes e bloqueando o *write thread pool*. Isso faz com que o *circuit breaker* trave o cluster, as buscas fiquem lentas e, por fim, falhem. Ajustar as configurações acima (heap, refresh, cache, thread‑pool, circuit breaker) e re‑executar o job deve restaurar a estabilidade. Se o problema persistir, considere escalar horizontalmente ou reduzir o número de shards.

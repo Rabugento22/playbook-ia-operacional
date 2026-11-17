@@ -1,0 +1,79 @@
+Linha do Tempo:  
+- 08:00 UTC: métricas – search_p99 850 ms, indexed_docs_per_s 4200, heap_used_pct 61 %, cache_hit_pct 74 % (Evidência: <metricas>).  
+- 08:02 UTC: reindex task [88123] progress 38 % (3.8 M/10 M docs) (Evidência: <logs>).  
+- 08:14 UTC: GC young 620 ms, heap 4.9 gb→3.1 gb (Evidência: <logs>).  
+- 08:41 UTC: IndexingMemoryController throttles shard logs‑2026.05[7] (segment writing backlog) (Evidência: <logs>).  
+- 09:00 UTC: métricas – search_p99 2300 ms, indexed_docs_per_s 9800, heap_used_pct 79 %, cache_hit_pct 58 % (Evidência: <metricas>).  
+- 09:03 UTC: threadpool queue 150/200 (Evidência: <logs>).  
+- 09:12 UTC: GC old 1.1 s, heap 6.3 gb→5.9 gb (Evidência: <logs>).  
+- 09:20 UTC: reindex progress 40 % (4.0 M/10 M docs) (Evidência: <logs>).  
+- 09:30 UTC: métricas – search_p99 4100 ms, indexed_docs_per_s 11200, heap_used_pct 88 %, cache_hit_pct 41 % (Evidência: <metricas>).  
+- 09:31 UTC: HierarchyCircuitBreakerService parent usage 6.9 gb/8 gb (86 %) (Evidência: <logs>).  
+- 09:44 UTC: slow query 2380 ms (Evidência: <logs>).  
+- 09:51 UTC: threadpool queue 188/200 (Evidência: <logs>).  
+- 09:58 UTC: threadpool queue full 200/200, rejecting bulk (Evidência: <logs>).  
+- 09:58 UTC: GC old 1.8 s, heap 7.6 gb→7.4 gb (Evidência: <logs>).  
+- 09:58 UTC: reindex still running 41 % (Evidência: <logs>).  
+- 09:58 UTC: indexing buffer above limit, throttling shard logs‑2026.05[7] (Evidência: <logs>).  
+- 09:58 UTC: query took 5031 ms (timeout 5000 ms) (Evidência: <logs>).  
+- 09:58 UTC: search returned partial results 11/12 shards succeeded (Evidência: <logs>).  
+- 09:58 UTC: circuit breaker tripped 96 % (Evidência: <logs>).  
+- 09:58 UTC: query cache eviction spiking, hit_ratio 0.29 (Evidência: <logs>).  
+- 10:01 UTC: CircuitBreakingException (Evidência: <logs>).  
+- 10:03 UTC: threadpool rejected 1284 bulk requests in last 5 min (Evidência: <logs>).  
+- 10:05 UTC: all shards failed for index logs‑2026.05 on 3 of last 20 queries (Evidência: <logs>).
+
+Causa‑Raiz:  
+- O job de reindexação (reindex_task 88123) executado a partir de 08:02 UTC consumiu recursos de memória e threadpool além da capacidade do cluster, provocando pressão de heap, GC intenso, acionamento do circuit breaker e falhas de busca. (Evidência: progressos de reindex, throttling de shard, GC, circuit breaker, threadpool full, falhas de busca).
+
+Mecanismo:  
+1. Reindexação iniciou em 08:02 UTC, enviando grandes lotes de bulk para o cluster (Evidência: progress 38 % em 08:02).  
+2. Lotes saturaram o threadpool de indexação, fazendo a fila crescer (09:03 UTC 150/200, 09:51 UTC 188/200, 09:58 UTC full).  
+3. O IndexingMemoryController detectou backlog de escrita de segmentos e começou a throttling do shard logs‑2026.05[7] (08:41 UTC, 09:58 UTC).  
+4. O aumento de operações de escrita elevou o uso de heap de 61 % para 94 % (métricas 08:00‑10:00).  
+5. GC frequente (young e old) tentou liberar memória, mas não conseguiu acompanhar a taxa de consumo (08:14, 09:12, 09:58).  
+6. Heap atingiu 86 % do limite do circuit breaker (09:31) e depois 96 % (09:58), acionando o circuit breaker (09:58).  
+7. O circuit breaker rejeitou consultas que exigiam mais memória, gerando CircuitBreakingException (10:01) e falhas de busca (10:05).  
+8. A alta taxa de evicção do cache de consulta reduziu a hit_ratio para 0,29 (09:58).  
+9. O resultado final foi aumento de latência de busca (p99 de 850 ms a 6700 ms) e falhas de consulta.
+
+Efeitos/Consequências:  
+- Aumento de latência de busca (p99 de 850 ms → 6700 ms).  
+- Falhas de consulta (CircuitBreakingException, partial results, all shards failed).  
+- Rejeição de bulk requests (threadpool full).  
+- Throttling de shard, reduzindo taxa de indexação.  
+- Evicção de cache de consulta, diminuindo hit_ratio.  
+- GC intenso, potencial degradação de desempenho geral.
+
+Correlações:  
+- Aumento de indexed_docs_per_s correlaciona com aumento de heap_used_pct e GC.  
+- Aumento de cache_hit_pct inversamente correlaciona com aumento de p99.  
+- Aumento de threadpool queue correlaciona com falhas de busca, mas não prova causalidade direta.
+
+Grau de Confiança:  
+- Alta (Justificativa: múltiplas evidências convergentes – progressos de reindex, throttling, GC, circuit breaker, threadpool full, falhas de busca – todas alinhadas no mesmo intervalo de tempo e com valores específicos que explicam a degradação observada. Nenhum dado relevante contradiz a hipótese de que o reindex job foi o gatilho principal).
+
+Limitações dos Dados:  
+- Logs disponíveis apenas de cerebro-node-3; não sabemos se outros nós tiveram métricas semelhantes.  
+- Não há configuração detalhada do job de reindexação (tamanho de lote, taxa de bulk).  
+- Falta de métricas de I/O de disco e rede que poderiam confirmar se o backlog de escrita de segmentos era causado por I/O.  
+- Hipóteses alternativas não descartadas: carga de indexação externa, falha de disco, problemas de rede que poderiam contribuir para o backlog.
+
+Ações:  
+
+Conter agora:  
+- Pausar imediatamente o job de reindexação (cerebro-node-3).  
+- Reduzir o tamanho dos lotes de bulk (se configurável) ou limitar a taxa de indexação.  
+- Aumentar o tamanho da fila do threadpool de indexação (se possível) para evitar rejeições.  
+- Desativar temporariamente o reindex job no cron (para evitar execução simultânea).  
+
+Corrigir depois:  
+- Reconfigurar o job de reindexação para usar lotes menores e/ou taxa de indexação mais baixa, alinhada à capacidade de heap e threadpool.  
+- Ajustar o circuit breaker (parent) para um limite mais conservador ou aumentar a memória heap (8 gb → 12 gb).  
+- Adicionar nós ao cluster ou aumentar a capacidade de memória dos nós existentes.  
+- Habilitar e ajustar o IndexingMemoryController para limitar o backlog de escrita de segmentos.  
+- Monitorar métricas de GC, heap e threadpool após a correção para garantir estabilidade.  
+
+Não fazer ainda:  
+- Não aumentar a heap sem antes confirmar que o problema é realmente memória (dados de I/O ausentes).  
+- Não alterar a configuração de refresh_interval ou query_cache sem evidência de impacto direto.
