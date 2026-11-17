@@ -27,7 +27,7 @@ Oito saídas reais e sem edição, com códigos neutros em [`amostras/`](amostra
 | G | qwen3:14b | pedido solto | 137,2 s | 2.324 |
 | H | gpt-oss:20b | prompt causa-raiz | 105,8 s | 4.386 |
 
-As notas de referência estão em [`calibracao/pontuacao-referencia.md`](calibracao/pontuacao-referencia.md). **Foram dadas pelo Claude, a pedido do Rubens**, e não pelo Rubens (ver as ressalvas lá).
+As notas de referência estão em [`calibracao/pontuacao-referencia.md`](calibracao/pontuacao-referencia.md). **É a avaliação do Rubens, adotada por ele; as notas foram propostas pelo Claude** (ver as ressalvas lá).
 
 ## Versões do juiz e distância para a referência
 

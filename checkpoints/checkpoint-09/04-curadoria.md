@@ -4,7 +4,7 @@ Dados em [`03-execucao.md`](03-execucao.md); notas de referência em [`calibraca
 
 ## Resumo honesto
 
-O gate funciona de ponta a ponta, reprova as análises ruins das amostras e aprovou a análise real que o prompt `causa-raiz` gerou (7 de 8). **A calibração que o enunciado pede não foi atingida por inteiro:** o enunciado quer o juiz a no máximo 1 ponto da referência em cada critério, e em cada execução do juiz final um dos 32 pares ficou a 2 pontos. Além disso, **a referência foi dada pelo Claude, e não pelo Rubens**, e o juiz **não é determinístico**: duas execuções do mesmo juiz deram notas diferentes em seis das oito amostras.
+O gate funciona de ponta a ponta, reprova as análises ruins das amostras e aprovou a análise real que o prompt `causa-raiz` gerou (7 de 8). **A calibração que o enunciado pede não foi atingida por inteiro:** o enunciado quer o juiz a no máximo 1 ponto da referência em cada critério, e em cada execução do juiz final um dos 32 pares ficou a 2 pontos. Além disso, **a referência é a avaliação do Rubens, mas as notas foram propostas pelo Claude e adotadas por ele**, e o juiz **não é determinístico**: duas execuções do mesmo juiz deram notas diferentes em seis das oito amostras.
 
 ## Como o juiz foi calibrado
 
@@ -28,7 +28,7 @@ Versão final (v9): `juiz.txt` com os fatos do caso, quatro arquivos de critéri
 
 ## Limitações
 
-- **A referência não é humana.** O enunciado pede a pontuação do aluno. As notas são do Claude, a pedido do Rubens, e não foram cegas ao juiz (o Claude tinha visto os totais da primeira rodada). A calibração mede o quanto o juiz se parece com o Claude. Se o Rubens revisar as notas, a conta muda; as mais discutíveis estão listadas no arquivo da pontuação.
+- **A referência nasceu da leitura de um modelo.** O enunciado pede a pontuação do aluno. As notas foram propostas pelo Claude e o Rubens as adotou como a sua avaliação; a proposta não foi cega ao juiz (o Claude tinha visto os totais da primeira rodada). A calibração mede o quanto o juiz se parece com essa avaliação. Se o Rubens mudar alguma nota, a conta muda; as mais discutíveis estão listadas no arquivo da pontuação.
 - **Oito amostras, um caso.** O juiz foi ajustado com as mesmas oito amostras em que foi medido, e os fatos da degradação do Cerebro estão dentro do texto dele. Não há garantia de que valha para outro incidente, nem de que o ajuste não tenha se encaixado nessas amostras. Um conjunto separado de amostras confirmaria.
 - **Ruído do juiz.** Com notas que variam até 2 pontos entre execuções, um build pode ser reprovado ou aprovado por flutuação, especialmente perto do corte (F, 5 a 7 pontos). É a preocupação que o próprio enunciado do CP10 levanta.
 - **Um juiz de família diferente do gerador reduz o favorecimento do próprio texto, mas não o elimina:** o juiz continua lendo os fatos e a rubrica, que descrevem a resposta certa.

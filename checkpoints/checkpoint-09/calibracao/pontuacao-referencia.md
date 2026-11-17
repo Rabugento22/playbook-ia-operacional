@@ -2,10 +2,10 @@
 
 ## Quem pontuou
 
-**Estas notas foram dadas pelo Claude, a pedido do Rubens, e não pelo Rubens.** O enunciado do CP09 pede que o próprio aluno pontue as saídas; o Rubens delegou a tarefa. Duas ressalvas que afetam a calibração:
+**Esta é a avaliação do Rubens, adotada por ele em 2026-11-17. As notas foram propostas pelo Claude (um modelo) a partir da leitura de cada amostra, e o Rubens as aceitou como a sua pontuação.** O enunciado do CP09 pede que o aluno pontue as saídas; aqui o aluno delegou a leitura e a proposta das notas e assumiu o resultado. O registro descreve o processo como ele foi, por duas razões que afetam a calibração:
 
-- As notas de referência vêm de um modelo, não de um humano. A calibração mede a distância entre o juiz e o Claude. Para valer como calibração humana, as notas precisam ser revistas pelo Rubens (ver "Revisão pendente" abaixo).
-- O Claude já tinha visto os totais da primeira rodada do juiz (A 8, B 8, C 6, D 4, E 8, F 8, G 8, H 8) antes de pontuar. Os totais não foram usados na pontuação, que seguiu os descritores de [`02-rubrica.md`](../02-rubrica.md) lendo cada amostra, mas a pontuação não foi cega.
+- As notas nasceram da leitura de um modelo. A calibração mede a distância entre o juiz e essa avaliação, que o Rubens adotou, e não a de uma pontuação que ele tenha construído do zero.
+- O Claude já tinha visto os totais da primeira rodada do juiz (A 8, B 8, C 6, D 4, E 8, F 8, G 8, H 8) antes de propor as notas. Os totais não foram usados, e as notas seguiram os descritores de [`02-rubrica.md`](../02-rubrica.md) lendo cada amostra, mas a pontuação não foi cega.
 
 ## Notas (C1 causa-raiz, C2 correlação × causa, C3 ação, C4 honestidade)
 
@@ -20,6 +20,6 @@
 | G | 1 | 0 | 1 | 0 | 2 | não | Quatro "causas raiz", entre elas o cache e o refresh interval (C1=1, C2=0). Só aumenta recursos e muda parâmetros (C3=1). Sem limitações (C4=0). |
 | H | 2 | 2 | 2 | 1 | 7 | sim | Reindexação como condição inicial, com a cadeia até as falhas de busca, embora com horário de início errado (C1=2). Cache como efeito e correlação sem prova (C2=2). Pausa a reindexação e deixa o heap para depois (C3=2). Limitações concretas, mas confiança alta (C4=1). |
 
-## Revisão pendente
+## Revisão
 
-O Rubens pode revisar qualquer nota. As mais discutíveis: B/C1 e F/C1 (se "reindexação combinada com outros fatores" é 1 ou 2), B/C4 e H/C4 (confiança média contra alta) e F, que ficou em 5, um ponto abaixo do corte. Se alguma nota mudar, a comparação de [`03-execucao.md`](../03-execucao.md) e a curadoria precisam ser refeitas.
+O Rubens aceitou as notas como estão. Se quiser mudar alguma, as mais discutíveis: B/C1 e F/C1 (se "reindexação combinada com outros fatores" é 1 ou 2), B/C4 e H/C4 (confiança média contra alta) e F, que ficou em 5, um ponto abaixo do corte. Se alguma nota mudar, a comparação de [`03-execucao.md`](../03-execucao.md) e a curadoria precisam ser refeitas.
