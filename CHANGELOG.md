@@ -10,6 +10,8 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/).
 - Provedor `providers/ollama-local.js` para o `promptfoo` com o Ollama local.
 - Entradas dos checkpoints 01 a 06, transcritas do enunciado.
 - Prompt `devops/triagem-de-pods` (`1.0.0`).
+- Prompts `devops/migracao-forge-diagnostico`, `-plano` e `-execucao` (`1.0.0`), a cadeia do CP05, com janelas de consumo protegidas ao longo dos três elos.
+- Checkpoint 05: contexto, evolução v1 e v2 com medições, duas cadeias completas (um modelo cada) e curadoria.
 - Prompt `devops/decisao-backpressure` (`1.0.0`).
 - Checkpoint 04: contexto do cenário, evolução do prompt (v1 a v4), execução nos dois modelos e curadoria.
 - Prompt `devops/causa-raiz` (`1.0.0`).

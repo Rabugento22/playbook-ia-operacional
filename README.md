@@ -33,7 +33,7 @@ A biblioteca segue o template `prompt-registry`: categoria como pasta na raiz, u
 | [02](checkpoints/checkpoint-02/) | Nota de triagem padronizada ([`devops/nota-de-triagem`](devops/nota-de-triagem/)) | Concluído |
 | [03](checkpoints/checkpoint-03/) | Causa-raiz da degradação no Cerebro ([`devops/causa-raiz`](devops/causa-raiz/)) | Concluído |
 | [04](checkpoints/checkpoint-04/) | Decisão de backpressure do Relay ([`devops/decisao-backpressure`](devops/decisao-backpressure/)) | Concluído |
-| 05 | Cadeia de prompts da migração do Forge | Pendente |
+| [05](checkpoints/checkpoint-05/) | Cadeia de prompts da migração do Forge ([`diagnostico`](devops/migracao-forge-diagnostico/), [`plano`](devops/migracao-forge-plano/), [`execucao`](devops/migracao-forge-execucao/)) | Concluído |
 | 06 | NetworkPolicy do Sentinel, com verificação e refino | Pendente |
 | 07 | Biblioteca no formato do template | Pendente |
 | 08 | Testes determinísticos com `promptfoo` | Pendente |
